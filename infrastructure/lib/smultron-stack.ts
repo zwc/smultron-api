@@ -73,27 +73,23 @@ export class SmultronStack extends cdk.Stack {
       environment: commonEnv,
     };
 
-    // Common bundling configuration
-    const bundlingConfig = {
-      image: lambda.Runtime.NODEJS_20_X.bundlingImage,
-      command: [
-        'bash', '-c',
-        'npm install -g bun && bun install && bun build index.ts --outdir /asset-output --target node --format esm'
-      ],
-    };
+    // Lambda code - use pre-built dist folder
+    // Run 'bun run build' before deploying
+    // Path is relative to where cdk command is run (project root)
+    const lambdaCode = lambda.Code.fromAsset('dist');
 
     // Lambda Functions
     const loginFunction = new lambda.Function(this, 'LoginFunction', {
       ...commonLambdaProps,
       functionName: `smultron-login-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.login',
     });
 
     const listProductsFunction = new lambda.Function(this, 'ListProductsFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-products-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.listProducts',
     });
     productsTable.grantReadData(listProductsFunction);
@@ -101,7 +97,7 @@ export class SmultronStack extends cdk.Stack {
     const getProductFunction = new lambda.Function(this, 'GetProductFunction', {
       ...commonLambdaProps,
       functionName: `smultron-get-product-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.getProduct',
     });
     productsTable.grantReadData(getProductFunction);
@@ -109,7 +105,7 @@ export class SmultronStack extends cdk.Stack {
     const createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
       ...commonLambdaProps,
       functionName: `smultron-create-product-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.createProduct',
     });
     productsTable.grantWriteData(createProductFunction);
@@ -117,7 +113,7 @@ export class SmultronStack extends cdk.Stack {
     const updateProductFunction = new lambda.Function(this, 'UpdateProductFunction', {
       ...commonLambdaProps,
       functionName: `smultron-update-product-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.updateProduct',
     });
     productsTable.grantReadWriteData(updateProductFunction);
@@ -125,7 +121,7 @@ export class SmultronStack extends cdk.Stack {
     const deleteProductFunction = new lambda.Function(this, 'DeleteProductFunction', {
       ...commonLambdaProps,
       functionName: `smultron-delete-product-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.deleteProduct',
     });
     productsTable.grantReadWriteData(deleteProductFunction);
@@ -133,7 +129,7 @@ export class SmultronStack extends cdk.Stack {
     const listCategoriesFunction = new lambda.Function(this, 'ListCategoriesFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-categories-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.listCategories',
     });
     categoriesTable.grantReadData(listCategoriesFunction);
@@ -141,7 +137,7 @@ export class SmultronStack extends cdk.Stack {
     const getCategoryFunction = new lambda.Function(this, 'GetCategoryFunction', {
       ...commonLambdaProps,
       functionName: `smultron-get-category-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.getCategory',
     });
     categoriesTable.grantReadData(getCategoryFunction);
@@ -149,7 +145,7 @@ export class SmultronStack extends cdk.Stack {
     const createCategoryFunction = new lambda.Function(this, 'CreateCategoryFunction', {
       ...commonLambdaProps,
       functionName: `smultron-create-category-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.createCategory',
     });
     categoriesTable.grantWriteData(createCategoryFunction);
@@ -157,7 +153,7 @@ export class SmultronStack extends cdk.Stack {
     const updateCategoryFunction = new lambda.Function(this, 'UpdateCategoryFunction', {
       ...commonLambdaProps,
       functionName: `smultron-update-category-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.updateCategory',
     });
     categoriesTable.grantReadWriteData(updateCategoryFunction);
@@ -165,7 +161,7 @@ export class SmultronStack extends cdk.Stack {
     const deleteCategoryFunction = new lambda.Function(this, 'DeleteCategoryFunction', {
       ...commonLambdaProps,
       functionName: `smultron-delete-category-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.deleteCategory',
     });
     categoriesTable.grantReadWriteData(deleteCategoryFunction);
@@ -173,7 +169,7 @@ export class SmultronStack extends cdk.Stack {
     const createOrderFunction = new lambda.Function(this, 'CreateOrderFunction', {
       ...commonLambdaProps,
       functionName: `smultron-create-order-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.createOrder',
     });
     ordersTable.grantWriteData(createOrderFunction);
@@ -182,7 +178,7 @@ export class SmultronStack extends cdk.Stack {
     const listOrdersFunction = new lambda.Function(this, 'ListOrdersFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-orders-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.listOrders',
     });
     ordersTable.grantReadData(listOrdersFunction);
@@ -190,7 +186,7 @@ export class SmultronStack extends cdk.Stack {
     const getOrderFunction = new lambda.Function(this, 'GetOrderFunction', {
       ...commonLambdaProps,
       functionName: `smultron-get-order-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.getOrder',
     });
     ordersTable.grantReadData(getOrderFunction);
@@ -198,7 +194,7 @@ export class SmultronStack extends cdk.Stack {
     const updateOrderStatusFunction = new lambda.Function(this, 'UpdateOrderStatusFunction', {
       ...commonLambdaProps,
       functionName: `smultron-update-order-status-${environment}`,
-      code: lambda.Code.fromAsset('../', { bundling: bundlingConfig }),
+      code: lambdaCode,
       handler: 'index.updateOrderStatus',
     });
     ordersTable.grantReadWriteData(updateOrderStatusFunction);
@@ -289,21 +285,14 @@ export class SmultronStack extends cdk.Stack {
       queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
     });
 
-    // Certificate (if provided and in us-east-1)
-    // CloudFront requires certificates to be in us-east-1 region
-    let certificate: acm.ICertificate | undefined;
-    let distributionDomainNames: string[] | undefined;
-    
-    if (certificateArn) {
-      // Check if certificate is in us-east-1 (required for CloudFront)
-      if (certificateArn.includes(':us-east-1:')) {
-        certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
-        distributionDomainNames = [domainName];
-      } else {
-        console.warn(`Warning: Certificate ${certificateArn} is not in us-east-1. CloudFront will use default domain.`);
-        console.warn(`To use custom domain ${domainName}, create a certificate in us-east-1 and provide that ARN.`);
-      }
-    }
+    // Import certificate from the exported value
+    // The certificate is created in us-east-1 by the CertificateStack
+    const certificateArnImported = cdk.Fn.importValue(`${domainName.replace(/\./g, '-')}-certificate-arn`);
+    const certificate = acm.Certificate.fromCertificateArn(
+      this,
+      'ImportedCertificate',
+      certificateArnImported
+    );
 
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {
       comment: `Smultron API CloudFront Distribution - ${environment}`,
@@ -355,10 +344,8 @@ export class SmultronStack extends cdk.Stack {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
       },
-      ...(certificate && distributionDomainNames && {
-        domainNames: distributionDomainNames,
-        certificate,
-      }),
+      domainNames: [domainName],
+      certificate,
     });
 
     // Outputs
