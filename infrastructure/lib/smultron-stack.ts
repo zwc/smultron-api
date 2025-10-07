@@ -74,10 +74,11 @@ export class SmultronStack extends cdk.Stack {
 
     // Common Lambda props
     const commonLambdaProps = {
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_22_X,
       timeout: cdk.Duration.seconds(30),
       memorySize: 512,
       environment: commonEnv,
+      architecture: lambda.Architecture.ARM_64, // Use ARM for better performance and lower cost
     };
 
     // Lambda code - use pre-built dist folder
