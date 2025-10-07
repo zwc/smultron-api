@@ -11,20 +11,20 @@ import { Construct } from 'constructs';
 
 interface SmultronStackProps extends cdk.StackProps {
   environment: string;
+  certificateArn: string;
+  domainName: string;
 }
 
 export class SmultronStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: SmultronStackProps) {
     super(scope, id, props);
 
-    const { environment } = props;
+    const { environment, certificateArn, domainName } = props;
 
     // Environment variables from context or process.env
     const adminUsername = this.node.tryGetContext('adminUsername') || process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = this.node.tryGetContext('adminPassword') || process.env.ADMIN_PASSWORD;
     const jwtSecret = this.node.tryGetContext('jwtSecret') || process.env.JWT_SECRET;
-    const domainName = this.node.tryGetContext('domainName') || process.env.DOMAIN_NAME || 'smultron.zwc.se';
-    const certificateArn = this.node.tryGetContext('certificateArn') || process.env.CERTIFICATE_ARN;
 
     if (!adminPassword || !jwtSecret) {
       throw new Error('ADMIN_PASSWORD and JWT_SECRET must be provided via context or environment variables');
@@ -285,13 +285,12 @@ export class SmultronStack extends cdk.Stack {
       queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
     });
 
-    // Import certificate from the exported value
+    // Import certificate from the CertificateStack (cross-region reference)
     // The certificate is created in us-east-1 by the CertificateStack
-    const certificateArnImported = cdk.Fn.importValue(`${domainName.replace(/\./g, '-')}-certificate-arn`);
     const certificate = acm.Certificate.fromCertificateArn(
       this,
       'ImportedCertificate',
-      certificateArnImported
+      certificateArn
     );
 
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {

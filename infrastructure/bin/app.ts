@@ -34,6 +34,8 @@ const mainStack = new SmultronStack(app, `SmultronStack-${environment}`, {
   environment,
   stackName: `smultron-${environment}`,
   description: `Smultron E-commerce API - ${environment} environment`,
+  certificateArn: certStack.certificate.certificateArn,
+  domainName,
   crossRegionReferences: true,
 });
 

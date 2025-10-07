@@ -14,8 +14,8 @@
     "cdk:synth:prod": "cdk synth --context environment=prod",
     "cdk:diff:stage": "cdk diff --context environment=stage",
     "cdk:diff:prod": "cdk diff --context environment=prod",
-    "cdk:deploy:stage": "cdk deploy --context environment=stage --require-approval never",
-    "cdk:deploy:prod": "cdk deploy --context environment=prod --require-approval never",
+    "cdk:deploy:stage": "npx cdk deploy --context environment=stage --require-approval never --all",
+    "cdk:deploy:prod": "npx cdk deploy --context environment=prod --require-approval never --all",
     "cdk:destroy:stage": "cdk destroy --context environment=stage --force",
     "cdk:destroy:prod": "cdk destroy --context environment=prod --force"
   },
