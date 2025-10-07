@@ -286,10 +286,18 @@ export class SmultronStack extends cdk.Stack {
       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
     });
 
+    // Custom origin request policy optimized for API Gateway
     const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'ApiOriginRequestPolicy', {
       originRequestPolicyName: `smultron-api-origin-${environment}`,
-      comment: 'Origin request policy for API',
-      headerBehavior: cloudfront.OriginRequestHeaderBehavior.all(),
+      comment: 'Origin request policy optimized for API Gateway',
+      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList(
+        'Accept',
+        'Accept-Language',
+        'Content-Type',
+        'Referer',
+        'User-Agent'
+      ),
+      cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
       queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
     });
 
