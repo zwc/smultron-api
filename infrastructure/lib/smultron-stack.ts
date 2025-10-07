@@ -211,6 +211,7 @@ export class SmultronStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'SmultronApi', {
       restApiName: `smultron-api-${environment}`,
       description: `Smultron E-commerce API - ${environment}`,
+      endpointConfiguration: { types: [apigateway.EndpointType.REGIONAL] },
       deployOptions: {
         stageName: 'api',
         throttlingBurstLimit: 100,
@@ -262,44 +263,11 @@ export class SmultronStack extends cdk.Stack {
     orderStatus.addMethod('PUT', new apigateway.LambdaIntegration(updateOrderStatusFunction));
 
     // CloudFront Distribution
-    const cachePolicy = new cloudfront.CachePolicy(this, 'ApiCachePolicy', {
-      cachePolicyName: `smultron-api-cache-${environment}`,
-      comment: 'Cache policy for public API endpoints',
-      defaultTtl: cdk.Duration.minutes(5),
-      minTtl: cdk.Duration.seconds(1),
-      maxTtl: cdk.Duration.hours(24),
-      enableAcceptEncodingGzip: true,
-      enableAcceptEncodingBrotli: true,
-      headerBehavior: cloudfront.CacheHeaderBehavior.none(),
-      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-    });
-
-    const noCachePolicy = new cloudfront.CachePolicy(this, 'ApiNoCachePolicy', {
-      cachePolicyName: `smultron-api-no-cache-${environment}`,
-      comment: 'No cache policy for private API endpoints',
-      defaultTtl: cdk.Duration.seconds(0),
-      minTtl: cdk.Duration.seconds(0),
-      maxTtl: cdk.Duration.seconds(1),
-      enableAcceptEncodingGzip: true,
-      enableAcceptEncodingBrotli: true,
-      headerBehavior: cloudfront.CacheHeaderBehavior.none(),
-      queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
-    });
-
-    // Custom origin request policy optimized for API Gateway
-    const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'ApiOriginRequestPolicy', {
-      originRequestPolicyName: `smultron-api-origin-${environment}`,
-      comment: 'Origin request policy optimized for API Gateway',
-      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList(
-        'Accept',
-        'Accept-Language',
-        'Content-Type',
-        'Referer',
-        'User-Agent'
-      ),
-      cookieBehavior: cloudfront.OriginRequestCookieBehavior.none(),
-      queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
-    });
+    // Use AWS managed policies optimized for API Gateway
+    const cachePolicy = cloudfront.CachePolicy.CACHING_OPTIMIZED;
+    const noCachePolicy = cloudfront.CachePolicy.CACHING_DISABLED;
+    // Use ALL_VIEWER_EXCEPT_HOST_HEADER to avoid Host header conflicts with API Gateway
+    const originRequestPolicy = cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER;
 
     // Import certificate from the CertificateStack (cross-region reference)
     // The certificate is created in us-east-1 by the CertificateStack
@@ -327,10 +295,13 @@ export class SmultronStack extends cdk.Stack {
       destinationKeyPrefix: 'docs',
     });
 
+    // API Gateway origin with /api path prefix
+    const apiOrigin = new origins.RestApiOrigin(api, { originPath: '/api' });
+
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {
       comment: `Smultron API CloudFront Distribution - ${environment}`,
       defaultBehavior: {
-        origin: new origins.RestApiOrigin(api),
+        origin: apiOrigin,
         cachePolicy: noCachePolicy,
         originRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -344,30 +315,30 @@ export class SmultronStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
-        // Cache public GET endpoints
-        '/api/v1/products': {
-          origin: new origins.RestApiOrigin(api),
+        // Cache public GET endpoints (CloudFront paths without /api)
+        '/v1/products': {
+          origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
-        '/api/v1/products/*': {
-          origin: new origins.RestApiOrigin(api),
+        '/v1/products/*': {
+          origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
-        '/api/v1/categories': {
-          origin: new origins.RestApiOrigin(api),
+        '/v1/categories': {
+          origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
-        '/api/v1/categories/*': {
-          origin: new origins.RestApiOrigin(api),
+        '/v1/categories/*': {
+          origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -415,6 +386,12 @@ export class SmultronStack extends cdk.Stack {
       value: `https://${subdomainName}/docs/docs.html`,
       description: 'API Documentation URL',
       exportName: `smultron-docs-url-${environment}`,
+    });
+
+    new cdk.CfnOutput(this, 'ApiEndpoint', {
+      value: `https://${subdomainName}/v1`,
+      description: 'API v1 Endpoint (via CloudFront)',
+      exportName: `smultron-api-endpoint-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'ProductsTableName', {

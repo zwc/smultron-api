@@ -5,7 +5,7 @@ info:
   description: E-commerce API for products, categories, and orders management
 
 servers:
-  - url: /api/v1
+  - url: /v1
     description: API Server (uses current domain)
 
 components:
