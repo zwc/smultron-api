@@ -7,6 +7,13 @@
     "test": "bun test",
     "dev": "bun run --watch index.ts",
     "build": "bun build index.ts --outdir ./dist --target node",
+    "cdk": "cdk",
+    "cdk:synth": "cdk synth",
+    "cdk:diff": "cdk diff",
+    "cdk:deploy:stage": "cdk deploy --context environment=stage --require-approval never",
+    "cdk:deploy:prod": "cdk deploy --context environment=prod --require-approval never",
+    "cdk:destroy:stage": "cdk destroy --context environment=stage",
+    "cdk:destroy:prod": "cdk destroy --context environment=prod",
     "deploy": "./infrastructure/deploy.sh",
     "deploy-docs": "./infrastructure/deploy-docs.sh"
   },
@@ -17,10 +24,13 @@
     "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.143",
+    "@types/bcryptjs": "^2.4.6",
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/aws-lambda": "^8.10.143"
+    "@types/node": "^24.7.0",
+    "aws-cdk-lib": "^2.219.0",
+    "constructs": "^10.4.2"
   },
   "peerDependencies": {
     "typescript": "^5"

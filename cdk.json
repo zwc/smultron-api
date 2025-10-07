@@ -1,0 +1,6 @@
+{
+  "app": "bun run infrastructure/bin/app.ts",
+  "context": {
+    "@aws-cdk/core:newStyleStackSynthesis": true
+  }
+}
