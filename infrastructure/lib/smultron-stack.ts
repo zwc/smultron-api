@@ -54,8 +54,8 @@ export class SmultronStack extends cdk.Stack {
     });
 
     // Common Lambda environment variables
+    // Note: AWS_REGION is automatically set by Lambda runtime
     const commonEnv = {
-      AWS_REGION: this.region,
       PRODUCTS_TABLE: productsTable.tableName,
       CATEGORIES_TABLE: categoriesTable.tableName,
       ORDERS_TABLE: ordersTable.tableName,
@@ -266,7 +266,7 @@ export class SmultronStack extends cdk.Stack {
       maxTtl: cdk.Duration.hours(24),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'),
+      headerBehavior: cloudfront.CacheHeaderBehavior.none(),
       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
     });
 
@@ -278,21 +278,31 @@ export class SmultronStack extends cdk.Stack {
       maxTtl: cdk.Duration.seconds(1),
       enableAcceptEncodingGzip: true,
       enableAcceptEncodingBrotli: true,
-      headerBehavior: cloudfront.CacheHeaderBehavior.allowList('Authorization'),
+      headerBehavior: cloudfront.CacheHeaderBehavior.none(),
       queryStringBehavior: cloudfront.CacheQueryStringBehavior.all(),
     });
 
     const originRequestPolicy = new cloudfront.OriginRequestPolicy(this, 'ApiOriginRequestPolicy', {
       originRequestPolicyName: `smultron-api-origin-${environment}`,
       comment: 'Origin request policy for API',
-      headerBehavior: cloudfront.OriginRequestHeaderBehavior.allowList('Authorization'),
+      headerBehavior: cloudfront.OriginRequestHeaderBehavior.all(),
       queryStringBehavior: cloudfront.OriginRequestQueryStringBehavior.all(),
     });
 
-    // Certificate (if provided)
+    // Certificate (if provided and in us-east-1)
+    // CloudFront requires certificates to be in us-east-1 region
     let certificate: acm.ICertificate | undefined;
+    let distributionDomainNames: string[] | undefined;
+    
     if (certificateArn) {
-      certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
+      // Check if certificate is in us-east-1 (required for CloudFront)
+      if (certificateArn.includes(':us-east-1:')) {
+        certificate = acm.Certificate.fromCertificateArn(this, 'Certificate', certificateArn);
+        distributionDomainNames = [domainName];
+      } else {
+        console.warn(`Warning: Certificate ${certificateArn} is not in us-east-1. CloudFront will use default domain.`);
+        console.warn(`To use custom domain ${domainName}, create a certificate in us-east-1 and provide that ARN.`);
+      }
     }
 
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {
@@ -345,8 +355,8 @@ export class SmultronStack extends cdk.Stack {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
       },
-      ...(certificate && {
-        domainNames: [domainName],
+      ...(certificate && distributionDomainNames && {
+        domainNames: distributionDomainNames,
         certificate,
       }),
     });

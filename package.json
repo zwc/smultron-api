@@ -4,18 +4,20 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "test": "bun test",
+    "test": "bun test tests/*.test.ts",
+    "test:integration": "bun test tests/integration/*.test.ts",
     "dev": "bun run --watch index.ts",
     "build": "bun build index.ts --outdir ./dist --target node",
     "cdk": "cdk",
-    "cdk:synth": "cdk synth",
-    "cdk:diff": "cdk diff",
+    "cdk:bootstrap": "cdk bootstrap",
+    "cdk:synth:stage": "cdk synth --context environment=stage",
+    "cdk:synth:prod": "cdk synth --context environment=prod",
+    "cdk:diff:stage": "cdk diff --context environment=stage",
+    "cdk:diff:prod": "cdk diff --context environment=prod",
     "cdk:deploy:stage": "cdk deploy --context environment=stage --require-approval never",
     "cdk:deploy:prod": "cdk deploy --context environment=prod --require-approval never",
-    "cdk:destroy:stage": "cdk destroy --context environment=stage",
-    "cdk:destroy:prod": "cdk destroy --context environment=prod",
-    "deploy": "./infrastructure/deploy.sh",
-    "deploy-docs": "./infrastructure/deploy-docs.sh"
+    "cdk:destroy:stage": "cdk destroy --context environment=stage --force",
+    "cdk:destroy:prod": "cdk destroy --context environment=prod --force"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.637.0",
