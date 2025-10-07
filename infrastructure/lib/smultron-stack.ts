@@ -321,9 +321,7 @@ export class SmultronStack extends cdk.Stack {
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {
       comment: `Smultron API CloudFront Distribution - ${environment}`,
       defaultBehavior: {
-        origin: new origins.RestApiOrigin(api, {
-          originPath: '/v1',
-        }),
+        origin: new origins.RestApiOrigin(api),
         cachePolicy: noCachePolicy,
         originRequestPolicy,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -339,36 +337,28 @@ export class SmultronStack extends cdk.Stack {
         },
         // Cache public GET endpoints
         '/api/v1/products': {
-          origin: new origins.RestApiOrigin(api, {
-            originPath: '/v1',
-          }),
+          origin: new origins.RestApiOrigin(api),
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         '/api/v1/products/*': {
-          origin: new origins.RestApiOrigin(api, {
-            originPath: '/v1',
-          }),
+          origin: new origins.RestApiOrigin(api),
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         '/api/v1/categories': {
-          origin: new origins.RestApiOrigin(api, {
-            originPath: '/v1',
-          }),
+          origin: new origins.RestApiOrigin(api),
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         '/api/v1/categories/*': {
-          origin: new origins.RestApiOrigin(api, {
-            originPath: '/v1',
-          }),
+          origin: new origins.RestApiOrigin(api),
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,

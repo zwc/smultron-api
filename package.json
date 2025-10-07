@@ -16,8 +16,8 @@
     "cdk:diff:prod": "cdk diff --context environment=prod",
     "cdk:deploy:stage": "npx cdk deploy --context environment=stage --require-approval never --all",
     "cdk:deploy:prod": "npx cdk deploy --context environment=prod --require-approval never --all",
-    "cdk:destroy:stage": "cdk destroy --context environment=stage --force",
-    "cdk:destroy:prod": "cdk destroy --context environment=prod --force"
+    "cdk:destroy:stage": "npx cdk destroy --context environment=stage --force --all",
+    "cdk:destroy:prod": "npx cdk destroy --context environment=prod --force --all"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.637.0",
