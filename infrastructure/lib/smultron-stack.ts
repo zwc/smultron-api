@@ -211,7 +211,7 @@ export class SmultronStack extends cdk.Stack {
       restApiName: `smultron-api-${environment}`,
       description: `Smultron E-commerce API - ${environment}`,
       deployOptions: {
-        stageName: 'v1',
+        stageName: 'api',
         throttlingBurstLimit: 100,
         throttlingRateLimit: 50,
       },
@@ -222,15 +222,15 @@ export class SmultronStack extends cdk.Stack {
       },
     });
 
-    // API Routes
-    const apiV1 = api.root.addResource('api').addResource('v1');
+    // API Routes - directly under root since stage is 'api'
+    const v1 = api.root.addResource('v1');
 
     // Auth routes
-    const auth = apiV1.addResource('auth');
+    const auth = v1.addResource('auth');
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(loginFunction));
 
     // Products routes
-    const products = apiV1.addResource('products');
+    const products = v1.addResource('products');
     products.addMethod('GET', new apigateway.LambdaIntegration(listProductsFunction));
     products.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
     
@@ -240,7 +240,7 @@ export class SmultronStack extends cdk.Stack {
     product.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
 
     // Categories routes
-    const categories = apiV1.addResource('categories');
+    const categories = v1.addResource('categories');
     categories.addMethod('GET', new apigateway.LambdaIntegration(listCategoriesFunction));
     categories.addMethod('POST', new apigateway.LambdaIntegration(createCategoryFunction));
     
@@ -250,7 +250,7 @@ export class SmultronStack extends cdk.Stack {
     category.addMethod('DELETE', new apigateway.LambdaIntegration(deleteCategoryFunction));
 
     // Orders routes
-    const orders = apiV1.addResource('orders');
+    const orders = v1.addResource('orders');
     orders.addMethod('GET', new apigateway.LambdaIntegration(listOrdersFunction));
     orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
     
