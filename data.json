@@ -1,0 +1,357 @@
+{
+	"categories":
+	[
+		{
+			"id"								:	"labubu",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Labubu",
+			"subtitle"							:	"",
+			"index"								:	1
+		},
+		{
+			"id"								:	"skullpanda",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Skullpanda",
+			"subtitle"							:	"",
+			"index"								:	2
+		},
+		{
+			"id"								:	"sonny-angel",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"",
+			"index"								:	3
+		},
+		{
+			"id"								:	"hacipupu",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Hacipupu",
+			"subtitle"							:	"",
+			"index"								:	4
+		},
+		{
+			"id"								:	"getahug",
+			"brand"								:	"Getahug",
+			"title"								:	"Getahug",
+			"subtitle"							:	"",
+			"index"								:	4
+		}
+	],
+	"products":
+	[
+		{
+			"id"								:	"big-into-energy",
+			"category"							:	"labubu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Labubu",
+			"subtitle"							:	"Big into energy",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"new",
+			"index"								:	1,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/labubu-big-into-energy-1.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/labubu-big-into-energy-1.jpg"
+													]
+		},
+		{
+			"id"								:	"exciting-macarons",
+			"category"							:	"labubu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Labubu",
+			"subtitle"							:	"Exciting macarons",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	22,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/labubu-exciting-macaron-1.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/labubu-exciting-macaron-1.jpg",
+														"/smultronet/graphics/temp/labubu-exciting-macaron-2.jpg"
+													]
+		},
+		{
+			"id"								:	"wacky-mart",
+			"category"							:	"labubu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Labubu",
+			"subtitle"							:	"Wacky mart",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	21,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/placeholder.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/placeholder.jpg"
+													]
+		},
+		{
+			"id"								:	"pin-for-love",
+			"category"							:	"labubu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Labubu",
+			"subtitle"							:	"Pin for love",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	20,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/labubu-pin-for-love-1.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/labubu-pin-for-love-1.jpg"
+													]
+		},
+		{
+			"id"								:	"bear-flavor",
+			"category"							:	"hacipupu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Hacipupu",
+			"subtitle"							:	"Bear flavor",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	17,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/placeholder.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/placeholder.jpg"
+													]
+		},
+		{
+			"id"								:	"the-constellation",
+			"category"							:	"hacipupu",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Hacipupu",
+			"subtitle"							:	"The constellation",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	14,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/placeholder.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/placeholder.jpg"
+													]
+		},
+		{
+			"id"								:	"l-impressionnisme",
+			"category"							:	"skullpanda",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Skullpanda",
+			"subtitle"							:	"L'impressionnisme",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"En unik och konstnärlig kollektion där Skullpanda möter impressionismens mjuka uttryck och känslor.",
+														"Varje figur är en kombination av detaljerad design och mjuk finish, vilket gör dem till perfekta samlarobjekt för de som uppskattar konst och karaktär.",
+														"Varje låda är förseglad och innehåller en slumpmässig Skullpanda-figur. Du vet inte vilken du får förrän du öppnar den, vilket gör samlandet spännande och oförutsägbart.",
+														"Serien innehåller också en unik figur som finns i endast 1 av 72 låder."
+													],
+			"tag"								:	"",
+			"index"								:	5,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/placeholder.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/placeholder.jpg"
+													]
+		},
+		{
+			"id"								:	"you-found-me",
+			"category"							:	"skullpanda",
+			"article"							:	"",
+			"brand"								:	"Pop Mart",
+			"title"								:	"Skullpanda",
+			"subtitle"							:	"You found me",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	4,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/placeholder.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/placeholder.jpg"
+													]
+		},
+		{
+			"id"								:	"kiss-kiss",
+			"category"							:	"sonny-angel",
+			"article"							:	"",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"Kiss kiss",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	12,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/sonny-angel-kiss-kiss-1.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/sonny-angel-kiss-kiss-1.jpg",
+														"/smultronet/graphics/temp/sonny-angel-kiss-kiss-2.jpg"
+													]
+		},
+		{
+			"id"								:	"christmas",
+			"category"							:	"sonny-angel",
+			"article"							:	"",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"Christmas",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"popular",
+			"index"								:	3,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/sonny-angel-christmas.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/sonny-angel-christmas.jpg"
+													]
+		},
+		{
+			"id"								:	"rainy-day",
+			"category"							:	"sonny-angel",
+			"article"							:	"",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"Rainy day",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"new",
+			"index"								:	11,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/sonny-angel-rainy-day.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/sonny-angel-rainy-day.jpg",
+														"/smultronet/graphics/temp/sonny-angel-sweets.jpg",
+														"/smultronet/graphics/temp/sonny-angel-christmas.jpg"
+													]
+		},
+		{
+			"id"								:	"sweets",
+			"category"							:	"sonny-angel",
+			"article"							:	"",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"Sweets",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	3,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/sonny-angel-sweets.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/sonny-angel-sweets.jpg"
+													]
+		},
+		{
+			"id"								:	"birthday-cake",
+			"category"							:	"sonny-angel",
+			"article"							:	"",
+			"brand"								:	"Dreams",
+			"title"								:	"Sonny Angel",
+			"subtitle"							:	"Birthday cake",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	10,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/sonny-angel-birthday-cake.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/sonny-angel-birthday-cake.jpg"
+													]
+		},
+		{
+			"id"								:	"animal-kingdom",
+			"category"							:	"getahug",
+			"article"							:	"",
+			"brand"								:	"Getahug",
+			"title"								:	"Getahug",
+			"subtitle"							:	"Animal kingdom",
+			"price"								:	599,
+			"price_reduced"						:	0,
+			"description"						:	[
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+														"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+													],
+			"tag"								:	"",
+			"index"								:	2,
+			"stock"								:	3,
+			"max_order"							:	0,
+			"image"								:	"/smultronet/graphics/temp/getahug-animal-kingdom.jpg",
+			"images"							:	[
+														"/smultronet/graphics/temp/getahug-animal-kingdom.jpg"
+													]
+		}
+	]
+}
