@@ -1,0 +1,664 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  DomainName:
+    Type: String
+    Default: smultron.zwc.se
+  CertificateArn:
+    Type: String
+    Description: ARN of ACM certificate for smultron.zwc.se
+  AdminUsername:
+    Type: String
+    Default: admin
+    NoEcho: true
+  AdminPassword:
+    Type: String
+    NoEcho: true
+  JWTSecret:
+    Type: String
+    NoEcho: true
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs20.x
+    MemorySize: 512
+    Environment:
+      Variables:
+        AWS_REGION: !Ref AWS::Region
+        PRODUCTS_TABLE: !Ref ProductsTable
+        CATEGORIES_TABLE: !Ref CategoriesTable
+        ORDERS_TABLE: !Ref OrdersTable
+        ADMIN_USERNAME: !Ref AdminUsername
+        ADMIN_PASSWORD: !Ref AdminPassword
+        JWT_SECRET: !Ref JWTSecret
+
+Resources:
+  ProductsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: smultron-products
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  CategoriesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: smultron-categories
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: smultron-orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  LoginFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-login
+      CodeUri: ./
+      Handler: index.login
+      Events:
+        LoginApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/login
+            Method: POST
+            RestApiId: !Ref ApiGateway
+
+  ListProductsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-list-products
+      CodeUri: ./
+      Handler: index.listProducts
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        ListProductsApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/products
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  GetProductFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-get-product
+      CodeUri: ./
+      Handler: index.getProduct
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        GetProductApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/products/{id}
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  CreateProductFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-create-product
+      CodeUri: ./
+      Handler: index.createProduct
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        CreateProductApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/products
+            Method: POST
+            RestApiId: !Ref ApiGateway
+
+  UpdateProductFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-update-product
+      CodeUri: ./
+      Handler: index.updateProduct
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        UpdateProductApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/products/{id}
+            Method: PUT
+            RestApiId: !Ref ApiGateway
+
+  DeleteProductFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-delete-product
+      CodeUri: ./
+      Handler: index.deleteProduct
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductsTable
+      Events:
+        DeleteProductApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/products/{id}
+            Method: DELETE
+            RestApiId: !Ref ApiGateway
+
+  ListCategoriesFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-list-categories
+      CodeUri: ./
+      Handler: index.listCategories
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+      Events:
+        ListCategoriesApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/categories
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  GetCategoryFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-get-category
+      CodeUri: ./
+      Handler: index.getCategory
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+      Events:
+        GetCategoryApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/categories/{id}
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  CreateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-create-category
+      CodeUri: ./
+      Handler: index.createCategory
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+      Events:
+        CreateCategoryApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/categories
+            Method: POST
+            RestApiId: !Ref ApiGateway
+
+  UpdateCategoryFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-update-category
+      CodeUri: ./
+      Handler: index.updateCategory
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+      Events:
+        UpdateCategoryApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/categories/{id}
+            Method: PUT
+            RestApiId: !Ref ApiGateway
+
+  DeleteCategoryFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-delete-category
+      CodeUri: ./
+      Handler: index.deleteCategory
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CategoriesTable
+      Events:
+        DeleteCategoryApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/categories/{id}
+            Method: DELETE
+            RestApiId: !Ref ApiGateway
+
+  CreateOrderFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-create-order
+      CodeUri: ./
+      Handler: index.createOrder
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+      Events:
+        CreateOrderApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/orders
+            Method: POST
+            RestApiId: !Ref ApiGateway
+
+  ListOrdersFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-list-orders
+      CodeUri: ./
+      Handler: index.listOrders
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+      Events:
+        ListOrdersApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/orders
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  GetOrderFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-get-order
+      CodeUri: ./
+      Handler: index.getOrder
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+      Events:
+        GetOrderApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/orders/{id}
+            Method: GET
+            RestApiId: !Ref ApiGateway
+
+  UpdateOrderStatusFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        Target: node20
+        Sourcemap: false
+        EntryPoints:
+          - index.ts
+        Banner:
+          - js=import { createRequire } from 'module'; const require = createRequire(import.meta.url);
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: smultron-update-order-status
+      CodeUri: ./
+      Handler: index.updateOrderStatus
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+      Events:
+        UpdateOrderStatusApi:
+          Type: Api
+          Properties:
+            Path: /api/v1/orders/{id}/status
+            Method: PUT
+            RestApiId: !Ref ApiGateway
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: smultron-api
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+      DefinitionBody:
+        openapi: 3.0.0
+        info:
+          title: Smultron API
+          version: 1.0.0
+        paths:
+          /api/v1/{proxy+}:
+            x-amazon-apigateway-any-method:
+              parameters:
+                - name: proxy
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+              x-amazon-apigateway-integration:
+                type: aws_proxy
+                httpMethod: POST
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ApiFunction.Arn}/invocations
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Aliases:
+          - !Ref DomainName
+        ViewerCertificate:
+          AcmCertificateArn: !Ref CertificateArn
+          SslSupportMethod: sni-only
+          MinimumProtocolVersion: TLSv1.2_2021
+        Origins:
+          - Id: ApiGatewayOrigin
+            DomainName: !Sub '${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com'
+            OriginPath: /prod
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: ApiGatewayOrigin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: true
+            Headers:
+              - Authorization
+              - Content-Type
+            Cookies:
+              Forward: none
+          Compress: true
+          DefaultTTL: 0
+          MinTTL: 0
+          MaxTTL: 0
+        CacheBehaviors:
+          - PathPattern: /api/v1/products
+            TargetOriginId: ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: none
+            Compress: true
+            DefaultTTL: 3600
+            MinTTL: 0
+            MaxTTL: 86400
+          - PathPattern: /api/v1/products/*
+            TargetOriginId: ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+              Cookies:
+                Forward: none
+            Compress: true
+            DefaultTTL: 3600
+            MinTTL: 0
+            MaxTTL: 86400
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/prod/api/v1'
+  CloudFrontUrl:
+    Description: CloudFront Distribution URL
+    Value: !Sub 'https://${CloudFrontDistribution.DomainName}'
+  CloudFrontDistributionId:
+    Description: CloudFront Distribution ID
+    Value: !Ref CloudFrontDistribution

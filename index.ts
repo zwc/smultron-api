@@ -1,0 +1,15 @@
+export { handler as login } from './src/handlers/login';
+export { handler as listProducts } from './src/handlers/list.products';
+export { handler as getProduct } from './src/handlers/get.product';
+export { handler as createProduct } from './src/handlers/create.product';
+export { handler as updateProduct } from './src/handlers/update.product';
+export { handler as deleteProduct } from './src/handlers/delete.product';
+export { handler as listCategories } from './src/handlers/list.categories';
+export { handler as getCategory } from './src/handlers/get.category';
+export { handler as createCategory } from './src/handlers/create.category';
+export { handler as updateCategory } from './src/handlers/update.category';
+export { handler as deleteCategory } from './src/handlers/delete.category';
+export { handler as createOrder } from './src/handlers/create.order';
+export { handler as listOrders } from './src/handlers/list.orders';
+export { handler as getOrder } from './src/handlers/get.order';
+export { handler as updateOrderStatus } from './src/handlers/update.order.status';
