@@ -7,6 +7,8 @@ import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
+import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
 
 interface SmultronStackProps extends cdk.StackProps {
@@ -25,10 +27,15 @@ export class SmultronStack extends cdk.Stack {
     const adminUsername = this.node.tryGetContext('adminUsername') || process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = this.node.tryGetContext('adminPassword') || process.env.ADMIN_PASSWORD;
     const jwtSecret = this.node.tryGetContext('jwtSecret') || process.env.JWT_SECRET;
+    const hostedZoneId = this.node.tryGetContext('hostedZoneId') || process.env.HOSTED_ZONE_ID;
 
     if (!adminPassword || !jwtSecret) {
       throw new Error('ADMIN_PASSWORD and JWT_SECRET must be provided via context or environment variables');
     }
+
+    // Determine the subdomain based on environment
+    // prod uses the root domain, stage uses stage subdomain
+    const subdomainName = environment === 'prod' ? domainName : `${environment}.${domainName}`;
 
     // DynamoDB Tables
     const productsTable = new dynamodb.Table(this, 'ProductsTable', {
@@ -293,6 +300,24 @@ export class SmultronStack extends cdk.Stack {
       certificateArn
     );
 
+    // S3 bucket for documentation
+    const docsBucket = new s3.Bucket(this, 'DocsBucket', {
+      bucketName: `smultron-docs-${environment}-${this.account}`,
+      removalPolicy: environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: environment !== 'prod',
+      publicReadAccess: false,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    });
+
+    // Deploy documentation files to S3
+    new s3deploy.BucketDeployment(this, 'DeployDocs', {
+      sources: [s3deploy.Source.asset('infrastructure', {
+        exclude: ['bin', 'lib', 'node_modules', '*.sh', '*.ts'],
+      })],
+      destinationBucket: docsBucket,
+      destinationKeyPrefix: 'docs',
+    });
+
     const distribution = new cloudfront.Distribution(this, 'SmultronDistribution', {
       comment: `Smultron API CloudFront Distribution - ${environment}`,
       defaultBehavior: {
@@ -305,6 +330,13 @@ export class SmultronStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
       },
       additionalBehaviors: {
+        // Swagger documentation from S3
+        '/docs/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket),
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        },
         // Cache public GET endpoints
         '/api/v1/products': {
           origin: new origins.RestApiOrigin(api, {
@@ -343,9 +375,23 @@ export class SmultronStack extends cdk.Stack {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
       },
-      domainNames: [domainName],
+      domainNames: [subdomainName],
       certificate,
     });
+
+    // Route53 DNS record for CloudFront distribution
+    if (hostedZoneId) {
+      const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
+        hostedZoneId,
+        zoneName: domainName,
+      });
+
+      new route53.ARecord(this, 'CloudFrontAliasRecord', {
+        zone: hostedZone,
+        recordName: subdomainName,
+        target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
+      });
+    }
 
     // Outputs
     new cdk.CfnOutput(this, 'ApiUrl', {
@@ -358,6 +404,18 @@ export class SmultronStack extends cdk.Stack {
       value: `https://${distribution.distributionDomainName}`,
       description: 'CloudFront Distribution URL',
       exportName: `smultron-cloudfront-url-${environment}`,
+    });
+
+    new cdk.CfnOutput(this, 'CustomDomainUrl', {
+      value: `https://${subdomainName}`,
+      description: 'Custom Domain URL',
+      exportName: `smultron-custom-domain-url-${environment}`,
+    });
+
+    new cdk.CfnOutput(this, 'DocsUrl', {
+      value: `https://${subdomainName}/docs/docs.html`,
+      description: 'API Documentation URL',
+      exportName: `smultron-docs-url-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'ProductsTableName', {

@@ -5,8 +5,8 @@ info:
   description: E-commerce API for products, categories, and orders management
 
 servers:
-  - url: https://smultron.zwc.se/api/v1
-    description: Production server
+  - url: /api/v1
+    description: API Server (uses current domain)
 
 components:
   securitySchemes:

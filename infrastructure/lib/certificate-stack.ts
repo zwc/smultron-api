@@ -37,14 +37,20 @@ export class CertificateStack extends cdk.Stack {
 
       certificate = new acm.Certificate(this, 'Certificate', {
         domainName,
-        subjectAlternativeNames: [`*.${domainName}`],
+        subjectAlternativeNames: [
+          `*.${domainName}`, // Covers stage.smultron.zwc.se, prod.smultron.zwc.se, etc.
+          `www.${domainName}`,
+        ],
         validation: acm.CertificateValidation.fromDns(hostedZone),
       });
     } else {
       // Fallback to email validation if no hosted zone
       certificate = new acm.Certificate(this, 'Certificate', {
         domainName,
-        subjectAlternativeNames: [`*.${domainName}`],
+        subjectAlternativeNames: [
+          `*.${domainName}`,
+          `www.${domainName}`,
+        ],
         validation: acm.CertificateValidation.fromEmail(),
       });
     }
