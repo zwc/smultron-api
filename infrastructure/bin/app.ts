@@ -13,15 +13,17 @@ const awsAccount = process.env.CDK_DEFAULT_ACCOUNT;
 const awsRegion = process.env.CDK_DEFAULT_REGION || process.env.AWS_REGION || 'eu-north-1';
 
 // Create certificate stack in us-east-1 (required for CloudFront)
-const certStack = new CertificateStack(app, `SmultronCertificate`, {
+// Use environment-specific stack name to allow separate deployments for stage/prod
+const certStack = new CertificateStack(app, `SmultronCertificate-${environment}`, {
   env: {
     account: awsAccount,
     region: 'us-east-1', // CloudFront requires us-east-1
   },
-  stackName: `smultron-certificate`,
-  description: 'ACM Certificate for CloudFront (must be in us-east-1)',
+  stackName: `smultron-certificate-${environment}`,
+  description: `ACM Certificate for CloudFront (must be in us-east-1) - ${environment}`,
   domainName,
   hostedZoneId,
+  environment, // Pass environment to make exports unique
   crossRegionReferences: true,
 });
 

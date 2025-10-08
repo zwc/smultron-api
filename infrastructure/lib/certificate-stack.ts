@@ -6,6 +6,7 @@ import { Construct } from 'constructs';
 interface CertificateStackProps extends cdk.StackProps {
   domainName: string;
   hostedZoneId?: string;
+  environment: string; // Add environment to make exports unique
 }
 
 /**
@@ -24,7 +25,7 @@ export class CertificateStack extends cdk.Stack {
       },
     });
 
-    const { domainName, hostedZoneId } = props;
+    const { domainName, hostedZoneId, environment } = props;
 
     // If hosted zone ID is provided, use DNS validation, otherwise use email validation
     let certificate: acm.Certificate;
@@ -58,10 +59,11 @@ export class CertificateStack extends cdk.Stack {
     this.certificate = certificate;
 
     // Output the certificate ARN so it can be used in other stacks
+    // Make export name environment-specific to avoid conflicts between stage/prod
     new cdk.CfnOutput(this, 'CertificateArn', {
       value: certificate.certificateArn,
-      description: 'ACM Certificate ARN in us-east-1 for CloudFront',
-      exportName: `${domainName.replace(/\./g, '-')}-certificate-arn`,
+      description: `ACM Certificate ARN in us-east-1 for CloudFront (${environment})`,
+      exportName: `${domainName.replace(/\./g, '-')}-certificate-arn-${environment}`,
     });
   }
 }
