@@ -1,15 +1,14 @@
 import { expect, test, describe } from 'bun:test';
 
 // Integration tests require API_URL environment variable
-const API_URL = process.env.API_URL || process.env.CLOUDFRONT_URL;
+// Default to stage CloudFront URL if not specified
+const API_URL = process.env.API_URL || process.env.CLOUDFRONT_URL || 'https://stage.smultron.zwc.se';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-if (!API_URL) {
-  throw new Error('API_URL or CLOUDFRONT_URL environment variable is required for integration tests');
-}
-
 if (!ADMIN_PASSWORD) {
+  console.error('Error: ADMIN_PASSWORD environment variable is required for integration tests');
+  console.error('Please set ADMIN_PASSWORD before running tests');
   throw new Error('ADMIN_PASSWORD environment variable is required for integration tests');
 }
 
@@ -20,19 +19,15 @@ let testProductId2: string;
 let testOrderId: string;
 
 // Normalize API URL to ensure it has the correct path
-// If it ends with /api/v1, use it as is
-// If it ends with /v1, add /api before /v1
-// Otherwise append /api/v1
+// CloudFront domains use /v1, API Gateway uses /api/v1
 let normalizedApiUrl = API_URL;
-if (!normalizedApiUrl.endsWith('/api/v1')) {
-  if (normalizedApiUrl.endsWith('/v1')) {
-    // Replace /v1 with /api/v1
-    normalizedApiUrl = normalizedApiUrl.replace(/\/v1$/, '/api/v1');
-  } else {
-    // Add /api/v1
-    normalizedApiUrl = normalizedApiUrl.replace(/\/$/, '') + '/api/v1';
-  }
+if (!normalizedApiUrl.endsWith('/v1') && !normalizedApiUrl.endsWith('/api/v1')) {
+  // Add /v1 by default (CloudFront pattern)
+  normalizedApiUrl = normalizedApiUrl.replace(/\/$/, '') + '/v1';
+} else if (normalizedApiUrl.endsWith('/api/v1')) {
+  // Keep as is - this is API Gateway direct URL
 }
+// If ends with /v1, keep as is - this is CloudFront URL
 
 console.log(`Running integration tests against: ${normalizedApiUrl}`);
 

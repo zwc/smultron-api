@@ -35,7 +35,8 @@ interface DataFile {
 }
 
 // Configuration
-const API_URL = process.env.API_URL || 'https://fewl5l8ebd.execute-api.eu-north-1.amazonaws.com/api/v1';
+// Default to stage CloudFront URL
+const API_URL = process.env.API_URL || 'https://stage.smultron.zwc.se/v1';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 

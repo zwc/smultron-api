@@ -315,34 +315,58 @@ export class SmultronStack extends cdk.Stack {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
-        // Cache public GET endpoints (CloudFront paths without /api)
+        // Cache public GET endpoints, but allow all methods (POST/PUT/DELETE for admin)
+        // Public endpoints are read-only for unauthenticated users, but admins need write access
         '/v1/products': {
           origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
         },
         '/v1/products/*': {
           origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
         },
         '/v1/categories': {
           origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
         },
         '/v1/categories/*': {
           origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
+        },
+        // Auth endpoint - no caching
+        '/v1/auth/*': {
+          origin: apiOrigin,
+          cachePolicy: noCachePolicy,
+          originRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        },
+        // Orders endpoint - no caching, admin only
+        '/v1/orders': {
+          origin: apiOrigin,
+          cachePolicy: noCachePolicy,
+          originRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        },
+        '/v1/orders/*': {
+          origin: apiOrigin,
+          cachePolicy: noCachePolicy,
+          originRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         },
       },
       domainNames: [subdomainName],
