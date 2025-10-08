@@ -1,3 +1,1 @@
-Create integration tests, so that I can validate that the deployed environment is working as expected.
-
 I've provided .env with secrets to github. First I want to publish all .env as secrets on github for my repo. Then I would like to be able to deploy when pushing to main, first it should do unit test, then it should deploy to stage, run the integration tests, then deploy to prod, then run the integration tests again. The repo is at https://github.com/zwc/smultron-api
