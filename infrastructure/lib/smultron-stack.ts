@@ -9,6 +9,7 @@ import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as targets from 'aws-cdk-lib/aws-route53-targets';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import { Construct } from 'constructs';
 
 interface SmultronStackProps extends cdk.StackProps {
@@ -299,13 +300,9 @@ export class SmultronStack extends cdk.Stack {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     });
 
-    // Deploy documentation files to S3
-    new s3deploy.BucketDeployment(this, 'DeployDocs', {
-      sources: [s3deploy.Source.asset('infrastructure', {
-        exclude: ['bin', 'lib', 'node_modules', '*.sh', '*.ts'],
-      })],
-      destinationBucket: docsBucket,
-      destinationKeyPrefix: 'docs',
+    // Create Origin Access Control for docs bucket
+    const docsOac = new cloudfront.S3OriginAccessControl(this, 'DocsOAC', {
+      signing: cloudfront.Signing.SIGV4_NO_OVERRIDE,
     });
 
     // API Gateway origin with /api path prefix
@@ -323,10 +320,30 @@ export class SmultronStack extends cdk.Stack {
       additionalBehaviors: {
         // Swagger documentation from S3
         '/docs/*': {
-          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket),
+          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
+            originAccessControl: docsOac,
+          }),
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          functionAssociations: [{
+            function: new cloudfront.Function(this, 'DocsIndexFunction', {
+              code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+  
+  // Redirect /docs to /docs/index.html
+  if (uri === '/docs' || uri === '/docs/') {
+    request.uri = '/docs/index.html';
+  }
+  
+  return request;
+}
+              `),
+            }),
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          }],
         },
         // Cache public GET endpoints, but allow all methods (POST/PUT/DELETE for admin)
         // Public endpoints are read-only for unauthenticated users, but admins need write access
@@ -394,6 +411,18 @@ export class SmultronStack extends cdk.Stack {
       certificate,
     });
 
+    // Grant CloudFront access to docs bucket
+    docsBucket.addToResourcePolicy(new iam.PolicyStatement({
+      actions: ['s3:GetObject'],
+      resources: [docsBucket.arnForObjects('*')],
+      principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
+      conditions: {
+        StringEquals: {
+          'AWS:SourceArn': `arn:aws:cloudfront::${this.account}:distribution/${distribution.distributionId}`,
+        },
+      },
+    }));
+
     // Route53 DNS record for CloudFront distribution
     if (hostedZoneId) {
       const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
@@ -407,6 +436,17 @@ export class SmultronStack extends cdk.Stack {
         target: route53.RecordTarget.fromAlias(new targets.CloudFrontTarget(distribution)),
       });
     }
+
+    // Deploy documentation files to S3 with CloudFront cache invalidation
+    new s3deploy.BucketDeployment(this, 'DeployDocs', {
+      sources: [s3deploy.Source.asset('infrastructure', {
+        exclude: ['bin', 'lib', 'node_modules', '*.sh', '*.ts'],
+      })],
+      destinationBucket: docsBucket,
+      destinationKeyPrefix: 'docs',
+      distribution,
+      distributionPaths: ['/docs/*'],
+    });
 
     // Outputs
     new cdk.CfnOutput(this, 'ApiUrl', {
@@ -428,9 +468,15 @@ export class SmultronStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'DocsUrl', {
-      value: `https://${subdomainName}/docs/docs.html`,
-      description: 'API Documentation URL',
+      value: `https://${subdomainName}/docs`,
+      description: 'API Documentation URL (will redirect to /docs/index.html)',
       exportName: `smultron-docs-url-${environment}`,
+    });
+
+    new cdk.CfnOutput(this, 'DocsBucketName', {
+      value: docsBucket.bucketName,
+      description: 'Documentation S3 Bucket Name',
+      exportName: `smultron-docs-bucket-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'ApiEndpoint', {

@@ -146,6 +146,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /catalog:
+    get:
+      summary: Get complete catalog (categories and products)
+      description: Returns both categories and products in a single request for improved performance
+      tags:
+        - Catalog (Public)
+      responses:
+        '200':
+          description: Complete catalog with categories and products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+
   /products:
     get:
       summary: List all products
