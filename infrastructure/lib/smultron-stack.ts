@@ -318,8 +318,8 @@ export class SmultronStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
       },
       additionalBehaviors: {
-        // Swagger documentation from S3
-        '/docs/*': {
+        // Swagger documentation from S3 - handle /docs root path
+        '/docs': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
             originAccessControl: docsOac,
           }),
@@ -344,6 +344,15 @@ function handler(event) {
             }),
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           }],
+        },
+        // Swagger documentation from S3 - handle all docs files
+        '/docs/*': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
+            originAccessControl: docsOac,
+          }),
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         // Cache public GET endpoints, but allow all methods (POST/PUT/DELETE for admin)
         // Public endpoints are read-only for unauthenticated users, but admins need write access
