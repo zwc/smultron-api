@@ -1,4 +1,5 @@
 export { handler as login } from './src/handlers/login';
+export { handler as listCatalog } from './src/handlers/list.catalog';
 export { handler as listProducts } from './src/handlers/list.products';
 export { handler as getProduct } from './src/handlers/get.product';
 export { handler as createProduct } from './src/handlers/create.product';

@@ -94,6 +94,15 @@ export class SmultronStack extends cdk.Stack {
       handler: 'index.login',
     });
 
+    const listCatalogFunction = new lambda.Function(this, 'ListCatalogFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-list-catalog-${environment}`,
+      code: lambdaCode,
+      handler: 'index.listCatalog',
+    });
+    productsTable.grantReadData(listCatalogFunction);
+    categoriesTable.grantReadData(listCatalogFunction);
+
     const listProductsFunction = new lambda.Function(this, 'ListProductsFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-products-${environment}`,
@@ -231,6 +240,10 @@ export class SmultronStack extends cdk.Stack {
     const auth = v1.addResource('auth');
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(loginFunction));
 
+    // Catalog route (combined categories and products)
+    const catalog = v1.addResource('catalog');
+    catalog.addMethod('GET', new apigateway.LambdaIntegration(listCatalogFunction));
+
     // Products routes
     const products = v1.addResource('products');
     products.addMethod('GET', new apigateway.LambdaIntegration(listProductsFunction));
@@ -352,6 +365,14 @@ export class SmultronStack extends cdk.Stack {
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
+        },
+        // Catalog endpoint - public read-only, cache enabled
+        '/v1/catalog': {
+          origin: apiOrigin,
+          cachePolicy,
+          originRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         // Orders endpoint - no caching, admin only
         '/v1/orders': {
