@@ -62,7 +62,8 @@ export const queryItems = async <T>(
   tableName: string,
   indexName: string,
   keyConditionExpression: string,
-  expressionAttributeValues: Record<string, any>
+  expressionAttributeValues: Record<string, any>,
+  expressionAttributeNames?: Record<string, string>
 ): Promise<T[]> => {
   const result = await docClient.send(
     new QueryCommand({
@@ -70,6 +71,7 @@ export const queryItems = async <T>(
       IndexName: indexName,
       KeyConditionExpression: keyConditionExpression,
       ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeNames: expressionAttributeNames,
     })
   );
   return (result.Items as T[]) || [];

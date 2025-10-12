@@ -27,6 +27,9 @@ interface Product {
 	max_order: number;
 	image: string;
 	images: string[];
+	status: 'active' | 'inactive';
+	createdAt: string;
+	updatedAt: string;
 }
 
 interface DataFile {
@@ -35,7 +38,7 @@ interface DataFile {
 }
 
 // Configuration
-const API_URL = process.env.API_URL || 'https://smultron.zwc.se/v1';
+const API_URL = process.env.API_URL || 'https://stage.smultron.zwc.se/v1';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 

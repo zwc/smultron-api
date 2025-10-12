@@ -34,8 +34,9 @@ export const getActiveProducts = async (): Promise<Product[]> => {
   return await db.queryItems<Product>(
     PRODUCTS_TABLE,
     'StatusIndex',
-    'status = :status',
-    { ':status': 'active' }
+    '#status = :status',
+    { ':status': 'active' },
+    { '#status': 'status' }
   );
 };
 
@@ -179,8 +180,9 @@ export const adminGetProducts = async (options: {
     products = await db.queryItems<Product>(
       PRODUCTS_TABLE,
       'StatusIndex',
-      'status = :status',
-      { ':status': options.statusFilter[0] }
+      '#status = :status',
+      { ':status': options.statusFilter[0] },
+      { '#status': 'status' }
     );
   } else if (options.statusFilter && options.statusFilter.length > 1) {
     // Multiple statuses: query each and combine
@@ -188,8 +190,9 @@ export const adminGetProducts = async (options: {
       db.queryItems<Product>(
         PRODUCTS_TABLE,
         'StatusIndex',
-        'status = :status',
-        { ':status': status }
+        '#status = :status',
+        { ':status': status },
+        { '#status': 'status' }
       )
     );
     const results = await Promise.all(queries);
