@@ -73,16 +73,14 @@ components:
       properties:
         id:
           type: string
-        items:
+        cart:
           type: array
           items:
-            $ref: '#/components/schemas/OrderItem'
+            $ref: '#/components/schemas/CartItem'
+        order:
+          $ref: '#/components/schemas/OrderDetails'
         total:
           type: number
-        customerEmail:
-          type: string
-        customerName:
-          type: string
         status:
           type: string
           enum: [pending, confirmed, shipped, delivered, cancelled]
@@ -93,8 +91,67 @@ components:
           type: string
           format: date-time
 
+    CartItem:
+      type: object
+      required:
+        - id
+        - price
+        - number
+      properties:
+        id:
+          type: string
+          description: Product ID
+        price:
+          type: number
+          description: Price at time of order
+        number:
+          type: integer
+          minimum: 1
+          description: Quantity
+        brand:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type: string
+        category:
+          type: string
+        image:
+          type: string
+
+    OrderDetails:
+      type: object
+      required:
+        - name
+        - address
+        - zip
+        - city
+        - phone
+        - delivery
+        - payment
+      properties:
+        name:
+          type: string
+        company:
+          type: string
+        address:
+          type: string
+        zip:
+          type: string
+        city:
+          type: string
+        phone:
+          type: string
+        delivery:
+          type: string
+          description: Delivery method (e.g., postnord, dhl)
+        payment:
+          type: string
+          description: Payment method (e.g., swish, card)
+
     OrderItem:
       type: object
+      description: Legacy order item format (deprecated)
       properties:
         productId:
           type: string
@@ -508,6 +565,7 @@ paths:
   /orders:
     post:
       summary: Create a new order
+      description: Creates a new order and decreases stock for ordered products
       tags:
         - Orders (Public)
       requestBody:
@@ -517,28 +575,53 @@ paths:
             schema:
               type: object
               required:
-                - items
-                - total
-                - customerEmail
-                - customerName
+                - cart
+                - order
               properties:
-                items:
+                cart:
                   type: array
                   items:
-                    $ref: '#/components/schemas/OrderItem'
-                total:
-                  type: number
-                customerEmail:
-                  type: string
-                customerName:
-                  type: string
+                    $ref: '#/components/schemas/CartItem'
+                order:
+                  $ref: '#/components/schemas/OrderDetails'
+            example:
+              cart:
+                - id: "labubu-labubu-1760164608843-7wfhd2wyn"
+                  brand: "Pop Mart"
+                  title: "Labubu"
+                  subtitle: "Big into energy"
+                  category: "labubu"
+                  price: 599
+                  number: 1
+                  image: "/smultronet/graphics/temp/labubu-big-into-energy-1.jpg"
+              order:
+                name: "Bernhard"
+                company: "ZwC"
+                address: "Varmfrontsgatan 18"
+                zip: "128 33"
+                city: "Stockholm"
+                phone: "0793513563"
+                delivery: "postnord"
+                payment: "swish"
       responses:
         '201':
-          description: Order created
+          description: Order created successfully, stock decreased
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Order'
+        '400':
+          description: Invalid request or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     get:
       summary: List all orders

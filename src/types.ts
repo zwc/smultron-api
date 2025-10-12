@@ -26,15 +26,37 @@ export interface Category {
 
 export interface Order {
   id: string;
-  items: OrderItem[];
+  cart: CartItem[];
+  order: OrderDetails;
   total: number;
-  customerEmail: string;
-  customerName: string;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
   createdAt: string;
   updatedAt: string;
 }
 
+export interface CartItem {
+  id: string;  // Required: product ID
+  price: number;  // Required: price at time of order
+  number: number;  // Required: quantity
+  brand?: string;  // Optional
+  title?: string;  // Optional
+  subtitle?: string;  // Optional
+  category?: string;  // Optional
+  image?: string;  // Optional
+}
+
+export interface OrderDetails {
+  name: string;
+  company?: string;
+  address: string;
+  zip: string;
+  city: string;
+  phone: string;
+  delivery: string;
+  payment: string;
+}
+
+// Legacy support
 export interface OrderItem {
   productId: string;
   quantity: number;
