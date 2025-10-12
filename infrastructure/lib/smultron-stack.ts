@@ -318,8 +318,36 @@ export class SmultronStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
       },
       additionalBehaviors: {
-        // Swagger documentation from S3 - handle /docs root path
+        // Swagger documentation from S3 - redirect /docs to /docs/
         '/docs': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
+            originAccessControl: docsOac,
+          }),
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+          functionAssociations: [{
+            function: new cloudfront.Function(this, 'DocsRedirectFunction', {
+              code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  
+  // Always redirect /docs to /docs/ (with trailing slash)
+  return {
+    statusCode: 301,
+    statusDescription: 'Moved Permanently',
+    headers: {
+      'location': { value: '/docs/' }
+    }
+  };
+}
+              `),
+            }),
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          }],
+        },
+        // Swagger documentation from S3 - serve files and handle directory indexes
+        '/docs/*': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
             originAccessControl: docsOac,
           }),
@@ -333,9 +361,9 @@ function handler(event) {
   var request = event.request;
   var uri = request.uri;
   
-  // Redirect /docs to /docs/index.html
-  if (uri === '/docs' || uri === '/docs/') {
-    request.uri = '/docs/index.html';
+  // If URI ends with /, append index.html
+  if (uri.endsWith('/')) {
+    request.uri += 'index.html';
   }
   
   return request;
@@ -344,15 +372,6 @@ function handler(event) {
             }),
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           }],
-        },
-        // Swagger documentation from S3 - handle all docs files
-        '/docs/*': {
-          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
-            originAccessControl: docsOac,
-          }),
-          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
         },
         // Cache public GET endpoints, but allow all methods (POST/PUT/DELETE for admin)
         // Public endpoints are read-only for unauthenticated users, but admins need write access
