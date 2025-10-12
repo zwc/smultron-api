@@ -56,7 +56,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/labubu-big-into-energy-1.jpg",
-      "images": ["/smultronet/graphics/temp/labubu-big-into-energy-1.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/labubu-big-into-energy-1.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-09-28T21:43:30.209Z",
+      "updatedAt": "2025-09-28T21:43:30.209Z"
     },
     {
       "id": "exciting-macarons",
@@ -80,7 +85,10 @@
       "images": [
         "/smultronet/graphics/temp/labubu-exciting-macaron-1.jpg",
         "/smultronet/graphics/temp/labubu-exciting-macaron-2.jpg"
-      ]
+      ],
+      "status": "active",
+      "createdAt": "2025-09-29T21:43:30.209Z",
+      "updatedAt": "2025-09-29T21:43:30.209Z"
     },
     {
       "id": "wacky-mart",
@@ -101,7 +109,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/placeholder.jpg",
-      "images": ["/smultronet/graphics/temp/placeholder.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/placeholder.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-09-30T21:43:30.209Z",
+      "updatedAt": "2025-09-30T21:43:30.209Z"
     },
     {
       "id": "pin-for-love",
@@ -122,7 +135,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/labubu-pin-for-love-1.jpg",
-      "images": ["/smultronet/graphics/temp/labubu-pin-for-love-1.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/labubu-pin-for-love-1.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-01T21:43:30.209Z",
+      "updatedAt": "2025-10-01T21:43:30.209Z"
     },
     {
       "id": "bear-flavor",
@@ -143,7 +161,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/placeholder.jpg",
-      "images": ["/smultronet/graphics/temp/placeholder.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/placeholder.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-02T21:43:30.209Z",
+      "updatedAt": "2025-10-02T21:43:30.209Z"
     },
     {
       "id": "the-constellation",
@@ -164,7 +187,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/placeholder.jpg",
-      "images": ["/smultronet/graphics/temp/placeholder.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/placeholder.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-03T21:43:30.209Z",
+      "updatedAt": "2025-10-03T21:43:30.209Z"
     },
     {
       "id": "l-impressionnisme",
@@ -186,7 +214,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/placeholder.jpg",
-      "images": ["/smultronet/graphics/temp/placeholder.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/placeholder.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-04T21:43:30.209Z",
+      "updatedAt": "2025-10-04T21:43:30.209Z"
     },
     {
       "id": "you-found-me",
@@ -207,7 +240,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/placeholder.jpg",
-      "images": ["/smultronet/graphics/temp/placeholder.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/placeholder.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-05T21:43:30.209Z",
+      "updatedAt": "2025-10-05T21:43:30.209Z"
     },
     {
       "id": "kiss-kiss",
@@ -231,7 +269,10 @@
       "images": [
         "/smultronet/graphics/temp/sonny-angel-kiss-kiss-1.jpg",
         "/smultronet/graphics/temp/sonny-angel-kiss-kiss-2.jpg"
-      ]
+      ],
+      "status": "active",
+      "createdAt": "2025-10-06T21:43:30.209Z",
+      "updatedAt": "2025-10-06T21:43:30.209Z"
     },
     {
       "id": "christmas",
@@ -252,7 +293,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/sonny-angel-christmas.jpg",
-      "images": ["/smultronet/graphics/temp/sonny-angel-christmas.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/sonny-angel-christmas.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-07T21:43:30.209Z",
+      "updatedAt": "2025-10-07T21:43:30.209Z"
     },
     {
       "id": "rainy-day",
@@ -277,7 +323,10 @@
         "/smultronet/graphics/temp/sonny-angel-rainy-day.jpg",
         "/smultronet/graphics/temp/sonny-angel-sweets.jpg",
         "/smultronet/graphics/temp/sonny-angel-christmas.jpg"
-      ]
+      ],
+      "status": "active",
+      "createdAt": "2025-10-08T21:43:30.209Z",
+      "updatedAt": "2025-10-08T21:43:30.209Z"
     },
     {
       "id": "sweets",
@@ -298,7 +347,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/sonny-angel-sweets.jpg",
-      "images": ["/smultronet/graphics/temp/sonny-angel-sweets.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/sonny-angel-sweets.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-09T21:43:30.209Z",
+      "updatedAt": "2025-10-09T21:43:30.209Z"
     },
     {
       "id": "birthday-cake",
@@ -319,7 +373,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/sonny-angel-birthday-cake.jpg",
-      "images": ["/smultronet/graphics/temp/sonny-angel-birthday-cake.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/sonny-angel-birthday-cake.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-10T21:43:30.209Z",
+      "updatedAt": "2025-10-10T21:43:30.209Z"
     },
     {
       "id": "animal-kingdom",
@@ -340,7 +399,12 @@
       "stock": 3,
       "max_order": 0,
       "image": "/smultronet/graphics/temp/getahug-animal-kingdom.jpg",
-      "images": ["/smultronet/graphics/temp/getahug-animal-kingdom.jpg"]
+      "images": [
+        "/smultronet/graphics/temp/getahug-animal-kingdom.jpg"
+      ],
+      "status": "active",
+      "createdAt": "2025-10-11T21:43:30.209Z",
+      "updatedAt": "2025-10-11T21:43:30.209Z"
     }
   ]
 }

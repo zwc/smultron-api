@@ -600,6 +600,82 @@ describe('Integration Tests - Cleanup', () => {
     expect(response.status).toBe(401);
   });
 
+  test('should list products with filters (admin)', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products?limit=10&offset=0&sort=-createdAt`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.status).toBe(200);
+    const data: any = await response.json();
+    expect(data.data).toBeArray();
+    expect(data.meta).toBeDefined();
+    expect(data.meta.total).toBeNumber();
+    expect(data.meta.limit).toBe(10);
+    expect(data.meta.offset).toBe(0);
+    expect(data.meta.sort).toBe('-createdAt');
+    expect(data.links).toBeDefined();
+    expect(data.links.self).toBeString();
+  });
+
+  test('should filter products by status (admin)', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products?status=active&limit=5`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.status).toBe(200);
+    const data: any = await response.json();
+    expect(data.meta.filters.status).toEqual(['active']);
+    expect(data.meta.limit).toBe(5);
+  });
+
+  test('should search products (admin)', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products?q=test&limit=20`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.status).toBe(200);
+    const data: any = await response.json();
+    expect(data.meta.filters.q).toBe('test');
+  });
+
+  test('should paginate products (admin)', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products?limit=2&offset=0`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.status).toBe(200);
+    const data: any = await response.json();
+    expect(data.data.length).toBeLessThanOrEqual(2);
+    
+    if (data.meta.total > 2) {
+      expect(data.links.next).toBeString();
+    }
+  });
+
+  test('should reject listing products without auth', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products`, {
+      method: 'GET',
+    });
+
+    expect(response.status).toBe(401);
+  });
+
+  test('should reject invalid query parameters (admin)', async () => {
+    const response = await fetch(`${normalizedApiUrl}/admin/products?limit=1000&sort=invalid`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.status).toBe(400);
+    const data: any = await response.json();
+    expect(data.error).toBe('Validation error');
+    expect(data.details).toBeDefined();
+  });
+
   test('should delete the test category (admin)', async () => {
     const response = await fetch(`${normalizedApiUrl}/categories/${testCategoryId}`, {
       method: 'DELETE',

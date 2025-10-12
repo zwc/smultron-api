@@ -1,11 +1,12 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
-import { getAllProducts } from '../services/product';
+import { getActiveProducts } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
-    const products = await getAllProducts();
+    // Only return active products for public endpoint
+    const products = await getActiveProducts();
     return successResponse(products);
   } catch (error) {
     console.error('List products error:', error);

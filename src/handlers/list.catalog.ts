@@ -1,14 +1,15 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
-import { getAllCategories, getAllProducts } from '../services/product';
+import { getAllCategories, getActiveProducts } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
     // Fetch both categories and products in parallel for better performance
+    // Only return active products for public catalog
     const [categories, products] = await Promise.all([
       getAllCategories(),
-      getAllProducts()
+      getActiveProducts()
     ]);
 
     return successResponse({

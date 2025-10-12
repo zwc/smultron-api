@@ -14,6 +14,28 @@ export interface Product {
   max_order: number;
   image: string;
   images: string[];
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductsResponse {
+  data: Product[];
+  meta: {
+    total: number;
+    limit: number;
+    offset: number;
+    sort: string;
+    filters: {
+      status: string[] | null;
+      q: string | null;
+    };
+  };
+  links: {
+    self: string;
+    next: string | null;
+    prev: string | null;
+  };
 }
 
 export interface Category {

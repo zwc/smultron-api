@@ -14,3 +14,4 @@ export { handler as createOrder } from './src/handlers/create.order';
 export { handler as listOrders } from './src/handlers/list.orders';
 export { handler as getOrder } from './src/handlers/get.order';
 export { handler as updateOrderStatus } from './src/handlers/update.order.status';
+export { handler as adminListProducts } from './src/handlers/admin.list.products';

@@ -53,6 +53,15 @@ components:
           type: array
           items:
             type: string
+        status:
+          type: string
+          enum: [active, inactive]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     Category:
       type: object
@@ -188,6 +197,122 @@ paths:
                     type: string
         '401':
           description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/products:
+    get:
+      summary: List products (Admin)
+      description: Get paginated list of products with filtering, search, and sorting
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          description: Filter by product status (can be multiple)
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [active, inactive]
+          style: form
+          explode: true
+        - name: q
+          in: query
+          description: Search query (searches title, subtitle, brand, description)
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort field and direction (prefix with - for descending)
+          required: false
+          schema:
+            type: string
+            enum: [createdAt, -createdAt, updatedAt, -updatedAt, id, -id]
+            default: -createdAt
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of items to skip
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      limit:
+                        type: integer
+                      offset:
+                        type: integer
+                      sort:
+                        type: string
+                      filters:
+                        type: object
+                        properties:
+                          status:
+                            type: array
+                            items:
+                              type: string
+                            nullable: true
+                          q:
+                            type: string
+                            nullable: true
+                  links:
+                    type: object
+                    properties:
+                      self:
+                        type: string
+                      next:
+                        type: string
+                        nullable: true
+                      prev:
+                        type: string
+                        nullable: true
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:

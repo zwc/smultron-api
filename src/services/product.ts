@@ -5,12 +5,16 @@ const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || 'smultron-products';
 const CATEGORIES_TABLE = process.env.CATEGORIES_TABLE || 'smultron-categories';
 const ORDERS_TABLE = process.env.ORDERS_TABLE || 'smultron-orders';
 
-export const createProduct = (data: Omit<Product, 'id'>): Product => {
+export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { status?: 'active' | 'inactive' }): Product => {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9);
+  const now = new Date().toISOString();
   return {
     id: `${data.category}-${data.title.toLowerCase().replace(/\s+/g, '-')}-${timestamp}-${random}`,
     ...data,
+    status: data.status || 'active',
+    createdAt: now,
+    updatedAt: now,
   };
 };
 
@@ -26,15 +30,28 @@ export const getAllProducts = async (): Promise<Product[]> => {
   return await db.scanTable<Product>(PRODUCTS_TABLE);
 };
 
+export const getActiveProducts = async (): Promise<Product[]> => {
+  return await db.queryItems<Product>(
+    PRODUCTS_TABLE,
+    'StatusIndex',
+    'status = :status',
+    { ':status': 'active' }
+  );
+};
+
 export const updateProduct = async (
   id: string,
-  updates: Partial<Omit<Product, 'id'>>
+  updates: Partial<Omit<Product, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<Product> => {
   const updateParts: string[] = [];
   const attributeValues: Record<string, any> = {};
   const attributeNames: Record<string, string> = {};
 
-  Object.entries(updates).forEach(([key, value], index) => {
+  // Add updatedAt timestamp
+  const now = new Date().toISOString();
+  const allUpdates = { ...updates, updatedAt: now };
+
+  Object.entries(allUpdates).forEach(([key, value], index) => {
     const attrName = `#attr${index}`;
     const attrValue = `:val${index}`;
     updateParts.push(`${attrName} = ${attrValue}`);
@@ -146,4 +163,77 @@ export const updateOrderStatus = async (
       '#updatedAt': 'updatedAt',
     }
   );
+};
+
+export const adminGetProducts = async (options: {
+  statusFilter?: string[];
+  searchQuery?: string;
+  sortField: string;
+  limit: number;
+  offset: number;
+}): Promise<{ items: Product[]; total: number }> => {
+  let products: Product[];
+
+  // If filtering by a single status, use GSI for efficient query
+  if (options.statusFilter && options.statusFilter.length === 1) {
+    products = await db.queryItems<Product>(
+      PRODUCTS_TABLE,
+      'StatusIndex',
+      'status = :status',
+      { ':status': options.statusFilter[0] }
+    );
+  } else if (options.statusFilter && options.statusFilter.length > 1) {
+    // Multiple statuses: query each and combine
+    const queries = options.statusFilter.map(status =>
+      db.queryItems<Product>(
+        PRODUCTS_TABLE,
+        'StatusIndex',
+        'status = :status',
+        { ':status': status }
+      )
+    );
+    const results = await Promise.all(queries);
+    products = results.flat();
+  } else {
+    // No status filter: get all products
+    products = await getAllProducts();
+  }
+
+  // Apply search query (search in title, subtitle, brand, description)
+  if (options.searchQuery) {
+    const query = options.searchQuery.toLowerCase();
+    products = products.filter(p => 
+      p.title.toLowerCase().includes(query) ||
+      p.subtitle.toLowerCase().includes(query) ||
+      p.brand.toLowerCase().includes(query) ||
+      p.description.some(d => d.toLowerCase().includes(query))
+    );
+  }
+
+  // Sort products
+  const sortField = options.sortField.startsWith('-') 
+    ? options.sortField.substring(1) 
+    : options.sortField;
+  const sortDirection = options.sortField.startsWith('-') ? -1 : 1;
+
+  products.sort((a, b) => {
+    let aVal: any, bVal: any;
+    
+    if (sortField === 'createdAt' || sortField === 'updatedAt') {
+      aVal = a[sortField];
+      bVal = b[sortField];
+    } else {
+      aVal = a.id;
+      bVal = b.id;
+    }
+
+    if (aVal < bVal) return -1 * sortDirection;
+    if (aVal > bVal) return 1 * sortDirection;
+    return 0;
+  });
+
+  const total = products.length;
+  const items = products.slice(options.offset, options.offset + options.limit);
+
+  return { items, total };
 };

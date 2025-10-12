@@ -47,6 +47,14 @@ export class SmultronStack extends cdk.Stack {
       removalPolicy: environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
     });
 
+    // Add GSI for filtering products by status
+    productsTable.addGlobalSecondaryIndex({
+      indexName: 'StatusIndex',
+      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const categoriesTable = new dynamodb.Table(this, 'CategoriesTable', {
       tableName: `smultron-categories-${environment}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
@@ -144,6 +152,14 @@ export class SmultronStack extends cdk.Stack {
     });
     productsTable.grantReadWriteData(deleteProductFunction);
 
+    const adminListProductsFunction = new lambda.Function(this, 'AdminListProductsFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-admin-list-products-${environment}`,
+      code: lambdaCode,
+      handler: 'index.adminListProducts',
+    });
+    productsTable.grantReadData(adminListProductsFunction);
+
     const listCategoriesFunction = new lambda.Function(this, 'ListCategoriesFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-categories-${environment}`,
@@ -240,6 +256,11 @@ export class SmultronStack extends cdk.Stack {
     // Auth routes
     const auth = v1.addResource('auth');
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(loginFunction));
+
+    // Admin routes
+    const admin = v1.addResource('admin');
+    const adminProducts = admin.addResource('products');
+    adminProducts.addMethod('GET', new apigateway.LambdaIntegration(adminListProductsFunction));
 
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');
