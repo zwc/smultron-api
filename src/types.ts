@@ -38,11 +38,6 @@ export interface CartItem {
   id: string;  // Required: product ID
   price: number;  // Required: price at time of order
   number: number;  // Required: quantity
-  brand?: string;  // Optional
-  title?: string;  // Optional
-  subtitle?: string;  // Optional
-  category?: string;  // Optional
-  image?: string;  // Optional
 }
 
 export interface OrderDetails {

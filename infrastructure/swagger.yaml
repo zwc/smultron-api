@@ -108,16 +108,6 @@ components:
           type: integer
           minimum: 1
           description: Quantity
-        brand:
-          type: string
-        title:
-          type: string
-        subtitle:
-          type: string
-        category:
-          type: string
-        image:
-          type: string
 
     OrderDetails:
       type: object
@@ -587,13 +577,11 @@ paths:
             example:
               cart:
                 - id: "labubu-labubu-1760164608843-7wfhd2wyn"
-                  brand: "Pop Mart"
-                  title: "Labubu"
-                  subtitle: "Big into energy"
-                  category: "labubu"
                   price: 599
                   number: 1
-                  image: "/smultronet/graphics/temp/labubu-big-into-energy-1.jpg"
+                - id: "sonny-angel-christmas-1760164608843-abc123"
+                  price: 599
+                  number: 2
               order:
                 name: "Bernhard"
                 company: "ZwC"
