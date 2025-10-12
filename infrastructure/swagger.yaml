@@ -18,6 +18,17 @@ components:
   schemas:
     Product:
       type: object
+      required:
+        - id
+        - category
+        - brand
+        - title
+        - price
+        - stock
+        - image
+        - status
+        - createdAt
+        - updatedAt
       properties:
         id:
           type: string
@@ -56,12 +67,15 @@ components:
         status:
           type: string
           enum: [active, inactive]
+          description: Product visibility status. Only 'active' products are shown in public endpoints.
         createdAt:
           type: string
           format: date-time
+          description: ISO 8601 timestamp when the product was created
         updatedAt:
           type: string
           format: date-time
+          description: ISO 8601 timestamp when the product was last updated
 
     Category:
       type: object
@@ -205,7 +219,19 @@ paths:
   /admin/products:
     get:
       summary: List products (Admin)
-      description: Get paginated list of products with filtering, search, and sorting
+      description: |
+        Get paginated list of products with filtering, search, and sorting.
+        
+        **Performance Notes:**
+        - Uses DynamoDB Global Secondary Index (GSI) for efficient status filtering
+        - Single status filter queries use GSI directly for optimal performance
+        - Multiple status filters query GSI for each status and combine results
+        - No status filter performs full table scan
+        
+        **Filtering:**
+        - Status filtering is optimized with GSI on status + createdAt
+        - Search performs in-memory filtering on results
+        - Results are sorted in-memory after retrieval
       tags:
         - Admin
       security:
@@ -321,12 +347,12 @@ paths:
   /catalog:
     get:
       summary: Get complete catalog (categories and products)
-      description: Returns both categories and products in a single request for improved performance
+      description: Returns both categories and active products in a single request for improved performance. Only products with status 'active' are included.
       tags:
         - Catalog (Public)
       responses:
         '200':
-          description: Complete catalog with categories and products
+          description: Complete catalog with categories and active products
           content:
             application/json:
               schema:
@@ -338,17 +364,19 @@ paths:
                       $ref: '#/components/schemas/Category'
                   products:
                     type: array
+                    description: Only active products are returned
                     items:
                       $ref: '#/components/schemas/Product'
 
   /products:
     get:
-      summary: List all products
+      summary: List all active products
+      description: Returns only products with status 'active'. For admin access to all products including inactive ones, use the /admin/products endpoint.
       tags:
         - Products (Public)
       responses:
         '200':
-          description: List of products
+          description: List of active products
           content:
             application/json:
               schema:
@@ -409,6 +437,11 @@ paths:
                   type: array
                   items:
                     type: string
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  default: active
+                  description: Product visibility status. Defaults to 'active' if not specified.
       responses:
         '201':
           description: Product created
@@ -499,9 +532,13 @@ paths:
                   type: array
                   items:
                     type: string
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  description: Update product visibility status. Change to 'inactive' to hide from public endpoints.
       responses:
         '200':
-          description: Product updated
+          description: Product updated (updatedAt timestamp is automatically set)
           content:
             application/json:
               schema:
