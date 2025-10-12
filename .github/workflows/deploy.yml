@@ -40,7 +40,7 @@ jobs:
     name: Deploy to Stage
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'stage')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     concurrency:
       group: deploy-stage
       cancel-in-progress: false
@@ -80,11 +80,12 @@ jobs:
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test, deploy-stage]
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
     concurrency:
       group: deploy-prod
