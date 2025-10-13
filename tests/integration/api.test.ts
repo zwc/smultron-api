@@ -372,6 +372,12 @@ describe('Integration Tests - Orders', () => {
       }),
     });
 
+    if (response.status !== 201) {
+      const errorData = await response.text();
+      console.error(`Order creation failed (${response.status}):`, errorData);
+      console.error('Product IDs used:', { testProductId, testProductId2 });
+    }
+
     expect(response.status).toBe(201);
     const data: any = await response.json();
     expect(data.id).toBeDefined();

@@ -207,7 +207,7 @@ export class SmultronStack extends cdk.Stack {
       handler: 'index.createOrder',
     });
     ordersTable.grantWriteData(createOrderFunction);
-    productsTable.grantReadData(createOrderFunction);
+    productsTable.grantReadWriteData(createOrderFunction); // Need write access to update stock
 
     const listOrdersFunction = new lambda.Function(this, 'ListOrdersFunction', {
       ...commonLambdaProps,
