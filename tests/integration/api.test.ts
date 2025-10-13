@@ -449,7 +449,7 @@ describe('Integration Tests - Orders', () => {
     expect(response.status).toBe(200);
     const data: any = await response.json();
     expect(data.id).toBe(testOrderId);
-    expect(data.customerEmail).toBe('test@example.com');
+    expect(data.order.email).toBe('test@example.com');
   });
 
   test('should return 404 for non-existent order', async () => {
