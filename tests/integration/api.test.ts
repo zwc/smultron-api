@@ -347,21 +347,28 @@ describe('Integration Tests - Orders', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customerEmail: 'test@example.com',
-        customerName: 'Test Customer',
-        items: [
+        cart: [
           {
-            productId: testProductId,
-            quantity: 2,
+            id: testProductId,
+            number: 2,
             price: 89.99,
           },
           {
-            productId: testProductId2,
-            quantity: 1,
+            id: testProductId2,
+            number: 1,
             price: 149.99,
           },
         ],
-        total: 329.97,
+        order: {
+          name: 'Test Customer',
+          address: '123 Test Street',
+          zip: '12345',
+          city: 'Test City',
+          phone: '+46701234567',
+          email: 'test@example.com',
+          delivery: 'standard',
+          payment: 'card',
+        },
       }),
     });
 
@@ -377,24 +384,30 @@ describe('Integration Tests - Orders', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customerEmail: 'invalid-email',
-        items: [],
-        total: -10,
+        cart: [],
+        order: {},
       }),
     });
 
     expect(response.status).toBe(400);
   });
 
-  test('should reject creating order with empty items', async () => {
+  test('should reject creating order with empty cart', async () => {
     const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customerEmail: 'test@example.com',
-        customerName: 'Test Customer',
-        items: [],
-        total: 0,
+        cart: [],
+        order: {
+          name: 'Test Customer',
+          address: '123 Test Street',
+          zip: '12345',
+          city: 'Test City',
+          phone: '+46701234567',
+          email: 'test@example.com',
+          delivery: 'standard',
+          payment: 'card',
+        },
       }),
     });
 

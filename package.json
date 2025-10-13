@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "test": "bun test tests/*.test.ts",
+    "test:local": "bun test tests/local.test.ts",
     "test:integration": "bun test tests/integration/*.test.ts",
     "test:integration:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/integration/*.test.ts",
     "dev": "bun run --watch index.ts",

@@ -299,7 +299,10 @@ export class SmultronStack extends cdk.Stack {
 
     // CloudFront Distribution
     // Use AWS managed policies optimized for API Gateway
-    const cachePolicy = cloudfront.CachePolicy.CACHING_OPTIMIZED;
+    // For dev environment, disable caching completely for faster iteration
+    const cachePolicy = environment === 'dev' 
+      ? cloudfront.CachePolicy.CACHING_DISABLED 
+      : cloudfront.CachePolicy.CACHING_OPTIMIZED;
     const noCachePolicy = cloudfront.CachePolicy.CACHING_DISABLED;
     // Use ALL_VIEWER_EXCEPT_HOST_HEADER to avoid Host header conflicts with API Gateway
     const originRequestPolicy = cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER;

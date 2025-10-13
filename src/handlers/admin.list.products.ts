@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { adminGetProducts } from '../services/product';
 import type { AdminProductsResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
+import { unauthorizedResponse, errorResponse } from '../utils/response';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
@@ -21,9 +22,8 @@ const QueryParamsSchema = z.object({
 
 export const handler = async (event: any) => {
   // Verify authentication
-  const authError = verifyAuthToken(event);
-  if (authError) {
-    return authError;
+  if (!verifyAuthToken(event.headers || {})) {
+    return unauthorizedResponse();
   }
 
   try {
