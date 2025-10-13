@@ -10,22 +10,27 @@ NC='\033[0m' # No Color
 # Check if environment is provided
 ENVIRONMENT=${1:-stage}
 
-if [[ "$ENVIRONMENT" != "stage" && "$ENVIRONMENT" != "prod" ]]; then
-  echo -e "${RED}Error: Environment must be 'stage' or 'prod'${NC}"
-  echo "Usage: ./deploy-cdk.sh [stage|prod]"
+if [[ "$ENVIRONMENT" != "dev" && "$ENVIRONMENT" != "stage" && "$ENVIRONMENT" != "prod" ]]; then
+  echo -e "${RED}Error: Environment must be 'dev', 'stage' or 'prod'${NC}"
+  echo "Usage: ./deploy-cdk.sh [dev|stage|prod]"
   exit 1
 fi
 
 echo -e "${GREEN}🚀 Deploying Smultron API to ${ENVIRONMENT} environment${NC}"
 
-# Load environment variables from .env
-if [ -f .env ]; then
+# Load environment variables from .env or .env.{environment}
+ENV_FILE=".env"
+if [ "$ENVIRONMENT" == "dev" ] && [ -f .env.dev ]; then
+  ENV_FILE=".env.dev"
+  echo -e "${YELLOW}📦 Loading environment variables from .env.dev${NC}"
+elif [ -f .env ]; then
   echo -e "${YELLOW}📦 Loading environment variables from .env${NC}"
-  export $(cat .env | grep -v '^#' | xargs)
 else
   echo -e "${RED}Error: .env file not found${NC}"
   exit 1
 fi
+
+export $(cat $ENV_FILE | grep -v '^#' | xargs)
 
 # Validate required environment variables
 if [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
