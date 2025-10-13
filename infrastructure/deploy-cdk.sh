@@ -19,14 +19,21 @@ fi
 echo -e "${GREEN}🚀 Deploying Smultron API to ${ENVIRONMENT} environment${NC}"
 
 # Load environment variables from .env or .env.{environment}
-ENV_FILE=".env"
-if [ "$ENVIRONMENT" == "dev" ] && [ -f .env.dev ]; then
+# Check parent directory first (when running from infrastructure/)
+if [ -f ../.env.dev ] && [ "$ENVIRONMENT" == "dev" ]; then
+  ENV_FILE="../.env.dev"
+  echo -e "${YELLOW}📦 Loading environment variables from .env.dev${NC}"
+elif [ -f ../.env ]; then
+  ENV_FILE="../.env"
+  echo -e "${YELLOW}📦 Loading environment variables from .env${NC}"
+elif [ -f .env.dev ] && [ "$ENVIRONMENT" == "dev" ]; then
   ENV_FILE=".env.dev"
   echo -e "${YELLOW}📦 Loading environment variables from .env.dev${NC}"
 elif [ -f .env ]; then
+  ENV_FILE=".env"
   echo -e "${YELLOW}📦 Loading environment variables from .env${NC}"
 else
-  echo -e "${RED}Error: .env file not found${NC}"
+  echo -e "${RED}Error: .env file not found in current or parent directory${NC}"
   exit 1
 fi
 
@@ -38,32 +45,42 @@ if [ -z "$ADMIN_PASSWORD" ] || [ -z "$JWT_SECRET" ]; then
   exit 1
 fi
 
-# Run tests
-echo -e "${YELLOW}🧪 Running tests${NC}"
-bun test
+# Run tests only for stage and prod deployments
+if [[ "$ENVIRONMENT" != "dev" ]]; then
+  echo -e "${YELLOW}🧪 Running tests${NC}"
+  cd ..
+  bun test
+  cd infrastructure
+else
+  echo -e "${YELLOW}⏭️  Skipping tests for dev environment${NC}"
+fi
 
 # Build the application
 echo -e "${YELLOW}🔨 Building application${NC}"
-bun run build
+(cd .. && bun run build)
+
+# Change to root directory for CDK commands (cdk.json is there)
+cd ..
 
 # CDK Bootstrap (only needed once per account/region)
 echo -e "${YELLOW}🔧 Checking CDK bootstrap${NC}"
-cdk bootstrap
+npx cdk bootstrap
 
 # Synthesize CDK template
 echo -e "${YELLOW}📝 Synthesizing CDK template${NC}"
-cdk synth --context environment=$ENVIRONMENT
+npx cdk synth --context environment=$ENVIRONMENT
 
 # Deploy to AWS
 echo -e "${YELLOW}☁️  Deploying to AWS${NC}"
-cdk deploy \
+npx cdk deploy \
   --context environment=$ENVIRONMENT \
   --context adminUsername=$ADMIN_USERNAME \
   --context adminPassword=$ADMIN_PASSWORD \
   --context jwtSecret=$JWT_SECRET \
   --context domainName=${DOMAIN_NAME:-smultron.zwc.se} \
-  --context certificateArn=$CERTIFICATE_ARN \
-  --require-approval never
+  --context hostedZoneId=$HOSTED_ZONE_ID \
+  --require-approval never \
+  --all
 
 echo -e "${GREEN}✅ Deployment to ${ENVIRONMENT} completed successfully!${NC}"
 
