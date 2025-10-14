@@ -71,7 +71,7 @@ export class SmultronStack extends cdk.Stack {
 
     // Common Lambda environment variables
     // Note: AWS_REGION is automatically set by Lambda runtime
-    const commonEnv = {
+    const commonEnv: Record<string, string> = {
       PRODUCTS_TABLE: productsTable.tableName,
       CATEGORIES_TABLE: categoriesTable.tableName,
       ORDERS_TABLE: ordersTable.tableName,
@@ -80,6 +80,13 @@ export class SmultronStack extends cdk.Stack {
       JWT_SECRET: jwtSecret,
       ENVIRONMENT: environment,
     };
+
+    // Feature flag: Disable auth for dev environment if DISABLE_AUTH env var is set
+    const disableAuth = process.env.DISABLE_AUTH || 'false';
+    if (environment === 'dev' && disableAuth === 'true') {
+      commonEnv.DISABLE_AUTH = 'true';
+      console.warn('⚠️  DISABLE_AUTH is enabled for dev environment - Authentication will be bypassed!');
+    }
 
     // Common Lambda props
     const commonLambdaProps = {
