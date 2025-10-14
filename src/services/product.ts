@@ -31,13 +31,32 @@ export const getAllProducts = async (): Promise<Product[]> => {
 };
 
 export const getActiveProducts = async (): Promise<Product[]> => {
-  return await db.queryItems<Product>(
-    PRODUCTS_TABLE,
-    'StatusIndex',
-    '#status = :status',
-    { ':status': 'active' },
-    { '#status': 'status' }
-  );
+  let products: Product[];
+  
+  try {
+    // Try to use GSI for better performance
+    products = await db.queryItems<Product>(
+      PRODUCTS_TABLE,
+      'StatusIndex',
+      '#status = :status',
+      { ':status': 'active' },
+      { '#status': 'status' }
+    );
+  } catch (error) {
+    // Fall back to scanning all products if GSI is not available
+    console.warn('StatusIndex GSI not available, falling back to table scan');
+    const allProducts = await getAllProducts();
+    products = allProducts.filter(p => p.status === 'active');
+  }
+  
+  // Sort products alphabetically by title
+  return products.sort((a, b) => {
+    const aTitle = a.title.toLowerCase();
+    const bTitle = b.title.toLowerCase();
+    if (aTitle < bTitle) return -1;
+    if (aTitle > bTitle) return 1;
+    return 0;
+  });
 };
 
 export const updateProduct = async (
@@ -91,7 +110,16 @@ export const getCategory = async (id: string): Promise<Category | null> => {
 };
 
 export const getAllCategories = async (): Promise<Category[]> => {
-  return await db.scanTable<Category>(CATEGORIES_TABLE);
+  const categories = await db.scanTable<Category>(CATEGORIES_TABLE);
+  
+  // Sort categories alphabetically by title
+  return categories.sort((a, b) => {
+    const aTitle = a.title.toLowerCase();
+    const bTitle = b.title.toLowerCase();
+    if (aTitle < bTitle) return -1;
+    if (aTitle > bTitle) return 1;
+    return 0;
+  });
 };
 
 export const updateCategory = async (
@@ -175,31 +203,43 @@ export const adminGetProducts = async (options: {
 }): Promise<{ items: Product[]; total: number }> => {
   let products: Product[];
 
-  // If filtering by a single status, use GSI for efficient query
-  if (options.statusFilter && options.statusFilter.length === 1) {
-    products = await db.queryItems<Product>(
-      PRODUCTS_TABLE,
-      'StatusIndex',
-      '#status = :status',
-      { ':status': options.statusFilter[0] },
-      { '#status': 'status' }
-    );
-  } else if (options.statusFilter && options.statusFilter.length > 1) {
-    // Multiple statuses: query each and combine
-    const queries = options.statusFilter.map(status =>
-      db.queryItems<Product>(
+  try {
+    // If filtering by a single status, use GSI for efficient query
+    if (options.statusFilter && options.statusFilter.length === 1) {
+      products = await db.queryItems<Product>(
         PRODUCTS_TABLE,
         'StatusIndex',
         '#status = :status',
-        { ':status': status },
+        { ':status': options.statusFilter[0] },
         { '#status': 'status' }
-      )
-    );
-    const results = await Promise.all(queries);
-    products = results.flat();
-  } else {
-    // No status filter: get all products
-    products = await getAllProducts();
+      );
+    } else if (options.statusFilter && options.statusFilter.length > 1) {
+      // Multiple statuses: query each and combine
+      const queries = options.statusFilter.map(status =>
+        db.queryItems<Product>(
+          PRODUCTS_TABLE,
+          'StatusIndex',
+          '#status = :status',
+          { ':status': status },
+          { '#status': 'status' }
+        )
+      );
+      const results = await Promise.all(queries);
+      products = results.flat();
+    } else {
+      // No status filter: get all products
+      products = await getAllProducts();
+    }
+  } catch (error) {
+    // Fall back to scanning all products if GSI is not available
+    console.warn('StatusIndex GSI not available, falling back to table scan with filtering');
+    const allProducts = await getAllProducts();
+    
+    if (options.statusFilter && options.statusFilter.length > 0) {
+      products = allProducts.filter(p => options.statusFilter!.includes(p.status));
+    } else {
+      products = allProducts;
+    }
   }
 
   // Apply search query (search in title, subtitle, brand, description)
@@ -225,6 +265,9 @@ export const adminGetProducts = async (options: {
     if (sortField === 'createdAt' || sortField === 'updatedAt') {
       aVal = a[sortField];
       bVal = b[sortField];
+    } else if (sortField === 'title') {
+      aVal = a.title.toLowerCase();
+      bVal = b.title.toLowerCase();
     } else {
       aVal = a.id;
       bVal = b.id;

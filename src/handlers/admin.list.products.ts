@@ -14,7 +14,8 @@ const QueryParamsSchema = z.object({
   sort: z.enum([
     'createdAt', '-createdAt',
     'updatedAt', '-updatedAt',
-    'id', '-id'
+    'id', '-id',
+    'title', '-title'
   ]).optional().default('-createdAt'),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
   offset: z.coerce.number().int().min(0).optional().default(0)

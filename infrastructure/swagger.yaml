@@ -260,7 +260,7 @@ paths:
           required: false
           schema:
             type: string
-            enum: [createdAt, -createdAt, updatedAt, -updatedAt, id, -id]
+            enum: [createdAt, -createdAt, updatedAt, -updatedAt, id, -id, title, -title]
             default: -createdAt
         - name: limit
           in: query
@@ -347,7 +347,7 @@ paths:
   /catalog:
     get:
       summary: Get complete catalog (categories and products)
-      description: Returns both categories and active products in a single request for improved performance. Only products with status 'active' are included.
+      description: Returns both categories and active products in a single request for improved performance. Only products with status 'active' are included. Both categories and products are sorted alphabetically by title.
       tags:
         - Catalog (Public)
       responses:
@@ -371,7 +371,7 @@ paths:
   /products:
     get:
       summary: List all active products
-      description: Returns only products with status 'active'. For admin access to all products including inactive ones, use the /admin/products endpoint.
+      description: Returns only products with status 'active', sorted alphabetically by title. For admin access to all products including inactive ones, use the /admin/products endpoint.
       tags:
         - Products (Public)
       responses:
