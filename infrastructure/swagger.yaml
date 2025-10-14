@@ -458,7 +458,8 @@ paths:
 
   /products/{id}:
     get:
-      summary: Get product by ID
+      summary: Get product by ID with categories
+      description: Returns a single active product with a list of all categories. Only products with status 'active' are returned.
       tags:
         - Products (Public)
       parameters:
@@ -469,13 +470,51 @@ paths:
             type: string
       responses:
         '200':
-          description: Product details
+          description: Product details with categories
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Product'
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    description: All available categories
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        id:
+                          type: string
+                  status:
+                    type: string
+                    enum: [active, inactive]
+                  id:
+                    type: string
+                  category:
+                    type: string
+                  title:
+                    type: string
+                  subtitle:
+                    type: string
+                  brand:
+                    type: string
+                  price:
+                    type: number
+                  stock:
+                    type: integer
+                  description:
+                    type: array
+                    items:
+                      type: string
+                  image:
+                    type: string
+                  images:
+                    type: array
+                    items:
+                      type: string
         '404':
-          description: Product not found
+          description: Product not found or inactive
           content:
             application/json:
               schema:

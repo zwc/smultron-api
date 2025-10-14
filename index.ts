@@ -2,6 +2,7 @@ export { handler as login } from './src/handlers/login';
 export { handler as listCatalog } from './src/handlers/list.catalog';
 export { handler as listProducts } from './src/handlers/list.products';
 export { handler as getProduct } from './src/handlers/get.product';
+export { handler as getProductPublic } from './src/handlers/get.product.public';
 export { handler as createProduct } from './src/handlers/create.product';
 export { handler as updateProduct } from './src/handlers/update.product';
 export { handler as deleteProduct } from './src/handlers/delete.product';

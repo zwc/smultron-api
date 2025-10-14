@@ -1,0 +1,55 @@
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIResponse } from '../types';
+import { getProduct, getAllCategories } from '../services/product';
+import { successResponse, errorResponse, notFoundResponse } from '../utils/response';
+
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+  try {
+    const id = event.pathParameters?.id;
+    
+    if (!id) {
+      return errorResponse('Product ID is required', 400);
+    }
+
+    const product = await getProduct(id);
+    
+    if (!product) {
+      return notFoundResponse('Product');
+    }
+
+    // Only return active products for public endpoint
+    if (product.status !== 'active') {
+      return notFoundResponse('Product');
+    }
+
+    // Get all categories
+    const allCategories = await getAllCategories();
+    
+    // Format categories as simple objects with title and id
+    const categories = allCategories.map(cat => ({
+      title: cat.title,
+      id: cat.id
+    }));
+
+    // Construct the response with categories first, then product fields
+    const response = {
+      categories,
+      status: product.status,
+      id: product.id,
+      category: product.category,
+      title: product.title,
+      subtitle: product.subtitle,
+      brand: product.brand,
+      price: product.price,
+      stock: product.stock,
+      description: product.description,
+      image: product.image,
+      images: product.images
+    };
+
+    return successResponse(response);
+  } catch (error) {
+    console.error('Get product error:', error);
+    return errorResponse('Internal server error', 500);
+  }
+};
