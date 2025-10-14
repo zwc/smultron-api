@@ -168,8 +168,11 @@ describe('Get Product Public Endpoint Tests', () => {
   test('should get product with categories', async () => {
     const event = createEvent({
       httpMethod: 'GET',
-      path: `/v1/products/${testProductId}`,
+      path: `/v1/admin/products/${testProductId}`,
       pathParameters: { id: testProductId },
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
 
     const response = await getProductPublicHandler(event);
@@ -209,8 +212,11 @@ describe('Get Product Public Endpoint Tests', () => {
   test('should return 404 for non-existent product', async () => {
     const event = createEvent({
       httpMethod: 'GET',
-      path: '/v1/products/non-existent-id',
+      path: '/v1/admin/products/non-existent-id',
       pathParameters: { id: 'non-existent-id' },
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
 
     const response = await getProductPublicHandler(event);
@@ -221,13 +227,28 @@ describe('Get Product Public Endpoint Tests', () => {
   test('should return 400 when product ID is missing', async () => {
     const event = createEvent({
       httpMethod: 'GET',
-      path: '/v1/products/',
+      path: '/v1/admin/products/',
       pathParameters: null,
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
     });
 
     const response = await getProductPublicHandler(event);
     
     expect(response.statusCode).toBe(400);
+  });
+
+  test('should return 401 without authentication', async () => {
+    const event = createEvent({
+      httpMethod: 'GET',
+      path: `/v1/admin/products/${testProductId}`,
+      pathParameters: { id: testProductId },
+    });
+
+    const response = await getProductPublicHandler(event);
+    
+    expect(response.statusCode).toBe(401);
   });
 
   afterAll(async () => {

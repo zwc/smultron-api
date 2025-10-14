@@ -268,6 +268,9 @@ export const adminGetProducts = async (options: {
     } else if (sortField === 'title') {
       aVal = a.title.toLowerCase();
       bVal = b.title.toLowerCase();
+    } else if (sortField === 'index') {
+      aVal = a.index;
+      bVal = b.index;
     } else {
       aVal = a.id;
       bVal = b.id;

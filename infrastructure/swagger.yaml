@@ -256,11 +256,11 @@ paths:
             type: string
         - name: sort
           in: query
-          description: Sort field and direction (prefix with - for descending)
+          description: Sort field and direction (prefix with - for descending). Use 'index' for manual custom sorting.
           required: false
           schema:
             type: string
-            enum: [createdAt, -createdAt, updatedAt, -updatedAt, id, -id, title, -title]
+            enum: [createdAt, -createdAt, updatedAt, -updatedAt, id, -id, title, -title, index, -index]
             default: -createdAt
         - name: limit
           in: query
@@ -337,6 +337,169 @@ paths:
                     type: array
                     items:
                       type: object
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/products/{id}:
+    get:
+      summary: Get product by ID with categories (Admin)
+      description: Returns a single product (active or inactive) with a list of all categories. This is an admin endpoint that shows all products regardless of status.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Product details with categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    description: All available categories
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        id:
+                          type: string
+                  status:
+                    type: string
+                    enum: [active, inactive]
+                  id:
+                    type: string
+                  category:
+                    type: string
+                  title:
+                    type: string
+                  subtitle:
+                    type: string
+                  brand:
+                    type: string
+                  price:
+                    type: number
+                  stock:
+                    type: integer
+                  description:
+                    type: array
+                    items:
+                      type: string
+                  image:
+                    type: string
+                  images:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update a product (Admin)
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                article:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                price:
+                  type: number
+                price_reduced:
+                  type: number
+                description:
+                  type: array
+                  items:
+                    type: string
+                tag:
+                  type: string
+                index:
+                  type: integer
+                stock:
+                  type: integer
+                max_order:
+                  type: integer
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  description: Update product visibility status. Change to 'inactive' to hide from public endpoints.
+      responses:
+        '200':
+          description: Product updated (updatedAt timestamp is automatically set)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      summary: Delete a product (Admin)
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Product deleted
         '401':
           description: Unauthorized
           content:
@@ -449,161 +612,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /products/{id}:
-    get:
-      summary: Get product by ID with categories
-      description: Returns a single active product with a list of all categories. Only products with status 'active' are returned.
-      tags:
-        - Products (Public)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Product details with categories
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  categories:
-                    type: array
-                    description: All available categories
-                    items:
-                      type: object
-                      properties:
-                        title:
-                          type: string
-                        id:
-                          type: string
-                  status:
-                    type: string
-                    enum: [active, inactive]
-                  id:
-                    type: string
-                  category:
-                    type: string
-                  title:
-                    type: string
-                  subtitle:
-                    type: string
-                  brand:
-                    type: string
-                  price:
-                    type: number
-                  stock:
-                    type: integer
-                  description:
-                    type: array
-                    items:
-                      type: string
-                  image:
-                    type: string
-                  images:
-                    type: array
-                    items:
-                      type: string
-        '404':
-          description: Product not found or inactive
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-    put:
-      summary: Update a product
-      tags:
-        - Products (Admin)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                category:
-                  type: string
-                article:
-                  type: string
-                brand:
-                  type: string
-                title:
-                  type: string
-                subtitle:
-                  type: string
-                price:
-                  type: number
-                price_reduced:
-                  type: number
-                description:
-                  type: array
-                  items:
-                    type: string
-                tag:
-                  type: string
-                index:
-                  type: integer
-                stock:
-                  type: integer
-                max_order:
-                  type: integer
-                image:
-                  type: string
-                images:
-                  type: array
-                  items:
-                    type: string
-                status:
-                  type: string
-                  enum: [active, inactive]
-                  description: Update product visibility status. Change to 'inactive' to hide from public endpoints.
-      responses:
-        '200':
-          description: Product updated (updatedAt timestamp is automatically set)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-    delete:
-      summary: Delete a product
-      tags:
-        - Products (Admin)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Product deleted
         '401':
           description: Unauthorized
           content:

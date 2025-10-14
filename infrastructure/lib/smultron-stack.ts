@@ -277,6 +277,11 @@ export class SmultronStack extends cdk.Stack {
     const admin = v1.addResource('admin');
     const adminProducts = admin.addResource('products');
     adminProducts.addMethod('GET', new apigateway.LambdaIntegration(adminListProductsFunction));
+    
+    const adminProduct = adminProducts.addResource('{id}');
+    adminProduct.addMethod('GET', new apigateway.LambdaIntegration(getProductPublicFunction));
+    adminProduct.addMethod('PUT', new apigateway.LambdaIntegration(updateProductFunction));
+    adminProduct.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
 
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');
@@ -286,11 +291,6 @@ export class SmultronStack extends cdk.Stack {
     const products = v1.addResource('products');
     products.addMethod('GET', new apigateway.LambdaIntegration(listProductsFunction));
     products.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
-    
-    const product = products.addResource('{id}');
-    product.addMethod('GET', new apigateway.LambdaIntegration(getProductPublicFunction));
-    product.addMethod('PUT', new apigateway.LambdaIntegration(updateProductFunction));
-    product.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
 
     // Categories routes
     const categories = v1.addResource('categories');
@@ -442,6 +442,14 @@ function handler(event) {
           originRequestPolicy,
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
+        },
+        // Admin endpoints - no caching, admin only
+        '/v1/admin/*': {
+          origin: apiOrigin,
+          cachePolicy: noCachePolicy,
+          originRequestPolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         },
         // Auth endpoint - no caching
         '/v1/auth/*': {
