@@ -303,27 +303,25 @@ export class SmultronStack extends cdk.Stack {
     adminProduct.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
 
     const adminCategories = admin.addResource('categories');
+    adminCategories.addMethod('GET', new apigateway.LambdaIntegration(listCategoriesFunction));
+    adminCategories.addMethod('POST', new apigateway.LambdaIntegration(createCategoryFunction));
+    
     const adminCategoryIndexes = adminCategories.addResource('indexes');
     adminCategoryIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateCategoryIndexesFunction));
+    
+    const adminCategory = adminCategories.addResource('{id}');
+    adminCategory.addMethod('GET', new apigateway.LambdaIntegration(getCategoryFunction));
+    adminCategory.addMethod('PUT', new apigateway.LambdaIntegration(updateCategoryFunction));
+    adminCategory.addMethod('DELETE', new apigateway.LambdaIntegration(deleteCategoryFunction));
 
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');
     catalog.addMethod('GET', new apigateway.LambdaIntegration(listCatalogFunction));
 
-    // Products routes
+    // Products routes (public read-only)
     const products = v1.addResource('products');
     products.addMethod('GET', new apigateway.LambdaIntegration(listProductsFunction));
     products.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
-
-    // Categories routes
-    const categories = v1.addResource('categories');
-    categories.addMethod('GET', new apigateway.LambdaIntegration(listCategoriesFunction));
-    categories.addMethod('POST', new apigateway.LambdaIntegration(createCategoryFunction));
-    
-    const category = categories.addResource('{id}');
-    category.addMethod('GET', new apigateway.LambdaIntegration(getCategoryFunction));
-    category.addMethod('PUT', new apigateway.LambdaIntegration(updateCategoryFunction));
-    category.addMethod('DELETE', new apigateway.LambdaIntegration(deleteCategoryFunction));
 
     // Orders routes
     const orders = v1.addResource('orders');
@@ -446,20 +444,6 @@ function handler(event) {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
         },
         '/v1/products/*': {
-          origin: apiOrigin,
-          cachePolicy,
-          originRequestPolicy,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
-        },
-        '/v1/categories': {
-          origin: apiOrigin,
-          cachePolicy,
-          originRequestPolicy,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
-        },
-        '/v1/categories/*': {
           origin: apiOrigin,
           cachePolicy,
           originRequestPolicy,
