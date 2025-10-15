@@ -131,13 +131,14 @@ export const getAllCategories = async (activeOnly: boolean = false): Promise<Cat
 
   if (activeOnly) {
     // Query using ActiveIndex GSI for better performance
-    // Note: DynamoDB stores booleans as strings in indexes
+    // DynamoDB GSI requires string partition key, but booleans are stored as actual booleans
     try {
       categories = await db.queryItems<Category>(
         CATEGORIES_TABLE,
         'ActiveIndex',
-        'active = :active',
-        { ':active': 'true' }
+        '#active = :active',
+        { ':active': true },
+        { '#active': 'active' }
       );
     } catch (error) {
       // Fallback to scan if GSI is not yet available (during deployment)
