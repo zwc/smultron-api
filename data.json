@@ -5,6 +5,7 @@
       "brand": "Pop Mart",
       "title": "Labubu",
       "subtitle": "",
+      "status": "active",
       "index": 1
     },
     {
@@ -12,6 +13,7 @@
       "brand": "Pop Mart",
       "title": "Skullpanda",
       "subtitle": "",
+      "status": "active",
       "index": 2
     },
     {
@@ -19,6 +21,7 @@
       "brand": "Dreams",
       "title": "Sonny Angel",
       "subtitle": "",
+      "status": "active",
       "index": 3
     },
     {
@@ -33,6 +36,7 @@
       "brand": "Getahug",
       "title": "Getahug",
       "subtitle": "",
+      "status": "active",
       "index": 4
     }
   ],

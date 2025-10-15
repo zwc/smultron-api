@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     // Get all active categories (for dropdown/selection)
-    const allCategories = await getAllCategories(true);
+    const allCategories = await getAllCategories('active');
     
     // Format categories as simple objects with title and id
     const categories = allCategories.map(cat => ({

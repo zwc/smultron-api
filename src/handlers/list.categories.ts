@@ -11,7 +11,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const categories = await getAllCategories();
+    // Get optional status filter from query parameters
+    const statusFilter = event.queryStringParameters?.status as 'active' | 'inactive' | undefined;
+    
+    // Validate status filter if provided
+    if (statusFilter && statusFilter !== 'active' && statusFilter !== 'inactive') {
+      return errorResponse('Status must be either "active" or "inactive"', 400);
+    }
+
+    const categories = await getAllCategories(statusFilter);
     
     // Format response with data wrapper
     const response: AdminCategoriesResponse = {

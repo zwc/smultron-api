@@ -62,10 +62,10 @@ export class SmultronStack extends cdk.Stack {
       removalPolicy: environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
     });
 
-    // Add GSI for filtering categories by active status
+    // Add GSI for filtering categories by status
     categoriesTable.addGlobalSecondaryIndex({
-      indexName: 'ActiveIndex',
-      partitionKey: { name: 'active', type: dynamodb.AttributeType.STRING },
+      indexName: 'StatusIndex',
+      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'index', type: dynamodb.AttributeType.NUMBER },
       projectionType: dynamodb.ProjectionType.ALL,
     });

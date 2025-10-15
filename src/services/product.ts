@@ -126,28 +126,26 @@ export const getCategory = async (id: string): Promise<Category | null> => {
   return await db.getItem<Category>(CATEGORIES_TABLE, { id });
 };
 
-export const getAllCategories = async (activeOnly: boolean = false): Promise<Category[]> => {
+export const getAllCategories = async (status?: 'active' | 'inactive'): Promise<Category[]> => {
   let categories: Category[];
 
-  if (activeOnly) {
-    // Query using ActiveIndex GSI for better performance
-    // DynamoDB GSI requires string partition key, but booleans are stored as actual booleans
+  if (status) {
+    // Query using StatusIndex GSI for better performance
     try {
       categories = await db.queryItems<Category>(
         CATEGORIES_TABLE,
-        'ActiveIndex',
-        '#active = :active',
-        { ':active': true },
-        { '#active': 'active' }
+        'StatusIndex',
+        'status = :status',
+        { ':status': status }
       );
     } catch (error) {
       // Fallback to scan if GSI is not yet available (during deployment)
-      console.warn('ActiveIndex not available, falling back to scan', error);
+      console.warn('StatusIndex not available, falling back to scan', error);
       const allCategories = await db.scanTable<Category>(CATEGORIES_TABLE);
-      categories = allCategories.filter(c => c.active);
+      categories = allCategories.filter(c => c.status === status);
     }
   } else {
-    // Get all categories (for admin)
+    // Get all categories (for admin without filter)
     categories = await db.scanTable<Category>(CATEGORIES_TABLE);
   }
   

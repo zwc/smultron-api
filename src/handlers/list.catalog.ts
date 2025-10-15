@@ -8,7 +8,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Fetch both categories and products in parallel for better performance
     // Only return active products and categories for public catalog
     const [categories, products] = await Promise.all([
-      getAllCategories(true), // Only active categories
+      getAllCategories('active'), // Only active categories
       getActiveProducts()
     ]);
 
