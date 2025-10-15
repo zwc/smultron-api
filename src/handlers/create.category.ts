@@ -15,13 +15,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     const body = JSON.parse(event.body);
-    const { brand, title, subtitle = '', index } = body;
+    const { brand, title, subtitle = '', index, active = true } = body;
 
     if (!brand || !title || index === undefined) {
       return errorResponse('Missing required fields', 400);
     }
 
-    const category = createCategory({ brand, title, subtitle, index });
+    // Validate active is boolean if provided
+    if (typeof active !== 'boolean') {
+      return errorResponse('Active must be a boolean', 400);
+    }
+
+    const category = createCategory({ brand, title, subtitle, index, active });
     await saveCategory(category);
 
     return successResponse(category, 201);

@@ -6,9 +6,9 @@ import { successResponse, errorResponse } from '../utils/response';
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
     // Fetch both categories and products in parallel for better performance
-    // Only return active products for public catalog
+    // Only return active products and categories for public catalog
     const [categories, products] = await Promise.all([
-      getAllCategories(),
+      getAllCategories(true), // Only active categories
       getActiveProducts()
     ]);
 

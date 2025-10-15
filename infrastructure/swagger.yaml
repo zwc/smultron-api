@@ -90,6 +90,9 @@ components:
           type: string
         index:
           type: integer
+        active:
+          type: boolean
+          description: Whether the category is active/visible to public users
 
     Order:
       type: object
@@ -809,6 +812,10 @@ paths:
                   type: string
                 index:
                   type: integer
+                active:
+                  type: boolean
+                  default: true
+                  description: Whether the category is active/visible to public users
       responses:
         '201':
           description: Category created
@@ -883,6 +890,9 @@ paths:
                   type: string
                 index:
                   type: integer
+                active:
+                  type: boolean
+                  description: Whether the category is active/visible to public users
       responses:
         '200':
           description: Category updated

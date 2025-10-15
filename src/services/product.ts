@@ -126,8 +126,29 @@ export const getCategory = async (id: string): Promise<Category | null> => {
   return await db.getItem<Category>(CATEGORIES_TABLE, { id });
 };
 
-export const getAllCategories = async (): Promise<Category[]> => {
-  const categories = await db.scanTable<Category>(CATEGORIES_TABLE);
+export const getAllCategories = async (activeOnly: boolean = false): Promise<Category[]> => {
+  let categories: Category[];
+
+  if (activeOnly) {
+    // Query using ActiveIndex GSI for better performance
+    // Note: DynamoDB stores booleans as strings in indexes
+    try {
+      categories = await db.queryItems<Category>(
+        CATEGORIES_TABLE,
+        'ActiveIndex',
+        'active = :active',
+        { ':active': 'true' }
+      );
+    } catch (error) {
+      // Fallback to scan if GSI is not yet available (during deployment)
+      console.warn('ActiveIndex not available, falling back to scan', error);
+      const allCategories = await db.scanTable<Category>(CATEGORIES_TABLE);
+      categories = allCategories.filter(c => c.active);
+    }
+  } else {
+    // Get all categories (for admin)
+    categories = await db.scanTable<Category>(CATEGORIES_TABLE);
+  }
   
   // Sort categories alphabetically by title
   return categories.sort((a, b) => {

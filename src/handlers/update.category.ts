@@ -25,6 +25,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Filter out protected fields that cannot be updated
     const { id: _id, ...updates } = body;
     
+    // Validate active field if provided
+    if ('active' in updates && typeof updates.active !== 'boolean') {
+      return errorResponse('Active must be a boolean', 400);
+    }
+    
     const updatedCategory = await updateCategory(id, updates);
 
     return successResponse(updatedCategory);

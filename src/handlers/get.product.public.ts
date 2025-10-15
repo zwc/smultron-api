@@ -23,8 +23,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return notFoundResponse('Product');
     }
 
-    // Get all categories
-    const allCategories = await getAllCategories();
+    // Get all active categories (for dropdown/selection)
+    const allCategories = await getAllCategories(true);
     
     // Format categories as simple objects with title and id
     const categories = allCategories.map(cat => ({

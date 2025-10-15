@@ -44,6 +44,7 @@ export interface Category {
   title: string;
   subtitle: string;
   index: number;
+  active: boolean;
 }
 
 export interface AdminCategoriesResponse {
