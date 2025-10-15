@@ -20,7 +20,11 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return errorResponse('Request body is required', 400);
     }
 
-    const updates = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    
+    // Filter out protected fields that cannot be updated
+    const { id: _id, ...updates } = body;
+    
     const updatedCategory = await updateCategory(id, updates);
 
     return successResponse(updatedCategory);
