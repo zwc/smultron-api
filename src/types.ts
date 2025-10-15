@@ -46,6 +46,13 @@ export interface Category {
   index: number;
 }
 
+export interface AdminCategoriesResponse {
+  data: Category[];
+  meta: {
+    total: number;
+  };
+}
+
 export interface Order {
   id: string;
   cart: CartItem[];

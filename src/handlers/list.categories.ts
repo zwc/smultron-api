@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import type { APIResponse } from '../types';
+import type { APIResponse, AdminCategoriesResponse } from '../types';
 import { getAllCategories } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
@@ -12,7 +12,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     const categories = await getAllCategories();
-    return successResponse(categories);
+    
+    // Format response with data wrapper
+    const response: AdminCategoriesResponse = {
+      data: categories,
+      meta: {
+        total: categories.length,
+      },
+    };
+    
+    return successResponse(response);
   } catch (error) {
     console.error('List categories error:', error);
     return errorResponse('Internal server error', 500);

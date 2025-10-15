@@ -761,13 +761,22 @@ paths:
         - BearerAuth: []
       responses:
         '200':
-          description: List of categories
+          description: List of categories with metadata
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Category'
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of categories
         '401':
           description: Unauthorized
           content:
