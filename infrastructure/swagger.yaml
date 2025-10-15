@@ -344,6 +344,72 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /admin/products/indexes:
+    patch:
+      summary: Bulk update product indexes (Admin)
+      description: Update index values for multiple products at once. This allows for manual custom sorting of products.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - updates
+              properties:
+                updates:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - index
+                    properties:
+                      id:
+                        type: string
+                        description: Product ID
+                      index:
+                        type: integer
+                        description: New index value for sorting
+            example:
+              updates:
+                - id: "product-1"
+                  index: 1
+                - id: "product-2"
+                  index: 2
+                - id: "product-3"
+                  index: 3
+      responses:
+        '200':
+          description: Indexes updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+                  message:
+                    type: string
+        '400':
+          description: Validation error or some updates failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/products/{id}:
     get:
       summary: Get product by ID with categories (Admin)
@@ -612,6 +678,72 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/indexes:
+    patch:
+      summary: Bulk update category indexes (Admin)
+      description: Update index values for multiple categories at once. This allows for manual custom sorting of categories.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - updates
+              properties:
+                updates:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: object
+                    required:
+                      - id
+                      - index
+                    properties:
+                      id:
+                        type: string
+                        description: Category ID
+                      index:
+                        type: integer
+                        description: New index value for sorting
+            example:
+              updates:
+                - id: "labubu"
+                  index: 1
+                - id: "sonny-angel"
+                  index: 2
+                - id: "skullpanda"
+                  index: 3
+      responses:
+        '200':
+          description: Indexes updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updated:
+                    type: integer
+                  message:
+                    type: string
+        '400':
+          description: Validation error or some updates failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
           content:

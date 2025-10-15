@@ -16,3 +16,5 @@ export { handler as listOrders } from './src/handlers/list.orders';
 export { handler as getOrder } from './src/handlers/get.order';
 export { handler as updateOrderStatus } from './src/handlers/update.order.status';
 export { handler as adminListProducts } from './src/handlers/admin.list.products';
+export { handler as adminUpdateProductIndexes } from './src/handlers/admin.update.product.indexes';
+export { handler as adminUpdateCategoryIndexes } from './src/handlers/admin.update.category.indexes';

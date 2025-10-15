@@ -176,6 +176,14 @@ export class SmultronStack extends cdk.Stack {
     });
     productsTable.grantReadData(adminListProductsFunction);
 
+    const adminUpdateProductIndexesFunction = new lambda.Function(this, 'AdminUpdateProductIndexesFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-admin-update-product-indexes-${environment}`,
+      code: lambdaCode,
+      handler: 'index.adminUpdateProductIndexes',
+    });
+    productsTable.grantReadWriteData(adminUpdateProductIndexesFunction);
+
     const listCategoriesFunction = new lambda.Function(this, 'ListCategoriesFunction', {
       ...commonLambdaProps,
       functionName: `smultron-list-categories-${environment}`,
@@ -215,6 +223,14 @@ export class SmultronStack extends cdk.Stack {
       handler: 'index.deleteCategory',
     });
     categoriesTable.grantReadWriteData(deleteCategoryFunction);
+
+    const adminUpdateCategoryIndexesFunction = new lambda.Function(this, 'AdminUpdateCategoryIndexesFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-admin-update-category-indexes-${environment}`,
+      code: lambdaCode,
+      handler: 'index.adminUpdateCategoryIndexes',
+    });
+    categoriesTable.grantReadWriteData(adminUpdateCategoryIndexesFunction);
 
     const createOrderFunction = new lambda.Function(this, 'CreateOrderFunction', {
       ...commonLambdaProps,
@@ -278,10 +294,17 @@ export class SmultronStack extends cdk.Stack {
     const adminProducts = admin.addResource('products');
     adminProducts.addMethod('GET', new apigateway.LambdaIntegration(adminListProductsFunction));
     
+    const adminProductIndexes = adminProducts.addResource('indexes');
+    adminProductIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateProductIndexesFunction));
+    
     const adminProduct = adminProducts.addResource('{id}');
     adminProduct.addMethod('GET', new apigateway.LambdaIntegration(getProductPublicFunction));
     adminProduct.addMethod('PUT', new apigateway.LambdaIntegration(updateProductFunction));
     adminProduct.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
+
+    const adminCategories = admin.addResource('categories');
+    const adminCategoryIndexes = adminCategories.addResource('indexes');
+    adminCategoryIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateCategoryIndexesFunction));
 
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');

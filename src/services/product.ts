@@ -90,6 +90,23 @@ export const updateProduct = async (
   );
 };
 
+export const updateProductIndex = async (id: string, index: number): Promise<void> => {
+  const now = new Date().toISOString();
+  await db.updateItem(
+    PRODUCTS_TABLE,
+    { id },
+    'SET #index = :index, #updatedAt = :updatedAt',
+    {
+      ':index': index,
+      ':updatedAt': now,
+    },
+    {
+      '#index': 'index',
+      '#updatedAt': 'updatedAt',
+    }
+  );
+};
+
 export const deleteProduct = async (id: string): Promise<void> => {
   await db.deleteItem(PRODUCTS_TABLE, { id });
 };
@@ -146,6 +163,20 @@ export const updateCategory = async (
     updateExpression,
     attributeValues,
     attributeNames
+  );
+};
+
+export const updateCategoryIndex = async (id: string, index: number): Promise<void> => {
+  await db.updateItem(
+    CATEGORIES_TABLE,
+    { id },
+    'SET #index = :index',
+    {
+      ':index': index,
+    },
+    {
+      '#index': 'index',
+    }
   );
 };
 
