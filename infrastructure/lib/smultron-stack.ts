@@ -301,6 +301,7 @@ export class SmultronStack extends cdk.Stack {
     const admin = v1.addResource('admin');
     const adminProducts = admin.addResource('products');
     adminProducts.addMethod('GET', new apigateway.LambdaIntegration(adminListProductsFunction));
+    adminProducts.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
     
     const adminProductIndexes = adminProducts.addResource('indexes');
     adminProductIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateProductIndexesFunction));
@@ -325,11 +326,6 @@ export class SmultronStack extends cdk.Stack {
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');
     catalog.addMethod('GET', new apigateway.LambdaIntegration(listCatalogFunction));
-
-    // Products routes (public read-only)
-    const products = v1.addResource('products');
-    products.addMethod('GET', new apigateway.LambdaIntegration(listProductsFunction));
-    products.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
 
     // Orders routes
     const orders = v1.addResource('orders');
@@ -441,22 +437,6 @@ function handler(event) {
             }),
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           }],
-        },
-        // Cache public GET endpoints, but allow all methods (POST/PUT/DELETE for admin)
-        // Public endpoints are read-only for unauthenticated users, but admins need write access
-        '/v1/products': {
-          origin: apiOrigin,
-          cachePolicy,
-          originRequestPolicy,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
-        },
-        '/v1/products/*': {
-          origin: apiOrigin,
-          cachePolicy,
-          originRequestPolicy,
-          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
-          allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL, // Allow POST/PUT/DELETE for admin
         },
         // Admin endpoints - no caching, admin only
         '/v1/admin/*': {

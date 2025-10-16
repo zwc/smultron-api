@@ -348,6 +348,78 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+    post:
+      summary: Create a new product (Admin)
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - category
+                - brand
+                - title
+                - price
+                - index
+                - stock
+                - image
+              properties:
+                category:
+                  type: string
+                article:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                price:
+                  type: number
+                price_reduced:
+                  type: number
+                description:
+                  type: array
+                  items:
+                    type: string
+                tag:
+                  type: string
+                index:
+                  type: integer
+                stock:
+                  type: integer
+                max_order:
+                  type: integer
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  default: active
+                  description: Product visibility status. Defaults to 'active' if not specified.
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /admin/products/indexes:
     patch:
       summary: Bulk update product indexes (Admin)
@@ -600,94 +672,6 @@ paths:
                     description: Only active products are returned
                     items:
                       $ref: '#/components/schemas/Product'
-
-  /products:
-    get:
-      summary: List all active products
-      description: Returns only products with status 'active', sorted alphabetically by title. For admin access to all products including inactive ones, use the /admin/products endpoint.
-      tags:
-        - Products (Public)
-      responses:
-        '200':
-          description: List of active products
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Product'
-
-    post:
-      summary: Create a new product
-      tags:
-        - Products (Admin)
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - category
-                - brand
-                - title
-                - price
-                - index
-                - stock
-                - image
-              properties:
-                category:
-                  type: string
-                article:
-                  type: string
-                brand:
-                  type: string
-                title:
-                  type: string
-                subtitle:
-                  type: string
-                price:
-                  type: number
-                price_reduced:
-                  type: number
-                description:
-                  type: array
-                  items:
-                    type: string
-                tag:
-                  type: string
-                index:
-                  type: integer
-                stock:
-                  type: integer
-                max_order:
-                  type: integer
-                image:
-                  type: string
-                images:
-                  type: array
-                  items:
-                    type: string
-                status:
-                  type: string
-                  enum: [active, inactive]
-                  default: active
-                  description: Product visibility status. Defaults to 'active' if not specified.
-      responses:
-        '201':
-          description: Product created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
   /admin/categories/indexes:
     patch:
