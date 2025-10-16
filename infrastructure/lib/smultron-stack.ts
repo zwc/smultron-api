@@ -143,15 +143,6 @@ export class SmultronStack extends cdk.Stack {
     });
     productsTable.grantReadData(getProductFunction);
 
-    const getProductPublicFunction = new lambda.Function(this, 'GetProductPublicFunction', {
-      ...commonLambdaProps,
-      functionName: `smultron-get-product-public-${environment}`,
-      code: lambdaCode,
-      handler: 'index.getProductPublic',
-    });
-    productsTable.grantReadData(getProductPublicFunction);
-    categoriesTable.grantReadData(getProductPublicFunction);
-
     const createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
       ...commonLambdaProps,
       functionName: `smultron-create-product-${environment}`,
@@ -307,7 +298,7 @@ export class SmultronStack extends cdk.Stack {
     adminProductIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateProductIndexesFunction));
     
     const adminProduct = adminProducts.addResource('{id}');
-    adminProduct.addMethod('GET', new apigateway.LambdaIntegration(getProductPublicFunction));
+    adminProduct.addMethod('GET', new apigateway.LambdaIntegration(getProductFunction));
     adminProduct.addMethod('PUT', new apigateway.LambdaIntegration(updateProductFunction));
     adminProduct.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
 
