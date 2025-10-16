@@ -38,7 +38,7 @@ interface DataFile {
 }
 
 // Configuration
-const API_URL = process.env.API_URL || 'https://stage.smultron.zwc.se/v1';
+const API_URL = process.env.API_URL || 'https://dev.smultron.zwc.se/v1';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
@@ -116,13 +116,13 @@ async function seedCategories(token: string): Promise<void> {
 	
 	for (const category of data.categories) {
 		try {
-			await apiRequest('POST', '/categories', token, category);
+			await apiRequest('POST', '/admin/categories', token, category);
 			console.log(`  ✓ Created category: ${category.name} (${category.id})`);
 		} catch (error: any) {
 			// If category already exists, try to update it
 			if (error.message.includes('409') || error.message.includes('already exists')) {
 				try {
-					await apiRequest('PUT', `/categories/${category.id}`, token, category);
+					await apiRequest('PUT', `/admin/categories/${category.id}`, token, category);
 					console.log(`  ↻ Updated category: ${category.name} (${category.id})`);
 				} catch (updateError) {
 					console.error(`  ✗ Failed to update category ${category.id}:`, updateError);
@@ -145,14 +145,14 @@ async function seedProducts(token: string): Promise<void> {
 	
 	for (const product of data.products) {
 		try {
-			await apiRequest('POST', '/products', token, product);
+			await apiRequest('POST', '/admin/products', token, product);
 			successCount++;
 			console.log(`  ✓ Created product: ${product.title} - ${product.subtitle} (${product.id})`);
 		} catch (error: any) {
 			// If product already exists, try to update it
 			if (error.message.includes('409') || error.message.includes('already exists')) {
 				try {
-					await apiRequest('PUT', `/products/${product.id}`, token, product);
+					await apiRequest('PUT', `/admin/products/${product.id}`, token, product);
 					successCount++;
 					console.log(`  ↻ Updated product: ${product.title} - ${product.subtitle} (${product.id})`);
 				} catch (updateError) {
@@ -174,10 +174,10 @@ async function verifyData(token: string): Promise<void> {
 	console.log('\n🔍 Verifying seeded data...');
 	
 	try {
-		const categories = await apiRequest('GET', '/categories', token);
+		const categories = await apiRequest('GET', '/admin/categories', token);
 		console.log(`  ✓ Categories in database: ${categories.length}`);
 		
-		const products = await apiRequest('GET', '/products', token);
+		const products = await apiRequest('GET', '/admin/products', token);
 		console.log(`  ✓ Products in database: ${products.length}`);
 	} catch (error) {
 		console.error('  ✗ Failed to verify data:', error);

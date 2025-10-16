@@ -9,8 +9,25 @@ export const createProduct = (data: Omit<Product, 'id' | 'slug' | 'createdAt' | 
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9);
   const now = new Date().toISOString();
-  const slug = `${data.category}-${data.title.toLowerCase().replace(/\s+/g, '-')}`;
+  
+  // Create slug from category (if provided) and title
+  const slugBase = data.category 
+    ? `${data.category}-${data.title}` 
+    : data.title;
+  const slug = slugBase.toLowerCase().replace(/\s+/g, '-');
+  
   return {
+    // Default values for optional fields
+    category: data.category || '',
+    article: data.article || '',
+    price_reduced: data.price_reduced ?? 0,
+    description: data.description || [],
+    tag: data.tag || '',
+    index: data.index ?? 0,
+    max_order: data.max_order ?? 999,
+    image: data.image || '',
+    images: data.images || [],
+    // Required and computed fields
     id: `${slug}-${timestamp}-${random}`,
     slug,
     ...data,
@@ -326,7 +343,7 @@ export const adminGetProducts = async (options: {
       p.title.toLowerCase().includes(query) ||
       p.subtitle.toLowerCase().includes(query) ||
       p.brand.toLowerCase().includes(query) ||
-      p.description.some(d => d.toLowerCase().includes(query))
+      (p.description && p.description.some(d => d.toLowerCase().includes(query)))
     );
   }
 
