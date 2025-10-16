@@ -28,6 +28,22 @@ export const getProduct = async (id: string): Promise<Product | null> => {
   return await db.getItem<Product>(PRODUCTS_TABLE, { id });
 };
 
+export const getProductBySlug = async (slug: string): Promise<Product | null> => {
+  try {
+    const results = await db.queryItems<Product>(
+      PRODUCTS_TABLE,
+      'SlugIndex',
+      'slug = :slug',
+      { ':slug': slug }
+    );
+    return results[0] ?? null;
+  } catch (error) {
+    console.warn('SlugIndex not available, falling back to scan');
+    const allProducts = await getAllProducts();
+    return allProducts.find(p => p.slug === slug) ?? null;
+  }
+};
+
 export const getAllProducts = async (): Promise<Product[]> => {
   return await db.scanTable<Product>(PRODUCTS_TABLE);
 };
@@ -130,6 +146,22 @@ export const saveCategory = async (category: Category): Promise<void> => {
 
 export const getCategory = async (id: string): Promise<Category | null> => {
   return await db.getItem<Category>(CATEGORIES_TABLE, { id });
+};
+
+export const getCategoryBySlug = async (slug: string): Promise<Category | null> => {
+  try {
+    const results = await db.queryItems<Category>(
+      CATEGORIES_TABLE,
+      'SlugIndex',
+      'slug = :slug',
+      { ':slug': slug }
+    );
+    return results[0] ?? null;
+  } catch (error) {
+    console.warn('SlugIndex not available, falling back to scan');
+    const allCategories = await db.scanTable<Category>(CATEGORIES_TABLE);
+    return allCategories.find(c => c.slug === slug) ?? null;
+  }
 };
 
 export const getAllCategories = async (status?: 'active' | 'inactive'): Promise<Category[]> => {

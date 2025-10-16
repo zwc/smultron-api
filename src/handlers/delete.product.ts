@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
-import { deleteProduct } from '../services/product';
-import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { getProductBySlug, deleteProduct } from '../services/product';
+import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -10,13 +10,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const id = event.pathParameters?.id;
+    const slug = event.pathParameters?.slug;
     
-    if (!id) {
-      return errorResponse('Product ID is required', 400);
+    if (!slug) {
+      return errorResponse('Product slug is required', 400);
     }
 
-    await deleteProduct(id);
+    // Get the product by slug to find its internal ID
+    const product = await getProductBySlug(slug);
+    if (!product) {
+      return notFoundResponse('Product');
+    }
+
+    await deleteProduct(product.id);
 
     return successResponse(null, 204);
   } catch (error) {

@@ -55,6 +55,13 @@ export class SmultronStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    // Add GSI for looking up products by slug
+    productsTable.addGlobalSecondaryIndex({
+      indexName: 'SlugIndex',
+      partitionKey: { name: 'slug', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const categoriesTable = new dynamodb.Table(this, 'CategoriesTable', {
       tableName: `smultron-categories-${environment}`,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
@@ -67,6 +74,13 @@ export class SmultronStack extends cdk.Stack {
       indexName: 'StatusIndex',
       partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'index', type: dynamodb.AttributeType.NUMBER },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    // Add GSI for looking up categories by slug
+    categoriesTable.addGlobalSecondaryIndex({
+      indexName: 'SlugIndex',
+      partitionKey: { name: 'slug', type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
@@ -297,7 +311,7 @@ export class SmultronStack extends cdk.Stack {
     const adminProductIndexes = adminProducts.addResource('indexes');
     adminProductIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateProductIndexesFunction));
     
-    const adminProduct = adminProducts.addResource('{id}');
+    const adminProduct = adminProducts.addResource('{slug}');
     adminProduct.addMethod('GET', new apigateway.LambdaIntegration(getProductFunction));
     adminProduct.addMethod('PUT', new apigateway.LambdaIntegration(updateProductFunction));
     adminProduct.addMethod('DELETE', new apigateway.LambdaIntegration(deleteProductFunction));
@@ -309,7 +323,7 @@ export class SmultronStack extends cdk.Stack {
     const adminCategoryIndexes = adminCategories.addResource('indexes');
     adminCategoryIndexes.addMethod('PATCH', new apigateway.LambdaIntegration(adminUpdateCategoryIndexesFunction));
     
-    const adminCategory = adminCategories.addResource('{id}');
+    const adminCategory = adminCategories.addResource('{slug}');
     adminCategory.addMethod('GET', new apigateway.LambdaIntegration(getCategoryFunction));
     adminCategory.addMethod('PUT', new apigateway.LambdaIntegration(updateCategoryFunction));
     adminCategory.addMethod('DELETE', new apigateway.LambdaIntegration(deleteCategoryFunction));

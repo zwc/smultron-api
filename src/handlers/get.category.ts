@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
-import { getCategory } from '../services/product';
+import { getCategoryBySlug } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
 import { stripCategoryId } from '../utils/transform';
@@ -12,13 +12,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const id = event.pathParameters?.id;
+    const slug = event.pathParameters?.slug;
     
-    if (!id) {
-      return errorResponse('Category ID is required', 400);
+    if (!slug) {
+      return errorResponse('Category slug is required', 400);
     }
 
-    const category = await getCategory(id);
+    const category = await getCategoryBySlug(slug);
     
     if (!category) {
       return notFoundResponse('Category');
