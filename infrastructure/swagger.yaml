@@ -652,7 +652,7 @@ paths:
   /catalog:
     get:
       summary: Get complete catalog (categories and products)
-      description: Returns both categories and active products in a single request for improved performance. Only products with status 'active' are included. Both categories and products are sorted alphabetically by title.
+      description: Returns both categories and active products in a single request for improved performance. Only products with status 'active' are included. Both categories and products are sorted alphabetically by title. Response structure matches admin endpoints format.
       tags:
         - Catalog (Public)
       responses:
@@ -664,14 +664,32 @@ paths:
                 type: object
                 properties:
                   categories:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Category'
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+                      meta:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            description: Total number of active categories
                   products:
-                    type: array
-                    description: Only active products are returned
-                    items:
-                      $ref: '#/components/schemas/Product'
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        description: Only active products are returned
+                        items:
+                          $ref: '#/components/schemas/Product'
+                      meta:
+                        type: object
+                        properties:
+                          total:
+                            type: integer
+                            description: Total number of active products
 
   /admin/categories/indexes:
     patch:
@@ -742,7 +760,7 @@ paths:
   /admin/categories:
     get:
       summary: List all categories (Admin)
-      description: Returns all categories sorted alphabetically by title. Admin authentication required. Optionally filter by status.
+      description: Returns all categories with optional filtering and sorting. Admin authentication required. Default sort is by title (alphabetical).
       tags:
         - Admin - Categories
       security:
@@ -755,6 +773,14 @@ paths:
             type: string
             enum: [active, inactive]
           description: Filter categories by status (active or inactive)
+        - name: sort
+          in: query
+          description: Sort field and direction (prefix with - for descending)
+          required: false
+          schema:
+            type: string
+            enum: [id, -id, title, -title, brand, -brand, index, -index]
+            default: title
       responses:
         '200':
           description: List of categories with metadata

@@ -245,18 +245,19 @@ describe('Category Status Filter Tests', () => {
     
     const body = JSON.parse(response.body);
     expect(body.categories).toBeDefined();
-    expect(Array.isArray(body.categories)).toBe(true);
+    expect(body.categories.data).toBeDefined();
+    expect(Array.isArray(body.categories.data)).toBe(true);
     
     // Should find active category
-    const activeFound = body.categories.some((cat: any) => cat.id === activeCategoryId);
+    const activeFound = body.categories.data.some((cat: any) => cat.id === activeCategoryId);
     expect(activeFound).toBe(true);
     
     // Should NOT find inactive category
-    const inactiveFound = body.categories.some((cat: any) => cat.id === inactiveCategoryId);
+    const inactiveFound = body.categories.data.some((cat: any) => cat.id === inactiveCategoryId);
     expect(inactiveFound).toBe(false);
     
     console.log('Public catalog shows only active categories:', {
-      total: body.categories.length,
+      total: body.categories.meta.total,
       activeFound,
       inactiveFound,
     });
