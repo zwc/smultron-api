@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { getProduct } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse } from '../utils/response';
+import { stripProductId } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -17,7 +18,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return notFoundResponse('Product');
     }
 
-    return successResponse({ data: product });
+    return successResponse({ data: stripProductId(product) });
   } catch (error) {
     console.error('Get product error:', error);
     return errorResponse('Internal server error', 500);

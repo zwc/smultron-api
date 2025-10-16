@@ -1,5 +1,6 @@
 export interface Product {
   id: string;
+  slug: string;
   category: string;
   article: string;
   brand: string;
@@ -19,8 +20,11 @@ export interface Product {
   updatedAt: string;
 }
 
+// Public product without internal ID
+export type PublicProduct = Omit<Product, 'id'>;
+
 export interface AdminProductsResponse {
-  data: Product[];
+  data: PublicProduct[];
   meta: {
     total: number;
     limit: number;
@@ -40,6 +44,7 @@ export interface AdminProductsResponse {
 
 export interface Category {
   id: string;
+  slug: string;
   brand: string;
   title: string;
   subtitle: string;
@@ -47,8 +52,11 @@ export interface Category {
   status: 'active' | 'inactive';
 }
 
+// Public category without internal ID
+export type PublicCategory = Omit<Category, 'id'>;
+
 export interface AdminCategoriesResponse {
-  data: Category[];
+  data: PublicCategory[];
   meta: {
     total: number;
   };

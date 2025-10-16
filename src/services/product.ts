@@ -5,12 +5,14 @@ const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || 'smultron-products';
 const CATEGORIES_TABLE = process.env.CATEGORIES_TABLE || 'smultron-categories';
 const ORDERS_TABLE = process.env.ORDERS_TABLE || 'smultron-orders';
 
-export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { status?: 'active' | 'inactive' }): Product => {
+export const createProduct = (data: Omit<Product, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'status'> & { status?: 'active' | 'inactive' }): Product => {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substr(2, 9);
   const now = new Date().toISOString();
+  const slug = `${data.category}-${data.title.toLowerCase().replace(/\s+/g, '-')}`;
   return {
-    id: `${data.category}-${data.title.toLowerCase().replace(/\s+/g, '-')}-${timestamp}-${random}`,
+    id: `${slug}-${timestamp}-${random}`,
+    slug,
     ...data,
     status: data.status || 'active',
     createdAt: now,
@@ -111,9 +113,13 @@ export const deleteProduct = async (id: string): Promise<void> => {
   await db.deleteItem(PRODUCTS_TABLE, { id });
 };
 
-export const createCategory = (data: Omit<Category, 'id'>): Category => {
+export const createCategory = (data: Omit<Category, 'id' | 'slug'>): Category => {
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substr(2, 9);
+  const slug = data.title.toLowerCase().replace(/\s+/g, '-');
   return {
-    id: data.title.toLowerCase().replace(/\s+/g, '-'),
+    id: `${slug}-${timestamp}-${random}`,
+    slug,
     ...data,
   };
 };

@@ -4,6 +4,7 @@ import type { APIResponse, AdminCategoriesResponse, Category } from '../types';
 import { getAllCategories } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
+import { stripCategoryIds } from '../utils/transform';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
@@ -58,9 +59,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return 0;
     });
     
-    // Format response with data wrapper
+    // Format response with data wrapper (strip internal IDs)
     const response: AdminCategoriesResponse = {
-      data: categories,
+      data: stripCategoryIds(categories),
       meta: {
         total: categories.length,
       },

@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { getAllCategories, getActiveProducts } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
+import { stripCategoryIds, stripProductIds } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -13,8 +14,18 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     ]);
 
     return successResponse({
-      categories,
-      products
+      categories: {
+        data: stripCategoryIds(categories),
+        meta: {
+          total: categories.length
+        }
+      },
+      products: {
+        data: stripProductIds(products),
+        meta: {
+          total: products.length
+        }
+      }
     });
   } catch (error) {
     console.error('List catalog error:', error);
