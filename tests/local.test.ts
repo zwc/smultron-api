@@ -5,7 +5,7 @@ import { handler as getProductHandler } from '../src/handlers/get.product';
 import { handler as createProductHandler } from '../src/handlers/create.product';
 import { handler as updateProductHandler } from '../src/handlers/update.product';
 import { handler as deleteProductHandler } from '../src/handlers/delete.product';
-import { handler as listCategoriesHandler } from '../src/handlers/list.categories';
+import { handler as listCategoriesHandler } from '../src/handlers/admin.list.categories';
 import { handler as getCategoryHandler } from '../src/handlers/get.category';
 import { handler as createCategoryHandler } from '../src/handlers/create.category';
 import { handler as updateCategoryHandler } from '../src/handlers/update.category';

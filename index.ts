@@ -5,7 +5,7 @@ export { handler as getProduct } from './src/handlers/get.product';
 export { handler as createProduct } from './src/handlers/create.product';
 export { handler as updateProduct } from './src/handlers/update.product';
 export { handler as deleteProduct } from './src/handlers/delete.product';
-export { handler as listCategories } from './src/handlers/list.categories';
+export { handler as listCategories } from './src/handlers/admin.list.categories';
 export { handler as getCategory } from './src/handlers/get.category';
 export { handler as createCategory } from './src/handlers/create.category';
 export { handler as updateCategory } from './src/handlers/update.category';

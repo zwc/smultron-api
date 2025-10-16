@@ -1,6 +1,6 @@
 import { expect, test, describe, beforeAll, afterAll } from 'bun:test';
 import { handler as loginHandler } from '../src/handlers/login';
-import { handler as listCategoriesHandler } from '../src/handlers/list.categories';
+import { handler as listCategoriesHandler } from '../src/handlers/admin.list.categories';
 import { handler as createCategoryHandler } from '../src/handlers/create.category';
 import { handler as deleteCategoryHandler } from '../src/handlers/delete.category';
 import type { APIGatewayProxyEvent } from 'aws-lambda';

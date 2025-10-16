@@ -2,7 +2,7 @@ import { expect, test, describe, beforeAll, afterAll } from 'bun:test';
 import { handler as adminUpdateProductIndexesHandler } from '../src/handlers/admin.update.product.indexes';
 import { handler as adminUpdateCategoryIndexesHandler } from '../src/handlers/admin.update.category.indexes';
 import { handler as adminListProductsHandler } from '../src/handlers/admin.list.products';
-import { handler as listCategoriesHandler } from '../src/handlers/list.categories';
+import { handler as listCategoriesHandler } from '../src/handlers/admin.list.categories';
 import { handler as createProductHandler } from '../src/handlers/create.product';
 import { handler as createCategoryHandler } from '../src/handlers/create.category';
 import { handler as deleteProductHandler } from '../src/handlers/delete.product';
