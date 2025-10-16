@@ -6,10 +6,7 @@ import { unauthorizedResponse, errorResponse } from '../utils/response';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
-  status: z.union([
-    z.array(z.enum(['active', 'inactive'])),
-    z.enum(['active', 'inactive']).transform(val => [val])
-  ]).optional(),
+  status: z.enum(['active', 'inactive']).optional(),
   q: z.string().optional(),
   sort: z.enum([
     'createdAt', '-createdAt',
@@ -30,21 +27,11 @@ export const handler = async (event: any) => {
 
   try {
     // Parse and validate query parameters
-    const rawParams = event.queryStringParameters || {};
-    
-    // Handle array parameters (status can be comma-separated or multiple params)
-    const normalizedParams = {
-      ...rawParams,
-      status: rawParams.status ? 
-        (Array.isArray(rawParams.status) ? rawParams.status : rawParams.status.split(',')) 
-        : undefined
-    };
-
-    const params = QueryParamsSchema.parse(normalizedParams);
+    const params = QueryParamsSchema.parse(event.queryStringParameters || {});
 
     // Get products from service
     const result = await adminGetProducts({
-      statusFilter: params.status,
+      status: params.status,
       searchQuery: params.q,
       sortField: params.sort,
       limit: params.limit,
@@ -55,7 +42,7 @@ export const handler = async (event: any) => {
     const baseUrl = `https://${event.requestContext.domainName}${event.requestContext.path}`;
     const buildUrl = (offset: number) => {
       const urlParams = new URLSearchParams();
-      if (params.status) urlParams.set('status', params.status.join(','));
+      if (params.status) urlParams.set('status', params.status);
       if (params.q) urlParams.set('q', params.q);
       urlParams.set('sort', params.sort);
       urlParams.set('limit', params.limit.toString());

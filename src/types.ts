@@ -27,7 +27,7 @@ export interface AdminProductsResponse {
     offset: number;
     sort: string;
     filters: {
-      status: string[] | null;
+      status: 'active' | 'inactive' | null;
       q: string | null;
     };
   };

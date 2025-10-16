@@ -1,5 +1,4 @@
 import { expect, test, describe, beforeAll, afterAll } from 'bun:test';
-import { handler as getProductPublicHandler } from '../src/handlers/get.product.public';
 import { handler as createProductHandler } from '../src/handlers/create.product';
 import { handler as createCategoryHandler } from '../src/handlers/create.category';
 import { handler as deleteProductHandler } from '../src/handlers/delete.product';

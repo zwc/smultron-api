@@ -228,8 +228,7 @@ paths:
         
         **Performance Notes:**
         - Uses DynamoDB Global Secondary Index (GSI) for efficient status filtering
-        - Single status filter queries use GSI directly for optimal performance
-        - Multiple status filters query GSI for each status and combine results
+        - Status filter queries use GSI directly for optimal performance
         - No status filter performs full table scan
         
         **Filtering:**
@@ -243,15 +242,11 @@ paths:
       parameters:
         - name: status
           in: query
-          description: Filter by product status (can be multiple)
+          description: Filter by product status
           required: false
           schema:
-            type: array
-            items:
-              type: string
-              enum: [active, inactive]
-          style: form
-          explode: true
+            type: string
+            enum: [active, inactive]
         - name: q
           in: query
           description: Search query (searches title, subtitle, brand, description)

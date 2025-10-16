@@ -135,8 +135,9 @@ export const getAllCategories = async (status?: 'active' | 'inactive'): Promise<
       categories = await db.queryItems<Category>(
         CATEGORIES_TABLE,
         'StatusIndex',
-        'status = :status',
-        { ':status': status }
+        '#status = :status',
+        { ':status': status },
+        { '#status': 'status' }
       );
     } catch (error) {
       // Fallback to scan if GSI is not yet available (during deployment)
@@ -246,7 +247,7 @@ export const updateOrderStatus = async (
 };
 
 export const adminGetProducts = async (options: {
-  statusFilter?: string[];
+  status?: 'active' | 'inactive';
   searchQuery?: string;
   sortField: string;
   limit: number;
@@ -255,28 +256,15 @@ export const adminGetProducts = async (options: {
   let products: Product[];
 
   try {
-    // If filtering by a single status, use GSI for efficient query
-    if (options.statusFilter && options.statusFilter.length === 1) {
+    // If filtering by status, use GSI for efficient query
+    if (options.status) {
       products = await db.queryItems<Product>(
         PRODUCTS_TABLE,
         'StatusIndex',
         '#status = :status',
-        { ':status': options.statusFilter[0] },
+        { ':status': options.status },
         { '#status': 'status' }
       );
-    } else if (options.statusFilter && options.statusFilter.length > 1) {
-      // Multiple statuses: query each and combine
-      const queries = options.statusFilter.map(status =>
-        db.queryItems<Product>(
-          PRODUCTS_TABLE,
-          'StatusIndex',
-          '#status = :status',
-          { ':status': status },
-          { '#status': 'status' }
-        )
-      );
-      const results = await Promise.all(queries);
-      products = results.flat();
     } else {
       // No status filter: get all products
       products = await getAllProducts();
@@ -286,8 +274,8 @@ export const adminGetProducts = async (options: {
     console.warn('StatusIndex GSI not available, falling back to table scan with filtering');
     const allProducts = await getAllProducts();
     
-    if (options.statusFilter && options.statusFilter.length > 0) {
-      products = allProducts.filter(p => options.statusFilter!.includes(p.status));
+    if (options.status) {
+      products = allProducts.filter(p => p.status === options.status);
     } else {
       products = allProducts;
     }

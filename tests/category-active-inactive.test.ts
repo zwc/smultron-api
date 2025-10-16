@@ -5,7 +5,6 @@ import { handler as createCategoryHandler } from '../src/handlers/create.categor
 import { handler as updateCategoryHandler } from '../src/handlers/update.category';
 import { handler as deleteCategoryHandler } from '../src/handlers/delete.category';
 import { handler as listCatalogHandler } from '../src/handlers/list.catalog';
-import { handler as getProductPublicHandler } from '../src/handlers/get.product.public';
 import { handler as createProductHandler } from '../src/handlers/create.product';
 import { handler as deleteProductHandler } from '../src/handlers/delete.product';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
