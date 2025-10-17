@@ -23,8 +23,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const body = JSON.parse(event.body);
     
-    // Filter out protected fields that cannot be updated
-    const { id: _id, slug: _slug, createdAt: _createdAt, updatedAt: _updatedAt, ...updates } = body;
+    // Filter out protected fields that cannot be updated (id, createdAt, updatedAt are managed by the system)
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...updates } = body;
     
     const updatedProduct = await updateProduct(id, updates);
 

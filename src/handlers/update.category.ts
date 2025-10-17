@@ -23,8 +23,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const body = JSON.parse(event.body);
     
-    // Filter out protected fields that cannot be updated
-    const { id: _id, slug: _slug, ...updates } = body;
+    // Filter out protected fields that cannot be updated (only id)
+    const { id: _id, ...updates } = body;
     
     // Validate status field if provided
     if ('status' in updates && updates.status !== 'active' && updates.status !== 'inactive') {
