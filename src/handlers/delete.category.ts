@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
-import { getCategoryBySlug, deleteCategory } from '../services/product';
-import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
+import { deleteCategory } from '../services/product';
+import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -10,19 +10,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const slug = event.pathParameters?.slug;
+    const id = event.pathParameters?.id;
     
-    if (!slug) {
-      return errorResponse('Category slug is required', 400);
+    if (!id) {
+      return errorResponse('Category ID is required', 400);
     }
 
-    // Get the category by slug to find its internal ID
-    const category = await getCategoryBySlug(slug);
-    if (!category) {
-      return notFoundResponse('Category');
-    }
-
-    await deleteCategory(category.id);
+    await deleteCategory(id);
 
     return successResponse(null, 204);
   } catch (error) {

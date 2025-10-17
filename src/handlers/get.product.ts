@@ -1,18 +1,18 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
-import { getProductBySlug } from '../services/product';
+import { getProduct } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse } from '../utils/response';
 import { stripProductId } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
-    const slug = event.pathParameters?.slug;
+    const id = event.pathParameters?.id;
     
-    if (!slug) {
-      return errorResponse('Product slug is required', 400);
+    if (!id) {
+      return errorResponse('Product ID is required', 400);
     }
 
-    const product = await getProductBySlug(slug);
+    const product = await getProduct(id);
     
     if (!product) {
       return notFoundResponse('Product');

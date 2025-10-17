@@ -1,8 +1,8 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
-import { getProductBySlug, updateProduct } from '../services/product';
-import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
+import { updateProduct } from '../services/product';
+import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { stripProductId } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
@@ -11,20 +11,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const slug = event.pathParameters?.slug;
+    const id = event.pathParameters?.id;
     
-    if (!slug) {
-      return errorResponse('Product slug is required', 400);
+    if (!id) {
+      return errorResponse('Product ID is required', 400);
     }
 
     if (!event.body) {
       return errorResponse('Request body is required', 400);
-    }
-
-    // Get the product by slug to find its internal ID
-    const product = await getProductBySlug(slug);
-    if (!product) {
-      return notFoundResponse('Product');
     }
 
     const body = JSON.parse(event.body);
@@ -32,7 +26,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Filter out protected fields that cannot be updated
     const { id: _id, slug: _slug, createdAt: _createdAt, updatedAt: _updatedAt, ...updates } = body;
     
-    const updatedProduct = await updateProduct(product.id, updates);
+    const updatedProduct = await updateProduct(id, updates);
 
     return successResponse({ data: stripProductId(updatedProduct) });
   } catch (error) {

@@ -6,9 +6,10 @@ const CATEGORIES_TABLE = process.env.CATEGORIES_TABLE || 'smultron-categories';
 const ORDERS_TABLE = process.env.ORDERS_TABLE || 'smultron-orders';
 
 export const createProduct = (data: Omit<Product, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'status'> & { status?: 'active' | 'inactive' }): Product => {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substr(2, 9);
   const now = new Date().toISOString();
+  
+  // Generate GUID for id
+  const id = crypto.randomUUID();
   
   // Create slug from category (if provided) and title
   const slugBase = data.category 
@@ -28,7 +29,7 @@ export const createProduct = (data: Omit<Product, 'id' | 'slug' | 'createdAt' | 
     image: data.image || '',
     images: data.images || [],
     // Required and computed fields
-    id: `${slug}-${timestamp}-${random}`,
+    id,
     slug,
     ...data,
     status: data.status || 'active',
@@ -43,22 +44,6 @@ export const saveProduct = async (product: Product): Promise<void> => {
 
 export const getProduct = async (id: string): Promise<Product | null> => {
   return await db.getItem<Product>(PRODUCTS_TABLE, { id });
-};
-
-export const getProductBySlug = async (slug: string): Promise<Product | null> => {
-  try {
-    const results = await db.queryItems<Product>(
-      PRODUCTS_TABLE,
-      'SlugIndex',
-      'slug = :slug',
-      { ':slug': slug }
-    );
-    return results[0] ?? null;
-  } catch (error) {
-    console.warn('SlugIndex not available, falling back to scan');
-    const allProducts = await getAllProducts();
-    return allProducts.find(p => p.slug === slug) ?? null;
-  }
 };
 
 export const getAllProducts = async (): Promise<Product[]> => {
@@ -147,11 +132,11 @@ export const deleteProduct = async (id: string): Promise<void> => {
 };
 
 export const createCategory = (data: Omit<Category, 'id' | 'slug'>): Category => {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substr(2, 9);
+  // Generate GUID for id
+  const id = crypto.randomUUID();
   const slug = data.title.toLowerCase().replace(/\s+/g, '-');
   return {
-    id: `${slug}-${timestamp}-${random}`,
+    id,
     slug,
     ...data,
   };
@@ -163,22 +148,6 @@ export const saveCategory = async (category: Category): Promise<void> => {
 
 export const getCategory = async (id: string): Promise<Category | null> => {
   return await db.getItem<Category>(CATEGORIES_TABLE, { id });
-};
-
-export const getCategoryBySlug = async (slug: string): Promise<Category | null> => {
-  try {
-    const results = await db.queryItems<Category>(
-      CATEGORIES_TABLE,
-      'SlugIndex',
-      'slug = :slug',
-      { ':slug': slug }
-    );
-    return results[0] ?? null;
-  } catch (error) {
-    console.warn('SlugIndex not available, falling back to scan');
-    const allCategories = await db.scanTable<Category>(CATEGORIES_TABLE);
-    return allCategories.find(c => c.slug === slug) ?? null;
-  }
 };
 
 export const getAllCategories = async (status?: 'active' | 'inactive'): Promise<Category[]> => {
