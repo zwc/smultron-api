@@ -2,7 +2,6 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { getAllCategories, getActiveProducts } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
-import { stripCategoryIds, stripProductIds } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -15,13 +14,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     return successResponse({
       categories: {
-        data: stripCategoryIds(categories),
+        data: categories,
         meta: {
           total: categories.length
         }
       },
       products: {
-        data: stripProductIds(products),
+        data: products,
         meta: {
           total: products.length
         }
