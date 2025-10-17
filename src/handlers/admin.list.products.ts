@@ -3,6 +3,7 @@ import { adminGetProducts } from '../services/product';
 import type { AdminProductsResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { unauthorizedResponse, errorResponse } from '../utils/response';
+import { formatProducts } from '../utils/transform';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
@@ -51,7 +52,7 @@ export const handler = async (event: any) => {
     };
 
     const response: AdminProductsResponse = {
-      data: result.items,
+      data: formatProducts(result.items),
       meta: {
         total: result.total,
         limit: params.limit,
