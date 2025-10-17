@@ -18,7 +18,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     await deleteCategory(id);
 
-    return successResponse(null, 204);
+    return successResponse({ 
+      message: 'Category deleted successfully',
+      id: id
+    });
   } catch (error) {
     console.error('Delete category error:', error);
     return errorResponse('Internal server error', 500);

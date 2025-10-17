@@ -18,7 +18,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     await deleteProduct(id);
 
-    return successResponse(null, 204);
+    return successResponse({ 
+      message: 'Product deleted successfully',
+      id: id
+    });
   } catch (error) {
     console.error('Delete product error:', error);
     return errorResponse('Internal server error', 500);
