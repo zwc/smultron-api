@@ -13,8 +13,12 @@ const QueryParamsSchema = z.object({
     'id', '-id',
     'title', '-title',
     'brand', '-brand',
-    'index', '-index'
+    'index', '-index',
+    'createdAt', '-createdAt',
+    'updatedAt', '-updatedAt'
   ]).optional().default('title'),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  offset: z.coerce.number().int().min(0).optional().default(0)
 });
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
@@ -59,12 +63,44 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return 0;
     });
     
+    // Store total before pagination
+    const total = categories.length;
+    
+    // Apply pagination
+    const paginatedCategories = categories.slice(params.offset, params.offset + params.limit);
+    
+    // Build pagination links
+    const baseUrl = `https://${event.requestContext.domainName}${event.requestContext.path}`;
+    const buildUrl = (offset: number) => {
+      const urlParams = new URLSearchParams();
+      if (params.status) urlParams.set('status', params.status);
+      urlParams.set('sort', params.sort);
+      urlParams.set('limit', params.limit.toString());
+      urlParams.set('offset', offset.toString());
+      return `${baseUrl}?${urlParams.toString()}`;
+    };
+    
     // Format response with data wrapper
     const response: AdminCategoriesResponse = {
-      data: formatCategories(categories),
+      data: formatCategories(paginatedCategories),
       meta: {
-        total: categories.length,
+        total: total,
+        limit: params.limit,
+        offset: params.offset,
+        sort: params.sort,
+        filters: {
+          status: params.status || null
+        }
       },
+      links: {
+        self: buildUrl(params.offset),
+        next: params.offset + params.limit < total
+          ? buildUrl(params.offset + params.limit)
+          : null,
+        prev: params.offset > 0
+          ? buildUrl(Math.max(0, params.offset - params.limit))
+          : null
+      }
     };
     
     return successResponse(response);

@@ -56,9 +56,20 @@ export interface Category {
 export type PublicCategory = Omit<Category, 'id'>;
 
 export interface AdminCategoriesResponse {
-  data: PublicCategory[];
+  data: Category[];
   meta: {
     total: number;
+    limit: number;
+    offset: number;
+    sort: string;
+    filters: {
+      status: 'active' | 'inactive' | null;
+    };
+  };
+  links: {
+    self: string;
+    next: string | null;
+    prev: string | null;
   };
 }
 
