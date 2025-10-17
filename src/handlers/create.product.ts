@@ -3,7 +3,7 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { createProduct, saveProduct } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
-import { stripProductId } from '../utils/transform';
+import { formatProduct } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -47,7 +47,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     await saveProduct(product);
 
-    return successResponse({ data: stripProductId(product) }, 201);
+    return successResponse({ data: formatProduct(product) }, 201);
   } catch (error) {
     console.error('Create product error:', error);
     return errorResponse('Internal server error', 500);

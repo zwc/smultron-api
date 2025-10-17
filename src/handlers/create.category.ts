@@ -3,6 +3,7 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { createCategory, saveCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { formatCategory } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -29,7 +30,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     const category = createCategory({ brand, title, subtitle, index, status });
     await saveCategory(category);
 
-    return successResponse(category, 201);
+    return successResponse({ data: formatCategory(category) }, 201);
   } catch (error) {
     console.error('Create category error:', error);
     return errorResponse('Internal server error', 500);
