@@ -290,6 +290,21 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Product'
+                  categories:
+                    type: array
+                    description: List of active categories sorted by index
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Category unique identifier (GUID)
+                        slug:
+                          type: string
+                          description: URL-friendly category identifier
+                        title:
+                          type: string
+                          description: Category display name
                   meta:
                     type: object
                     properties:

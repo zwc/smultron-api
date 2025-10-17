@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adminGetProducts } from '../services/product';
+import { adminGetProducts, getAllCategories } from '../services/product';
 import type { AdminProductsResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { unauthorizedResponse, errorResponse } from '../utils/response';
@@ -30,14 +30,26 @@ export const handler = async (event: any) => {
     // Parse and validate query parameters
     const params = QueryParamsSchema.parse(event.queryStringParameters || {});
 
-    // Get products from service
-    const result = await adminGetProducts({
-      status: params.status,
-      searchQuery: params.q,
-      sortField: params.sort,
-      limit: params.limit,
-      offset: params.offset
-    });
+    // Get products and categories in parallel
+    const [result, allCategories] = await Promise.all([
+      adminGetProducts({
+        status: params.status,
+        searchQuery: params.q,
+        sortField: params.sort,
+        limit: params.limit,
+        offset: params.offset
+      }),
+      getAllCategories('active')
+    ]);
+
+    // Sort categories by index and map to simplified format
+    const categories = allCategories
+      .sort((a, b) => a.index - b.index)
+      .map(cat => ({
+        id: cat.id,
+        slug: cat.slug,
+        title: cat.title
+      }));
 
     // Build pagination links
     const baseUrl = `https://${event.requestContext.domainName}${event.requestContext.path}`;
@@ -53,6 +65,7 @@ export const handler = async (event: any) => {
 
     const response: AdminProductsResponse = {
       data: formatProducts(result.items),
+      categories: categories,
       meta: {
         total: result.total,
         limit: params.limit,

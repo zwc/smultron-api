@@ -23,8 +23,15 @@ export interface Product {
 // Public product without internal ID
 export type PublicProduct = Omit<Product, 'id'>;
 
+export interface CategorySummary {
+  id: string;
+  slug: string;
+  title: string;
+}
+
 export interface AdminProductsResponse {
-  data: PublicProduct[];
+  data: Product[];
+  categories: CategorySummary[];
   meta: {
     total: number;
     limit: number;
