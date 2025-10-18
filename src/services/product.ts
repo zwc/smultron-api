@@ -131,14 +131,16 @@ export const deleteProduct = async (id: string): Promise<void> => {
   await db.deleteItem(PRODUCTS_TABLE, { id });
 };
 
-export const createCategory = (data: Omit<Category, 'id' | 'slug'>): Category => {
+export const createCategory = (data: Omit<Category, 'id' | 'createdAt' | 'updatedAt'>): Category => {
   // Generate GUID for id
   const id = crypto.randomUUID();
-  const slug = data.title.toLowerCase().replace(/\s+/g, '-');
+  const now = new Date().toISOString();
+  
   return {
     id,
-    slug,
     ...data,
+    createdAt: now,
+    updatedAt: now,
   };
 };
 
@@ -186,13 +188,17 @@ export const getAllCategories = async (status?: 'active' | 'inactive'): Promise<
 
 export const updateCategory = async (
   id: string,
-  updates: Partial<Omit<Category, 'id'>>
+  updates: Partial<Omit<Category, 'id' | 'createdAt' | 'updatedAt'>>
 ): Promise<Category> => {
   const updateParts: string[] = [];
   const attributeValues: Record<string, any> = {};
   const attributeNames: Record<string, string> = {};
 
-  Object.entries(updates).forEach(([key, value], index) => {
+  // Add updatedAt timestamp
+  const now = new Date().toISOString();
+  const allUpdates = { ...updates, updatedAt: now };
+
+  Object.entries(allUpdates).forEach(([key, value], index) => {
     const attrName = `#attr${index}`;
     const attrValue = `:val${index}`;
     updateParts.push(`${attrName} = ${attrValue}`);

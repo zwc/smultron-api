@@ -3,7 +3,7 @@ import type { APIResponse } from '../types';
 import { getCategory } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
-import { stripCategoryId } from '../utils/transform';
+import { formatCategory } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return notFoundResponse('Category');
     }
 
-    return successResponse({ data: stripCategoryId(category) });
+    return successResponse({ data: formatCategory(category) });
   } catch (error) {
     console.error('Get category error:', error);
     return errorResponse('Internal server error', 500);

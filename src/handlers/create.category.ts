@@ -1,9 +1,20 @@
+import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { createCategory, saveCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { formatCategory } from '../utils/transform';
+
+// Request body validation schema
+const CreateCategorySchema = z.object({
+  slug: z.string().min(1, 'Slug is required'),
+  brand: z.string(),
+  title: z.string().min(1, 'Title is required'),
+  subtitle: z.string().default(''),
+  index: z.number().int().min(0, 'Index must be a non-negative integer'),
+  status: z.enum(['active', 'inactive']).default('active')
+});
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -16,18 +27,22 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     const body = JSON.parse(event.body);
-    const { brand, title, subtitle = '', index, status = 'active' } = body;
 
-    if (!brand || !title || index === undefined) {
-      return errorResponse('Missing required fields', 400);
+    // Validate request body with Zod
+    let validatedData;
+    try {
+      validatedData = CreateCategorySchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return errorResponse(
+          `Validation error: ${error.issues.map((e) => e.message).join(', ')}`,
+          400
+        );
+      }
+      throw error;
     }
 
-    // Validate status if provided
-    if (status && status !== 'active' && status !== 'inactive') {
-      return errorResponse('Status must be either "active" or "inactive"', 400);
-    }
-
-    const category = createCategory({ brand, title, subtitle, index, status });
+    const category = createCategory(validatedData);
     await saveCategory(category);
 
     return successResponse({ data: formatCategory(category) }, 201);

@@ -76,6 +76,8 @@ export const formatCategory = (category: Category): Category => {
     subtitle: category.subtitle,
     status: category.status,
     index: category.index,
+    createdAt: category.createdAt,
+    updatedAt: category.updatedAt,
   };
 };
 

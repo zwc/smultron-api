@@ -2,43 +2,58 @@
   "categories": [
     {
       "id": "labubu",
+      "slug": "labubu",
       "brand": "Pop Mart",
       "title": "Labubu",
       "subtitle": "",
       "status": "active",
-      "index": 1
+      "index": 1,
+      "createdAt": "2025-09-20T10:00:00.000Z",
+      "updatedAt": "2025-09-20T10:00:00.000Z"
     },
     {
       "id": "skullpanda",
+      "slug": "skullpanda",
       "brand": "Pop Mart",
       "title": "Skullpanda",
       "subtitle": "",
       "status": "active",
-      "index": 2
+      "index": 2,
+      "createdAt": "2025-09-21T10:00:00.000Z",
+      "updatedAt": "2025-09-21T10:00:00.000Z"
     },
     {
       "id": "sonny-angel",
+      "slug": "sonny-angel",
       "brand": "Dreams",
       "title": "Sonny Angel",
       "subtitle": "",
       "status": "active",
-      "index": 3
+      "index": 3,
+      "createdAt": "2025-09-22T10:00:00.000Z",
+      "updatedAt": "2025-09-22T10:00:00.000Z"
     },
     {
       "id": "hacipupu",
+      "slug": "hacipupu",
       "brand": "Pop Mart",
       "title": "Hacipupu",
       "subtitle": "",
       "status": "active",
-      "index": 4
+      "index": 4,
+      "createdAt": "2025-09-23T10:00:00.000Z",
+      "updatedAt": "2025-09-23T10:00:00.000Z"
     },
     {
       "id": "getahug",
+      "slug": "getahug",
       "brand": "Getahug",
       "title": "Getahug",
       "subtitle": "",
       "status": "active",
-      "index": 4
+      "index": 4,
+      "createdAt": "2025-09-24T10:00:00.000Z",
+      "updatedAt": "2025-09-24T10:00:00.000Z"
     }
   ],
   "products": [

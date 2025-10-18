@@ -3,7 +3,7 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { updateCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
-import { stripCategoryId } from '../utils/transform';
+import { formatCategory } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -23,8 +23,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const body = JSON.parse(event.body);
     
-    // Filter out protected fields that cannot be updated (only id)
-    const { id: _id, ...updates } = body;
+    // Filter out protected fields that cannot be updated (id, createdAt, updatedAt are managed by the system)
+    const { id: _id, createdAt: _createdAt, updatedAt: _updatedAt, ...updates } = body;
     
     // Validate status field if provided
     if ('status' in updates && updates.status !== 'active' && updates.status !== 'inactive') {
@@ -33,7 +33,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     
     const updatedCategory = await updateCategory(id, updates);
 
-    return successResponse({ data: stripCategoryId(updatedCategory) });
+    return successResponse({ data: formatCategory(updatedCategory) });
   } catch (error) {
     console.error('Update category error:', error);
     return errorResponse('Internal server error', 500);

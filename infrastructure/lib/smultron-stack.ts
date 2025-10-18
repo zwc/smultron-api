@@ -142,6 +142,7 @@ export class SmultronStack extends cdk.Stack {
       handler: 'index.getProduct',
     });
     productsTable.grantReadData(getProductFunction);
+    categoriesTable.grantReadData(getProductFunction);
 
     const createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
       ...commonLambdaProps,

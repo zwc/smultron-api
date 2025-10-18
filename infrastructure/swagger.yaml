@@ -829,10 +829,14 @@ paths:
             schema:
               type: object
               required:
+                - slug
                 - brand
                 - title
                 - index
               properties:
+                slug:
+                  type: string
+                  description: URL-friendly identifier (e.g., "labubu", "sonny-angel")
                 brand:
                   type: string
                 title:

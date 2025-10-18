@@ -57,6 +57,8 @@ export interface Category {
   subtitle: string;
   index: number;
   status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Public category without internal ID
