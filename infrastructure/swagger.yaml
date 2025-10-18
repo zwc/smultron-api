@@ -590,6 +590,9 @@ paths:
             schema:
               type: object
               properties:
+                slug:
+                  type: string
+                  description: URL-friendly identifier for the product
                 category:
                   type: string
                 article:
@@ -924,6 +927,9 @@ paths:
             schema:
               type: object
               properties:
+                slug:
+                  type: string
+                  description: URL-friendly identifier for the category
                 brand:
                   type: string
                 title:
