@@ -5,33 +5,38 @@ const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || 'smultron-products';
 const CATEGORIES_TABLE = process.env.CATEGORIES_TABLE || 'smultron-categories';
 const ORDERS_TABLE = process.env.ORDERS_TABLE || 'smultron-orders';
 
-export const createProduct = (data: Omit<Product, 'id' | 'slug' | 'createdAt' | 'updatedAt' | 'status'> & { status?: 'active' | 'inactive' }): Product => {
+export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { slug?: string; status?: 'active' | 'inactive' }): Product => {
   const now = new Date().toISOString();
   
   // Generate GUID for id
   const id = crypto.randomUUID();
   
-  // Create slug from category (if provided) and title
-  const slugBase = data.category 
-    ? `${data.category}-${data.title}` 
-    : data.title;
-  const slug = slugBase.toLowerCase().replace(/\s+/g, '-');
+  // Use provided slug or auto-generate from category and title
+  const slug = data.slug || (() => {
+    const slugBase = data.category 
+      ? `${data.category}-${data.title}` 
+      : data.title;
+    return slugBase.toLowerCase().replace(/\s+/g, '-');
+  })();
+  
+  // Remove slug from data to avoid duplication
+  const { slug: _slug, ...restData } = data;
   
   return {
     // Default values for optional fields
-    category: data.category || '',
-    article: data.article || '',
-    price_reduced: data.price_reduced ?? 0,
-    description: data.description || [],
-    tag: data.tag || '',
-    index: data.index ?? 0,
-    max_order: data.max_order ?? 999,
-    image: data.image || '',
-    images: data.images || [],
+    category: restData.category || '',
+    article: restData.article || '',
+    price_reduced: restData.price_reduced ?? 0,
+    description: restData.description || [],
+    tag: restData.tag || '',
+    index: restData.index ?? 0,
+    max_order: restData.max_order ?? 999,
+    image: restData.image || '',
+    images: restData.images || [],
     // Required and computed fields
     id,
     slug,
-    ...data,
+    ...restData,
     status: data.status || 'active',
     createdAt: now,
     updatedAt: now,

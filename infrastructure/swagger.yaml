@@ -379,6 +379,9 @@ paths:
                 - stock
                 - image
               properties:
+                slug:
+                  type: string
+                  description: URL-friendly identifier
                 category:
                   type: string
                 article:
