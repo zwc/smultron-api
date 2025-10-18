@@ -13,7 +13,11 @@ const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1',
 });
 
-const docClient = DynamoDBDocumentClient.from(client);
+const docClient = DynamoDBDocumentClient.from(client, {
+  marshallOptions: {
+    removeUndefinedValues: true,
+  },
+});
 
 export const putItem = async (tableName: string, item: any): Promise<void> => {
   await docClient.send(

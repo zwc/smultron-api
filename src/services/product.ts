@@ -240,6 +240,19 @@ export const deleteCategory = async (id: string): Promise<void> => {
   await db.deleteItem(CATEGORIES_TABLE, { id });
 };
 
+// Order functions
+export const saveOrder = async (order: Order): Promise<void> => {
+  await db.putItem(ORDERS_TABLE, order);
+};
+
+export const getOrder = async (id: string): Promise<Order | null> => {
+  return await db.getItem<Order>(ORDERS_TABLE, { id });
+};
+
+export const getAllOrders = async (): Promise<Order[]> => {
+  return await db.scanTable<Order>(ORDERS_TABLE);
+};
+
 // Generate order number in format YYMM.XXX
 const generateOrderNumber = async (): Promise<string> => {
   const now = new Date();
@@ -247,9 +260,14 @@ const generateOrderNumber = async (): Promise<string> => {
   const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month with leading zero
   const prefix = `${year}${month}`;
   
+  console.log('Getting all orders to generate number with prefix:', prefix);
+  
   // Get all orders for the current month
   const allOrders = await getAllOrders();
+  console.log('Total orders in database:', allOrders.length);
+  
   const monthOrders = allOrders.filter(order => order.number?.startsWith(prefix));
+  console.log('Orders this month:', monthOrders.length);
   
   // Find the highest number for this month
   let maxNumber = 0;
@@ -265,7 +283,9 @@ const generateOrderNumber = async (): Promise<string> => {
   
   // Increment and format
   const nextNumber = (maxNumber + 1).toString().padStart(3, '0');
-  return `${prefix}.${nextNumber}`;
+  const orderNumber = `${prefix}.${nextNumber}`;
+  console.log('Generated order number:', orderNumber);
+  return orderNumber;
 };
 
 export const createOrder = async (
@@ -280,15 +300,20 @@ export const createOrder = async (
   
   // Generate unique ID and order number
   const id = crypto.randomUUID();
+  console.log('Generating order number...');
   const number = await generateOrderNumber();
+  console.log('Generated order number:', number);
   
   // Freeze product data from cart - copy full product details
+  console.log('Freezing product data for', cart.length, 'items...');
   const frozenCart: OrderCartItem[] = await Promise.all(
     cart.map(async (item) => {
       const product = await getProduct(item.id);
       if (!product) {
         throw new Error(`Product ${item.id} not found`);
       }
+      
+      console.log('Frozen product:', product.id, product.title);
       
       return {
         id: product.id,
@@ -323,18 +348,6 @@ export const createOrder = async (
     createdAt: isoString,
     updatedAt: isoString,
   };
-};
-
-export const saveOrder = async (order: Order): Promise<void> => {
-  await db.putItem(ORDERS_TABLE, order);
-};
-
-export const getOrder = async (id: string): Promise<Order | null> => {
-  return await db.getItem<Order>(ORDERS_TABLE, { id });
-};
-
-export const getAllOrders = async (): Promise<Order[]> => {
-  return await db.scanTable<Order>(ORDERS_TABLE);
 };
 
 export const updateOrderStatus = async (

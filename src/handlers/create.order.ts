@@ -87,8 +87,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       orderDetails.delivery_cost
     );
 
+    console.log('Order created successfully:', order.id, order.number);
+
     // Save order
     await saveOrder(order);
+
+    console.log('Order saved to database');
 
     // Update stock for all products
     await Promise.all(
@@ -97,9 +101,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       )
     );
 
+    console.log('Stock updated for products');
+
     return successResponse({ data: order }, 201);
   } catch (error) {
     console.error('Create order error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     return errorResponse('Internal server error', 500);
   }
 };
