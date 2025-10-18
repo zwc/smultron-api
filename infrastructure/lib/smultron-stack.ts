@@ -318,13 +318,16 @@ export class SmultronStack extends cdk.Stack {
 
     const adminOrders = admin.addResource('orders');
     adminOrders.addMethod('GET', new apigateway.LambdaIntegration(listOrdersFunction));
-    adminOrders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
     
     const adminOrder = adminOrders.addResource('{id}');
     adminOrder.addMethod('GET', new apigateway.LambdaIntegration(getOrderFunction));
     
     const adminOrderStatus = adminOrder.addResource('status');
     adminOrderStatus.addMethod('PUT', new apigateway.LambdaIntegration(updateOrderStatusFunction));
+
+    // Public Orders route (for order creation from the website)
+    const orders = v1.addResource('orders');
+    orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
 
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');

@@ -28,7 +28,7 @@ describe('Integration Tests - Order Creation', () => {
     // Login to get auth token
     const loginResponse = await fetch(`${normalizedApiUrl}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         username: ADMIN_USERNAME,
         password: ADMIN_PASSWORD,
@@ -98,11 +98,10 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`,
       },
       body: JSON.stringify(orderPayload),
     });
@@ -225,9 +224,9 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invalidPayload),
     });
 
@@ -255,9 +254,9 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invalidPayload),
     });
 
@@ -285,9 +284,9 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invalidPayload),
     });
 
@@ -315,9 +314,9 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invalidPayload),
     });
 
@@ -345,9 +344,9 @@ describe('Integration Tests - Order Creation', () => {
       },
     };
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders`, {
+    const response = await fetch(`${normalizedApiUrl}/orders`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(invalidPayload),
     });
 
