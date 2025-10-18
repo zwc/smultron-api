@@ -9,10 +9,10 @@ import { formatCategory } from '../utils/transform';
 // Request body validation schema
 const CreateCategorySchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
-  brand: z.string(),
   title: z.string().min(1, 'Title is required'),
+  brand: z.string().default(''),
   subtitle: z.string().default(''),
-  index: z.number().int().min(0, 'Index must be a non-negative integer'),
+  index: z.number().int().min(0, 'Index must be a non-negative integer').default(999),
   status: z.enum(['active', 'inactive']).default('active')
 });
 

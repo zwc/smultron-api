@@ -830,21 +830,26 @@ paths:
               type: object
               required:
                 - slug
-                - brand
                 - title
-                - index
               properties:
                 slug:
                   type: string
                   description: URL-friendly identifier (e.g., "labubu", "sonny-angel")
-                brand:
-                  type: string
                 title:
                   type: string
+                  description: Category display name
+                brand:
+                  type: string
+                  default: ""
+                  description: Brand name (optional)
                 subtitle:
                   type: string
+                  default: ""
+                  description: Category subtitle (optional)
                 index:
                   type: integer
+                  default: 0
+                  description: Sort order (optional, defaults to 0)
                 status:
                   type: string
                   enum: [active, inactive]

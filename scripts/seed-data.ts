@@ -5,10 +5,14 @@ import { join } from 'path';
 
 interface Category {
 	id: string;
-	name: string;
-	description: string[];
-	image: string;
+	slug: string;
+	brand: string;
+	title: string;
+	subtitle: string;
 	index: number;
+	status: 'active' | 'inactive';
+	createdAt: string;
+	updatedAt: string;
 }
 
 interface Product {
@@ -110,30 +114,83 @@ async function login(): Promise<string> {
 	return response.token;
 }
 
+// Delete all existing categories
+async function deleteAllCategories(token: string): Promise<void> {
+	console.log('\n🗑️  Deleting all existing categories...');
+	
+	try {
+		const response = await apiRequest('GET', '/admin/categories?limit=100', token);
+		const categories = response.data || [];
+		
+		if (categories.length === 0) {
+			console.log('  ℹ️  No categories to delete');
+			return;
+		}
+		
+		for (const category of categories) {
+			try {
+				await apiRequest('DELETE', `/admin/categories/${category.id}`, token);
+				console.log(`  ✓ Deleted category: ${category.title} (${category.id})`);
+			} catch (error) {
+				console.error(`  ✗ Failed to delete category ${category.id}:`, error);
+			}
+		}
+		
+		console.log(`✓ Deleted ${categories.length} categories`);
+	} catch (error) {
+		console.error('  ✗ Failed to fetch categories for deletion:', error);
+		throw error;
+	}
+}
+
+// Delete all existing products
+async function deleteAllProducts(token: string): Promise<void> {
+	console.log('\n🗑️  Deleting all existing products...');
+	
+	try {
+		const response = await apiRequest('GET', '/admin/products?limit=100', token);
+		const products = response.data || [];
+		
+		if (products.length === 0) {
+			console.log('  ℹ️  No products to delete');
+			return;
+		}
+		
+		for (const product of products) {
+			try {
+				await apiRequest('DELETE', `/admin/products/${product.id}`, token);
+				console.log(`  ✓ Deleted product: ${product.title} - ${product.subtitle} (${product.id})`);
+			} catch (error) {
+				console.error(`  ✗ Failed to delete product ${product.id}:`, error);
+			}
+		}
+		
+		console.log(`✓ Deleted ${products.length} products`);
+	} catch (error) {
+		console.error('  ✗ Failed to fetch products for deletion:', error);
+		throw error;
+	}
+}
+
 // Seed categories
 async function seedCategories(token: string): Promise<void> {
 	console.log('\n📁 Seeding categories...');
 	
+	let successCount = 0;
+	let errorCount = 0;
+	
 	for (const category of data.categories) {
 		try {
 			await apiRequest('POST', '/admin/categories', token, category);
-			console.log(`  ✓ Created category: ${category.name} (${category.id})`);
-		} catch (error: any) {
-			// If category already exists, try to update it
-			if (error.message.includes('409') || error.message.includes('already exists')) {
-				try {
-					await apiRequest('PUT', `/admin/categories/${category.id}`, token, category);
-					console.log(`  ↻ Updated category: ${category.name} (${category.id})`);
-				} catch (updateError) {
-					console.error(`  ✗ Failed to update category ${category.id}:`, updateError);
-				}
-			} else {
-				console.error(`  ✗ Failed to create category ${category.id}:`, error);
-			}
+			successCount++;
+			console.log(`  ✓ Created category: ${category.title} (${category.id})`);
+		} catch (error) {
+			errorCount++;
+			console.error(`  ✗ Failed to create category ${category.id}:`, error);
 		}
 	}
 	
-	console.log(`✓ Finished seeding ${data.categories.length} categories`);
+	console.log(`✓ Finished seeding categories: ${successCount} successful, ${errorCount} errors`);
 }
 
 // Seed products
@@ -148,21 +205,9 @@ async function seedProducts(token: string): Promise<void> {
 			await apiRequest('POST', '/admin/products', token, product);
 			successCount++;
 			console.log(`  ✓ Created product: ${product.title} - ${product.subtitle} (${product.id})`);
-		} catch (error: any) {
-			// If product already exists, try to update it
-			if (error.message.includes('409') || error.message.includes('already exists')) {
-				try {
-					await apiRequest('PUT', `/admin/products/${product.id}`, token, product);
-					successCount++;
-					console.log(`  ↻ Updated product: ${product.title} - ${product.subtitle} (${product.id})`);
-				} catch (updateError) {
-					errorCount++;
-					console.error(`  ✗ Failed to update product ${product.id}:`, updateError);
-				}
-			} else {
-				errorCount++;
-				console.error(`  ✗ Failed to create product ${product.id}:`, error);
-			}
+		} catch (error) {
+			errorCount++;
+			console.error(`  ✗ Failed to create product ${product.id}:`, error);
 		}
 	}
 	
@@ -193,13 +238,17 @@ async function main() {
 		// Step 1: Authenticate
 		const token = await login();
 		
-		// Step 2: Seed categories first (products depend on categories)
+		// Step 2: Delete all existing data
+		await deleteAllProducts(token);
+		await deleteAllCategories(token);
+		
+		// Step 3: Seed categories first (products depend on categories)
 		await seedCategories(token);
 		
-		// Step 3: Seed products
+		// Step 4: Seed products
 		await seedProducts(token);
 		
-		// Step 4: Verify the seeded data
+		// Step 5: Verify the seeded data
 		await verifyData(token);
 		
 		console.log('\n✅ Data seeding completed successfully!');
