@@ -316,20 +316,19 @@ export class SmultronStack extends cdk.Stack {
     adminCategory.addMethod('PUT', new apigateway.LambdaIntegration(updateCategoryFunction));
     adminCategory.addMethod('DELETE', new apigateway.LambdaIntegration(deleteCategoryFunction));
 
+    const adminOrders = admin.addResource('orders');
+    adminOrders.addMethod('GET', new apigateway.LambdaIntegration(listOrdersFunction));
+    adminOrders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
+    
+    const adminOrder = adminOrders.addResource('{id}');
+    adminOrder.addMethod('GET', new apigateway.LambdaIntegration(getOrderFunction));
+    
+    const adminOrderStatus = adminOrder.addResource('status');
+    adminOrderStatus.addMethod('PUT', new apigateway.LambdaIntegration(updateOrderStatusFunction));
+
     // Catalog route (combined categories and products)
     const catalog = v1.addResource('catalog');
     catalog.addMethod('GET', new apigateway.LambdaIntegration(listCatalogFunction));
-
-    // Orders routes
-    const orders = v1.addResource('orders');
-    orders.addMethod('GET', new apigateway.LambdaIntegration(listOrdersFunction));
-    orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
-    
-    const order = orders.addResource('{id}');
-    order.addMethod('GET', new apigateway.LambdaIntegration(getOrderFunction));
-    
-    const orderStatus = order.addResource('status');
-    orderStatus.addMethod('PUT', new apigateway.LambdaIntegration(updateOrderStatusFunction));
 
     // CloudFront Distribution
     // Use AWS managed policies optimized for API Gateway

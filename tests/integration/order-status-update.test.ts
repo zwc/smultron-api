@@ -120,7 +120,7 @@ describe('Integration Tests - Order Status Update', () => {
     // Wait a moment to ensure date_change will be different
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -157,7 +157,7 @@ describe('Integration Tests - Order Status Update', () => {
   });
 
   test('should verify status update persisted in database', async () => {
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -191,7 +191,7 @@ describe('Integration Tests - Order Status Update', () => {
     // Wait a moment
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -215,7 +215,7 @@ describe('Integration Tests - Order Status Update', () => {
     // Wait a moment
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -237,7 +237,7 @@ describe('Integration Tests - Order Status Update', () => {
   });
 
   test('should reject status update without authentication', async () => {
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ describe('Integration Tests - Order Status Update', () => {
   });
 
   test('should reject status update with invalid status value', async () => {
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -271,7 +271,7 @@ describe('Integration Tests - Order Status Update', () => {
   });
 
   test('should reject status update with missing status field', async () => {
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -286,7 +286,7 @@ describe('Integration Tests - Order Status Update', () => {
   });
 
   test('should reject status update for non-existent order', async () => {
-    const response = await fetch(`${normalizedApiUrl}/admin/orders/non-existent-id/status`, {
+    const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/non-existent-id/status`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${authToken}`,
@@ -308,7 +308,7 @@ describe('Integration Tests - Order Status Update', () => {
     for (const newStatus of statusChanges) {
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const response = await fetch(`${normalizedApiUrl}/admin/orders/${testOrderId}/status`, {
+      const response = await fetch(`${normalizedApiUrl}/admin/admin/orders/${testOrderId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,

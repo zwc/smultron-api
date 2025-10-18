@@ -2,7 +2,8 @@ import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { createOrder, saveOrder, getProduct, updateProduct } from '../services/product';
-import { successResponse, errorResponse } from '../utils/response';
+import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { verifyAuthToken } from '../middleware/auth';
 
 // Zod validation schemas
 const OrderInformationSchema = z.object({
@@ -30,6 +31,11 @@ const OrderSchema = z.object({
 });
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
+  // Verify authentication
+  if (!verifyAuthToken(event.headers || {})) {
+    return unauthorizedResponse();
+  }
+
   try {
     if (!event.body) {
       return errorResponse('Request body is required', 400);

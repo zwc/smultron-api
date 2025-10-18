@@ -61,9 +61,12 @@ async function main() {
   
   // 3. Create order
   console.log('\n3. Creating order...');
-  const orderRes = await fetch(`${API_URL}/orders`, {
+  const orderRes = await fetch(`${API_URL}/admin/orders`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({
       information: {
         name: 'Debug Test',
