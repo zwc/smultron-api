@@ -84,14 +84,47 @@ export interface AdminCategoriesResponse {
 
 export interface Order {
   id: string;
-  cart: CartItem[];
-  order: OrderDetails;
-  total: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  number: string; // Format: YYMM.XXX (e.g., "2510.001")
+  date: number; // Timestamp
+  date_change: number; // Timestamp
+  status: 'active' | 'inactive' | 'invalid';
+  delivery: string;
+  delivery_cost: number;
+  information: OrderInformation;
+  cart: OrderCartItem[]; // Frozen product snapshots
   createdAt: string;
   updatedAt: string;
 }
 
+export interface OrderInformation {
+  name: string;
+  company: string;
+  address: string;
+  zip: string;
+  city: string;
+  email: string;
+  phone: string;
+}
+
+export interface OrderCartItem {
+  id: string; // Product ID reference
+  number: number; // Quantity
+  // Frozen product data at time of order
+  slug: string;
+  category?: string;
+  article?: string;
+  brand: string;
+  title: string;
+  subtitle: string;
+  price: number;
+  price_reduced?: number;
+  description?: string[];
+  tag?: string;
+  image?: string;
+  images?: string[];
+}
+
+// Legacy interfaces (keep for backwards compatibility if needed)
 export interface CartItem {
   id: string;  // Required: product ID
   price: number;  // Required: price at time of order

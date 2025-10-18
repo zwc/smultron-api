@@ -1,8 +1,16 @@
+import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { updateOrderStatus } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+
+// Zod validation schema
+const UpdateOrderStatusSchema = z.object({
+  status: z.enum(['active', 'inactive', 'invalid'], {
+    message: "Status must be 'active', 'inactive', or 'invalid'"
+  })
+});
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -21,20 +29,24 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     const body = JSON.parse(event.body);
-    const { status } = body;
 
-    if (!status) {
-      return errorResponse('Status is required', 400);
+    // Validate request body with Zod
+    let validatedData;
+    try {
+      validatedData = UpdateOrderStatusSchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return errorResponse(
+          `Validation error: ${error.issues.map((e) => e.message).join(', ')}`,
+          400
+        );
+      }
+      throw error;
     }
 
-    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return errorResponse('Invalid status', 400);
-    }
+    const updatedOrder = await updateOrderStatus(id, validatedData.status);
 
-    const updatedOrder = await updateOrderStatus(id, status);
-
-    return successResponse(updatedOrder);
+    return successResponse({ data: updatedOrder });
   } catch (error) {
     console.error('Update order status error:', error);
     return errorResponse('Internal server error', 500);

@@ -1,4 +1,4 @@
-import type { Product, Category, Order } from '../types';
+import type { Product, Category, Order, OrderInformation, OrderCartItem } from '../types';
 import * as db from './dynamodb';
 
 const PRODUCTS_TABLE = process.env.PRODUCTS_TABLE || 'smultron-products';
@@ -240,13 +240,88 @@ export const deleteCategory = async (id: string): Promise<void> => {
   await db.deleteItem(CATEGORIES_TABLE, { id });
 };
 
-export const createOrder = (data: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Order => {
-  const now = new Date().toISOString();
+// Generate order number in format YYMM.XXX
+const generateOrderNumber = async (): Promise<string> => {
+  const now = new Date();
+  const year = now.getFullYear().toString().slice(-2); // Last 2 digits of year
+  const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Month with leading zero
+  const prefix = `${year}${month}`;
+  
+  // Get all orders for the current month
+  const allOrders = await getAllOrders();
+  const monthOrders = allOrders.filter(order => order.number?.startsWith(prefix));
+  
+  // Find the highest number for this month
+  let maxNumber = 0;
+  for (const order of monthOrders) {
+    const parts = order.number.split('.');
+    if (parts.length === 2 && parts[1]) {
+      const num = parseInt(parts[1], 10);
+      if (num > maxNumber) {
+        maxNumber = num;
+      }
+    }
+  }
+  
+  // Increment and format
+  const nextNumber = (maxNumber + 1).toString().padStart(3, '0');
+  return `${prefix}.${nextNumber}`;
+};
+
+export const createOrder = async (
+  information: OrderInformation,
+  cart: Array<{ id: string; number: number }>,
+  delivery: string,
+  delivery_cost: number
+): Promise<Order> => {
+  const now = new Date();
+  const timestamp = now.getTime();
+  const isoString = now.toISOString();
+  
+  // Generate unique ID and order number
+  const id = crypto.randomUUID();
+  const number = await generateOrderNumber();
+  
+  // Freeze product data from cart - copy full product details
+  const frozenCart: OrderCartItem[] = await Promise.all(
+    cart.map(async (item) => {
+      const product = await getProduct(item.id);
+      if (!product) {
+        throw new Error(`Product ${item.id} not found`);
+      }
+      
+      return {
+        id: product.id,
+        number: item.number,
+        // Freeze all product data
+        slug: product.slug,
+        category: product.category,
+        article: product.article,
+        brand: product.brand,
+        title: product.title,
+        subtitle: product.subtitle,
+        price: product.price,
+        price_reduced: product.price_reduced,
+        description: product.description,
+        tag: product.tag,
+        image: product.image,
+        images: product.images,
+      };
+    })
+  );
+  
   return {
-    id: `order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    ...data,
-    createdAt: now,
-    updatedAt: now,
+    id,
+    number,
+    date: timestamp,
+    date_change: timestamp,
+    status: 'active',
+    delivery,
+    delivery_cost,
+    information,
+    cart: frozenCart,
+    createdAt: isoString,
+    updatedAt: isoString,
   };
 };
 
@@ -266,16 +341,19 @@ export const updateOrderStatus = async (
   id: string,
   status: Order['status']
 ): Promise<Order> => {
+  const now = new Date();
   return await db.updateItem<Order>(
     ORDERS_TABLE,
     { id },
-    'SET #status = :status, #updatedAt = :updatedAt',
+    'SET #status = :status, #date_change = :date_change, #updatedAt = :updatedAt',
     {
       ':status': status,
-      ':updatedAt': new Date().toISOString(),
+      ':date_change': now.getTime(),
+      ':updatedAt': now.toISOString(),
     },
     {
       '#status': 'status',
+      '#date_change': 'date_change',
       '#updatedAt': 'updatedAt',
     }
   );

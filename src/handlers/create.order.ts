@@ -1,7 +1,33 @@
+import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import type { APIResponse, CartItem, OrderDetails } from '../types';
+import type { APIResponse } from '../types';
 import { createOrder, saveOrder, getProduct, updateProduct } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
+
+// Zod validation schemas
+const OrderInformationSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  company: z.string().default(''),
+  address: z.string().min(1, 'Address is required'),
+  zip: z.string().min(1, 'Zip code is required'),
+  city: z.string().min(1, 'City is required'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(1, 'Phone is required'),
+});
+
+const CartItemSchema = z.object({
+  id: z.string().min(1, 'Product ID is required'),
+  number: z.number().int().min(1, 'Quantity must be at least 1'),
+});
+
+const OrderSchema = z.object({
+  information: OrderInformationSchema,
+  cart: z.array(CartItemSchema).min(1, 'Cart must contain at least one item'),
+  order: z.object({
+    delivery: z.string().min(1, 'Delivery method is required'),
+    delivery_cost: z.number().min(0, 'Delivery cost must be non-negative'),
+  }),
+});
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -10,29 +36,22 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     }
 
     const body = JSON.parse(event.body);
-    const { cart, order: orderDetails } = body;
 
-    // Validate cart
-    if (!cart || !Array.isArray(cart) || cart.length === 0) {
-      return errorResponse('Order must contain at least one item in cart', 400);
-    }
-
-    // Validate required cart item fields
-    for (const item of cart) {
-      if (!item.id || typeof item.price !== 'number' || typeof item.number !== 'number' || item.number < 1) {
-        return errorResponse('Each cart item must have id, price, and number (quantity >= 1)', 400);
+    // Validate request body with Zod
+    let validatedData;
+    try {
+      validatedData = OrderSchema.parse(body);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return errorResponse(
+          `Validation error: ${error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
+          400
+        );
       }
+      throw error;
     }
 
-    // Validate order details
-    if (!orderDetails || !orderDetails.name || !orderDetails.address || 
-        !orderDetails.zip || !orderDetails.city || !orderDetails.phone || 
-        !orderDetails.delivery || !orderDetails.payment) {
-      return errorResponse('Missing required order details (name, address, zip, city, phone, delivery, payment)', 400);
-    }
-
-    // Calculate total from cart
-    const total = cart.reduce((sum: number, item: CartItem) => sum + (item.price * item.number), 0);
+    const { information, cart, order: orderDetails } = validatedData;
 
     // Check stock availability and prepare stock updates
     const stockUpdates: Array<{ id: string; newStock: number }> = [];
@@ -41,6 +60,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       
       if (!product) {
         return errorResponse(`Product ${item.id} not found`, 404);
+      }
+
+      if (product.status !== 'active') {
+        return errorResponse(`Product ${product.title || item.id} is not available`, 400);
       }
 
       if (product.stock < item.number) {
@@ -56,13 +79,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       });
     }
 
-    // Create order
-    const order = createOrder({
+    // Create order with frozen product data
+    const order = await createOrder(
+      information,
       cart,
-      order: orderDetails,
-      total,
-      status: 'pending',
-    });
+      orderDetails.delivery,
+      orderDetails.delivery_cost
+    );
 
     // Save order
     await saveOrder(order);
@@ -74,7 +97,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       )
     );
 
-    return successResponse(order, 201);
+    return successResponse({ data: order }, 201);
   } catch (error) {
     console.error('Create order error:', error);
     return errorResponse('Internal server error', 500);
