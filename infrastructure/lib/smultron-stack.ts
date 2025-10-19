@@ -393,6 +393,15 @@ export class SmultronStack extends cdk.Stack {
         allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
       },
       additionalBehaviors: {
+        // Swagger YAML - no caching so updates are immediate
+        '/docs/swagger.yaml': {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {
+            originAccessControl: docsOac,
+          }),
+          cachePolicy: noCachePolicy,
+          viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+          allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        },
         // Swagger documentation from S3 - redirect /docs to /docs/
         '/docs': {
           origin: origins.S3BucketOrigin.withOriginAccessControl(docsBucket, {

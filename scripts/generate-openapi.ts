@@ -78,6 +78,28 @@ async function main() {
     const method = ex.method.toLowerCase() as
       | "get" | "post" | "put" | "patch" | "delete" | "options" | "head";
 
+    // Determine tags based on route
+    const tags: string[] = [];
+    if (ex.route.startsWith('/admin/products')) {
+      tags.push('Products (Admin)');
+    } else if (ex.route.startsWith('/admin/categories')) {
+      tags.push('Categories (Admin)');
+    } else if (ex.route.startsWith('/admin/orders')) {
+      tags.push('Orders (Admin)');
+    } else if (ex.route.startsWith('/admin')) {
+      tags.push('Admin');
+    } else if (ex.route === '/orders' || ex.route.startsWith('/orders/')) {
+      tags.push('Public');
+    } else if (ex.route === '/catalog' || ex.route.startsWith('/catalog/')) {
+      tags.push('Public');
+    } else if (ex.route.startsWith('/products') || ex.route.startsWith('/categories')) {
+      tags.push('Public');
+    } else if (ex.route.startsWith('/auth')) {
+      tags.push('Authentication');
+    } else {
+      tags.push('Public');
+    }
+
     const request: any = {};
     
     // Simple convention:
@@ -108,7 +130,7 @@ async function main() {
     registry.registerPath({
       method,
       path: ex.route, // supports `/items/{id}`; path params come from the route itself
-      // You can add summary/tags/etc by exporting them from handlers and merging here
+      tags,
       request,
       responses,
     });
