@@ -38,3 +38,4 @@ export const updateOrderStatus = wrap(require('./src/handlers/update.order.statu
 export const adminListProducts = wrap(require('./src/handlers/admin.list.products').handler, 'adminListProducts');
 export const adminUpdateProductIndexes = wrap(require('./src/handlers/admin.update.product.indexes').handler, 'adminUpdateProductIndexes');
 export const adminUpdateCategoryIndexes = wrap(require('./src/handlers/admin.update.category.indexes').handler, 'adminUpdateCategoryIndexes');
+export const pingError = wrap(require('./src/handlers/ping.error').handler, 'pingError');
