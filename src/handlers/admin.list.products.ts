@@ -26,6 +26,8 @@ const QueryParamsSchema = z.object({
   offset: z.coerce.number().int().min(0).optional().default(0)
 });
 
+export const requestSchema = QueryParamsSchema;
+
 export const handler = async (event: any) => {
   // Verify authentication
   if (!verifyAuthToken(event.headers || {})) {
@@ -69,11 +71,7 @@ export const handler = async (event: any) => {
       return `${baseUrl}?${urlParams.toString()}`;
     };
 
-    const data = {
-      items: formatProducts(result.items),
-      categories,
-      total: result.total,
-    };
+    const data = formatProducts(result.items);
 
     const meta = {
       total: result.total,
@@ -83,7 +81,8 @@ export const handler = async (event: any) => {
       filters: {
         status: params.status || null,
         q: params.q || null
-      }
+      },
+      categories
     };
 
     const links = {

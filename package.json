@@ -10,7 +10,7 @@
     "test:integration:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/integration/*.test.ts",
     "dev": "bun run --watch index.ts",
     "build": "bun build index.ts --outdir ./dist --target node --format esm --minify --external @aws-sdk/* && echo '{\"type\":\"module\"}' > dist/package.json",
-  "generate:openapi": "bun run scripts/generate-openapi.ts",
+    "generate:openapi": "bun run scripts/generate-openapi.ts",
     "seed:dev": "PRODUCTS_TABLE=smultron-products-dev CATEGORIES_TABLE=smultron-categories-dev ORDERS_TABLE=smultron-orders-dev API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/seed-data.ts",
     "cdk": "cdk",
     "cdk:bootstrap": "cdk bootstrap",
@@ -28,6 +28,7 @@
     "cdk:destroy:prod": "npx cdk destroy --context environment=prod --force --all"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.1.0",
     "@aws-sdk/client-dynamodb": "^3.637.0",
     "@aws-sdk/lib-dynamodb": "^3.637.0",
     "bcryptjs": "^2.4.3",

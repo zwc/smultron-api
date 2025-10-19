@@ -27,6 +27,8 @@ const QueryParamsSchema = z.object({
   offset: z.coerce.number().int().min(0).optional().default(0)
 });
 
+export const requestSchema = QueryParamsSchema;
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
     // Verify authentication for admin endpoint
