@@ -10,8 +10,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return unauthorizedResponse();
     }
 
-    const orders = await getAllOrders();
-    return successResponse(orders);
+  const orders = await getAllOrders();
+  return successResponse({ data: orders });
   } catch (error) {
     console.error('List orders error:', error);
     return errorResponse('Internal server error', 500);
