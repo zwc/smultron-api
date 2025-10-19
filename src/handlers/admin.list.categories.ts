@@ -15,6 +15,7 @@ export const route = '/admin/categories';
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
   status: z.enum(['active', 'inactive']).optional(),
+  q: z.string().optional(),
   sort: z.enum([
     'id', '-id',
     'title', '-title',
@@ -52,6 +53,14 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Get categories with optional status filter
     let categories = await getAllCategories(params.status);
     
+    // Apply search filter if query string is provided
+    if (params.q) {
+      const searchQuery = params.q.toLowerCase();
+      categories = categories.filter(cat => 
+        cat.title.toLowerCase().includes(searchQuery)
+      );
+    }
+    
     // Apply sorting
     const sortField = params.sort.startsWith('-') ? params.sort.slice(1) : params.sort;
     const sortDirection = params.sort.startsWith('-') ? -1 : 1;
@@ -82,6 +91,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     const buildUrl = (offset: number) => {
       const urlParams = new URLSearchParams();
       if (params.status) urlParams.set('status', params.status);
+      if (params.q) urlParams.set('q', params.q);
       urlParams.set('sort', params.sort);
       urlParams.set('limit', params.limit.toString());
       urlParams.set('offset', offset.toString());
@@ -96,7 +106,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       offset: params.offset,
       sort: params.sort,
       filters: {
-        status: params.status || null
+        status: params.status || null,
+        q: params.q || null
       }
     };
 

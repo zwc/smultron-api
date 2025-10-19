@@ -146,7 +146,10 @@ async function main() {
       description:
         "Generated OpenAPI from Zod schemas with @asteasolutions/zod-to-openapi",
     },
-    servers: [{ url: "http://localhost:3000/v1", description: "Local development" }],
+    servers: [
+      { url: "https://dev.smultron.zwc.se/v1", description: "Development" },
+      { url: "http://localhost:3000/v1", description: "Local development" }
+    ],
   });
 
   fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
