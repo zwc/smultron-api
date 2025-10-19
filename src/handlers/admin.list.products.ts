@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { adminGetProducts, getAllCategories } from '../services/product';
 import type { AdminProductsResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
-import { unauthorizedResponse, errorResponse } from '../utils/response';
+import { unauthorizedResponse, errorResponse, successResponse } from '../utils/response';
 import { formatProducts } from '../utils/transform';
 import { AdminProductsResponseSchema } from '../schemas/handlers';
 
@@ -69,38 +69,34 @@ export const handler = async (event: any) => {
       return `${baseUrl}?${urlParams.toString()}`;
     };
 
-    const response: AdminProductsResponse = {
-      data: formatProducts(result.items),
-      categories: categories,
-      meta: {
-        total: result.total,
-        limit: params.limit,
-        offset: params.offset,
-        sort: params.sort,
-        filters: {
-          status: params.status || null,
-          q: params.q || null
-        }
-      },
-      links: {
-        self: buildUrl(params.offset),
-        next: params.offset + params.limit < result.total 
-          ? buildUrl(params.offset + params.limit) 
-          : null,
-        prev: params.offset > 0 
-          ? buildUrl(Math.max(0, params.offset - params.limit)) 
-          : null
+    const data = {
+      items: formatProducts(result.items),
+      categories,
+      total: result.total,
+    };
+
+    const meta = {
+      total: result.total,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+      filters: {
+        status: params.status || null,
+        q: params.q || null
       }
     };
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(response)
+    const links = {
+      self: buildUrl(params.offset),
+      next: params.offset + params.limit < result.total 
+        ? buildUrl(params.offset + params.limit) 
+        : null,
+      prev: params.offset > 0 
+        ? buildUrl(Math.max(0, params.offset - params.limit)) 
+        : null
     };
+
+    return successResponse(data, meta, links, 200);
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof z.ZodError) {

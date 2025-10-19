@@ -35,7 +35,13 @@ export const UpdateCategoryRequestSchema = CategorySchema.partial().omit({ id: t
 export const ListCatalogResponseSchema = envelope(z.object({ products: z.array(ProductSchema), categories: z.array(CategorySchema) }));
 
 // Admin products listing with meta
-export const AdminProductsResponseSchema = envelope(z.object({ items: z.array(ProductSchema), total: z.number().int().min(0) }));
+export const AdminProductsResponseSchema = envelope(
+  z.object({
+    items: z.array(ProductSchema),
+    categories: z.array(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
+    total: z.number().int().min(0),
+  })
+);
 
 // Update order status
 export const UpdateOrderStatusRequestSchema = z.object({ status: z.enum(['active', 'inactive', 'invalid']) });

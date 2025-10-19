@@ -86,30 +86,29 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return `${baseUrl}?${urlParams.toString()}`;
     };
     
-    // Format response with data wrapper
-    const response: AdminCategoriesResponse = {
-      data: formatCategories(paginatedCategories),
-      meta: {
-        total: total,
-        limit: params.limit,
-        offset: params.offset,
-        sort: params.sort,
-        filters: {
-          status: params.status || null
-        }
-      },
-      links: {
-        self: buildUrl(params.offset),
-        next: params.offset + params.limit < total
-          ? buildUrl(params.offset + params.limit)
-          : null,
-        prev: params.offset > 0
-          ? buildUrl(Math.max(0, params.offset - params.limit))
-          : null
+    // Prepare envelope parts (don't wrap twice)
+    const data = formatCategories(paginatedCategories);
+    const meta = {
+      total: total,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+      filters: {
+        status: params.status || null
       }
     };
-    
-    return successResponse(response);
+
+    const links = {
+      self: buildUrl(params.offset),
+      next: params.offset + params.limit < total
+        ? buildUrl(params.offset + params.limit)
+        : null,
+      prev: params.offset > 0
+        ? buildUrl(Math.max(0, params.offset - params.limit))
+        : null
+    };
+
+    return successResponse(data, meta, links, 200);
   } catch (error) {
     console.error('List categories error:', error);
     return errorResponse('Internal server error', 500);

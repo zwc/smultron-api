@@ -29,7 +29,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return notFoundResponse('Category');
     }
 
-    return successResponse({ data: formatCategory(category) });
+  return successResponse(formatCategory(category));
   } catch (error) {
     console.error('Get category error:', error);
     return errorResponse('Internal server error', 500);
