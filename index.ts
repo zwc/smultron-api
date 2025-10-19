@@ -1,19 +1,40 @@
-export { handler as login } from './src/handlers/login';
-export { handler as listCatalog } from './src/handlers/list.catalog';
-export { handler as listProducts } from './src/handlers/list.products';
-export { handler as getProduct } from './src/handlers/get.product';
-export { handler as createProduct } from './src/handlers/create.product';
-export { handler as updateProduct } from './src/handlers/update.product';
-export { handler as deleteProduct } from './src/handlers/delete.product';
-export { handler as listCategories } from './src/handlers/admin.list.categories';
-export { handler as getCategory } from './src/handlers/get.category';
-export { handler as createCategory } from './src/handlers/create.category';
-export { handler as updateCategory } from './src/handlers/update.category';
-export { handler as deleteCategory } from './src/handlers/delete.category';
-export { handler as createOrder } from './src/handlers/create.order';
-export { handler as listOrders } from './src/handlers/list.orders';
-export { handler as getOrder } from './src/handlers/get.order';
-export { handler as updateOrderStatus } from './src/handlers/update.order.status';
-export { handler as adminListProducts } from './src/handlers/admin.list.products';
-export { handler as adminUpdateProductIndexes } from './src/handlers/admin.update.product.indexes';
-export { handler as adminUpdateCategoryIndexes } from './src/handlers/admin.update.category.indexes';
+import { notifySlackOnError } from './src/utils/slack';
+
+function wrap(handler: any, name: string) {
+	return async (event: any, context: any) => {
+		try {
+			return await handler(event, context);
+		} catch (err) {
+			// Notify Slack asynchronously but don't block the response
+			notifySlackOnError(name, err).catch((e) => console.error('Slack notify failed', e));
+			console.error(`Unhandled error in ${name}:`, err);
+			// Return a generic 500 response to API Gateway
+			return {
+				statusCode: 500,
+				body: JSON.stringify({ error: 'Internal server error' }),
+				headers: { 'Content-Type': 'application/json' },
+			};
+		}
+	};
+}
+
+export { handler as rawLogin } from './src/handlers/login';
+export const login = wrap(require('./src/handlers/login').handler, 'login');
+export const listCatalog = wrap(require('./src/handlers/list.catalog').handler, 'listCatalog');
+export const listProducts = wrap(require('./src/handlers/list.products').handler, 'listProducts');
+export const getProduct = wrap(require('./src/handlers/get.product').handler, 'getProduct');
+export const createProduct = wrap(require('./src/handlers/create.product').handler, 'createProduct');
+export const updateProduct = wrap(require('./src/handlers/update.product').handler, 'updateProduct');
+export const deleteProduct = wrap(require('./src/handlers/delete.product').handler, 'deleteProduct');
+export const listCategories = wrap(require('./src/handlers/admin.list.categories').handler, 'listCategories');
+export const getCategory = wrap(require('./src/handlers/get.category').handler, 'getCategory');
+export const createCategory = wrap(require('./src/handlers/create.category').handler, 'createCategory');
+export const updateCategory = wrap(require('./src/handlers/update.category').handler, 'updateCategory');
+export const deleteCategory = wrap(require('./src/handlers/delete.category').handler, 'deleteCategory');
+export const createOrder = wrap(require('./src/handlers/create.order').handler, 'createOrder');
+export const listOrders = wrap(require('./src/handlers/list.orders').handler, 'listOrders');
+export const getOrder = wrap(require('./src/handlers/get.order').handler, 'getOrder');
+export const updateOrderStatus = wrap(require('./src/handlers/update.order.status').handler, 'updateOrderStatus');
+export const adminListProducts = wrap(require('./src/handlers/admin.list.products').handler, 'adminListProducts');
+export const adminUpdateProductIndexes = wrap(require('./src/handlers/admin.update.product.indexes').handler, 'adminUpdateProductIndexes');
+export const adminUpdateCategoryIndexes = wrap(require('./src/handlers/admin.update.category.indexes').handler, 'adminUpdateCategoryIndexes');

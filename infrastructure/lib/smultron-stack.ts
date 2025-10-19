@@ -87,6 +87,8 @@ export class SmultronStack extends cdk.Stack {
       ADMIN_PASSWORD: adminPassword,
       JWT_SECRET: jwtSecret,
       ENVIRONMENT: environment,
+      // Slack webhook for error notifications (optional)
+      SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL || '',
     };
 
     // Feature flag: Disable auth for dev environment if DISABLE_AUTH env var is set
