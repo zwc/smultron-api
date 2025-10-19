@@ -6,6 +6,14 @@ import { updateCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { formatCategory } from '../utils/transform';
 
+import { UpdateCategoryRequestSchema, CreateCategoryResponseSchema } from '../schemas/handlers';
+
+export const requestSchema = UpdateCategoryRequestSchema;
+export const responseSchema = CreateCategoryResponseSchema;
+
+export const method = 'PUT';
+export const route = '/admin/categories/{id}';
+
 // Request body validation schema for updating categories
 const UpdateCategorySchema = z.object({
   slug: z.string().min(1).optional(),

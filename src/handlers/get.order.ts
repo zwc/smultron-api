@@ -3,6 +3,12 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { getOrder } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
+import { GetOrderResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = GetOrderResponseSchema;
+
+export const method = 'GET';
+export const route = '/admin/orders/{id}';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {

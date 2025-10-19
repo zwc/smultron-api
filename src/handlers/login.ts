@@ -2,6 +2,13 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { generateToken } from '../utils/jwt';
 import { successResponse, errorResponse } from '../utils/response';
+import { LoginRequest, LoginResponse } from '../schemas/handlers';
+
+export const requestSchema = LoginRequest;
+export const responseSchema = LoginResponse;
+
+export const method = 'POST';
+export const route = '/auth/login';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {

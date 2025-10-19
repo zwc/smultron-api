@@ -7,6 +7,13 @@ import { successResponse, errorResponse, unauthorizedResponse } from '../utils/r
 import { stripProductId } from '../utils/transform';
 
 // Request body validation schema for updating products
+import { UpdateProductRequestSchema, CreateProductResponseSchema } from '../schemas/handlers';
+
+export const requestSchema = UpdateProductRequestSchema;
+export const responseSchema = CreateProductResponseSchema;
+
+export const method = 'PUT';
+export const route = '/admin/products/{id}';
 const UpdateProductSchema = z.object({
   slug: z.string().min(1).optional(),
   category: z.string().optional(),

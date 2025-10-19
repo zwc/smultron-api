@@ -3,6 +3,12 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { deleteProduct } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { CreateProductResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = CreateProductResponseSchema;
+
+export const method = 'DELETE';
+export const route = '/admin/products/{id}';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {

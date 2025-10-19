@@ -4,6 +4,11 @@ import { getCategory } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
 import { formatCategory } from '../utils/transform';
+import { GetCategoryResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = GetCategoryResponseSchema;
+export const method = 'GET';
+export const route = '/admin/categories/{id}';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {

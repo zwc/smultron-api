@@ -2,6 +2,12 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { getAllCategories, getActiveProducts } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
+import { ListCatalogResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = ListCatalogResponseSchema;
+
+export const method = 'GET';
+export const route = '/catalog';
 import { formatCategories, formatProducts } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {

@@ -6,6 +6,14 @@ import { createCategory, saveCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { formatCategory } from '../utils/transform';
 
+import { CreateCategoryRequestSchema, CreateCategoryResponseSchema } from '../schemas/handlers';
+
+export const requestSchema = CreateCategoryRequestSchema;
+export const responseSchema = CreateCategoryResponseSchema;
+
+export const method = 'POST';
+export const route = '/admin/categories';
+
 // Request body validation schema
 const CreateCategorySchema = z.object({
   slug: z.string().min(1, 'Slug is required'),

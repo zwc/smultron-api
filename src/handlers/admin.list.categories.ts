@@ -5,6 +5,12 @@ import { getAllCategories } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { verifyAuthToken } from '../middleware/auth';
 import { formatCategories } from '../utils/transform';
+import { ListCategoriesResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = ListCategoriesResponseSchema;
+
+export const method = 'GET';
+export const route = '/admin/categories';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({

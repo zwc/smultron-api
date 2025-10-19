@@ -3,6 +3,9 @@ import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { deleteCategory } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { CreateCategoryResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = CreateCategoryResponseSchema;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -27,3 +30,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     return errorResponse('Internal server error', 500);
   }
 };
+ 
+export const method = 'DELETE';
+export const route = '/admin/categories/{id}';

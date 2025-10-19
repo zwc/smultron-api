@@ -52,3 +52,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     return errorResponse('Internal server error', 500);
   }
 };
+
+export const method = 'PUT';
+export const route = '/admin/orders/{id}/status';

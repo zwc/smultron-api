@@ -4,6 +4,12 @@ import type { AdminProductsResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { unauthorizedResponse, errorResponse } from '../utils/response';
 import { formatProducts } from '../utils/transform';
+import { AdminProductsResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = AdminProductsResponseSchema;
+
+export const method = 'GET';
+export const route = '/admin/products';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({

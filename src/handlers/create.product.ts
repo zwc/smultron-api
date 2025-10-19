@@ -5,6 +5,13 @@ import { createProduct, saveProduct } from '../services/product';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 import { formatProduct } from '../utils/transform';
 
+import { CreateProductRequestSchema, CreateProductResponseSchema } from '../schemas/handlers';
+
+export const requestSchema = CreateProductRequestSchema;
+export const responseSchema = CreateProductResponseSchema;
+
+export const method = 'POST';
+export const route = '/admin/products';
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
     if (!verifyAuthToken(event.headers)) {

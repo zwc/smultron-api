@@ -3,6 +3,11 @@ import type { APIResponse } from '../types';
 import { getProduct, getAllCategories } from '../services/product';
 import { successResponse, errorResponse, notFoundResponse } from '../utils/response';
 import { formatProduct } from '../utils/transform';
+import { GetProductResponseSchema } from '../schemas/handlers';
+
+export const responseSchema = GetProductResponseSchema;
+export const method = 'GET';
+export const route = '/products/{id}';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
