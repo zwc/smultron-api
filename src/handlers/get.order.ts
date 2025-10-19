@@ -22,7 +22,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return notFoundResponse('Order');
     }
 
-    return successResponse(order);
+  return successResponse(order, { total: 1 });
   } catch (error) {
     console.error('Get order error:', error);
     return errorResponse('Internal server error', 500);

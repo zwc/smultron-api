@@ -13,20 +13,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       getActiveProducts()
     ]);
 
-    return successResponse({
-      categories: {
-        data: formatCategories(categories),
-        meta: {
-          total: categories.length
-        }
-      },
-      products: {
-        data: formatProducts(products),
-        meta: {
-          total: products.length
-        }
-      }
-    });
+    const formattedCategories = formatCategories(categories);
+    const formattedProducts = formatProducts(products);
+
+    return successResponse(
+      { products: formattedProducts, categories: formattedCategories },
+      { productsTotal: formattedProducts.length, categoriesTotal: formattedCategories.length }
+    );
   } catch (error) {
     console.error('List catalog error:', error);
     return errorResponse('Internal server error', 500);

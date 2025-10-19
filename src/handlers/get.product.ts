@@ -31,10 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         title: cat.title
       }));
 
-    return successResponse({ 
-      data: formatProduct(product),
-      categories: categories
-    });
+  return successResponse(formatProduct(product));
   } catch (error) {
     console.error('Get product error:', error);
     return errorResponse('Internal server error', 500);

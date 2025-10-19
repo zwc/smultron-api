@@ -31,7 +31,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const token = generateToken({ username });
 
-    return successResponse({ token });
+  return successResponse({ token });
   } catch (error) {
     console.error('Auth error:', error);
     return errorResponse('Internal server error', 500);

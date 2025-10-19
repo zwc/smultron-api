@@ -276,7 +276,22 @@ components:
       type: object
       properties:
         error:
-          type: string
+          type: object
+          properties:
+            message:
+              type: string
+
+    Envelope:
+      type: object
+      properties:
+        data:
+          nullable: true
+        meta:
+          nullable: true
+        links:
+          nullable: true
+        error:
+          nullable: true
 
 paths:
   /auth/login:
@@ -1136,19 +1151,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Order'
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    nullable: true
         '400':
           description: Invalid request or insufficient stock
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Envelope'
         '404':
           description: Product not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/Envelope'
 
   /admin/orders:
     get:
@@ -1192,7 +1216,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Order'
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Order'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                  links:
+                    nullable: true
+                  error:
+                    nullable: true
         '401':
           description: Unauthorized
           content:

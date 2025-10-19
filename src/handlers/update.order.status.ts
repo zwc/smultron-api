@@ -46,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const updatedOrder = await updateOrderStatus(id, validatedData.status);
 
-    return successResponse({ data: updatedOrder });
+  return successResponse(updatedOrder);
   } catch (error) {
     console.error('Update order status error:', error);
     return errorResponse('Internal server error', 500);

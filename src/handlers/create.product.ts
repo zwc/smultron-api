@@ -48,7 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     await saveProduct(product);
 
-    return successResponse({ data: formatProduct(product) }, 201);
+  return successResponse(formatProduct(product), null, null, 201);
   } catch (error) {
     console.error('Create product error:', error);
     return errorResponse('Internal server error', 500);

@@ -103,7 +103,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     console.log('Stock updated for products');
 
-    return successResponse({ data: order }, 201);
+  return successResponse(order, null, null, 201);
   } catch (error) {
     console.error('Create order error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');

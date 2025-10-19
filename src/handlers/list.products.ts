@@ -7,7 +7,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
   try {
     // Only return active products for public endpoint
     const products = await getActiveProducts();
-    return successResponse(products);
+  return successResponse(products);
   } catch (error) {
     console.error('List products error:', error);
     return errorResponse('Internal server error', 500);

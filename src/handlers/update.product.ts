@@ -63,7 +63,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     
     const updatedProduct = await updateProduct(id, validatedData);
 
-    return successResponse({ data: stripProductId(updatedProduct) });
+  return successResponse(stripProductId(updatedProduct));
   } catch (error) {
     console.error('Update product error:', error);
     return errorResponse('Internal server error', 500);

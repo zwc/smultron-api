@@ -5,8 +5,15 @@ function wrap(handler: any, name: string) {
 		try {
 			return await handler(event, context);
 		} catch (err) {
-			// Notify Slack asynchronously but don't block the response
-			notifySlackOnError(name, err).catch((e) => console.error('Slack notify failed', e));
+			// Await notify so logs from the notifier appear in CloudWatch for debugging
+			try {
+				// eslint-disable-next-line no-console
+				console.log(`Attempting to notify Slack for ${name}`);
+				await notifySlackOnError(name, err);
+			} catch (notifyErr) {
+				// eslint-disable-next-line no-console
+				console.error('Slack notify failed', notifyErr);
+			}
 			console.error(`Unhandled error in ${name}:`, err);
 			// Return a generic 500 response to API Gateway
 			return {

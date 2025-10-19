@@ -53,7 +53,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     
     const updatedCategory = await updateCategory(id, validatedData);
 
-    return successResponse({ data: formatCategory(updatedCategory) });
+  return successResponse(formatCategory(updatedCategory));
   } catch (error) {
     console.error('Update category error:', error);
     return errorResponse('Internal server error', 500);

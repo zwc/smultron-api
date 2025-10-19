@@ -45,7 +45,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     const category = createCategory(validatedData);
     await saveCategory(category);
 
-    return successResponse({ data: formatCategory(category) }, 201);
+  return successResponse(formatCategory(category), null, null, 201);
   } catch (error) {
     console.error('Create category error:', error);
     return errorResponse('Internal server error', 500);
