@@ -1320,6 +1320,8 @@ components:
 paths:
   /orders:
     post:
+      tags:
+        - Public
       requestBody:
         content:
           application/json:
@@ -1510,6 +1512,8 @@ paths:
                   - error
   /catalog:
     get:
+      tags:
+        - Public
       responses:
         "200":
           description: OK
@@ -1636,11 +1640,15 @@ paths:
                   - error
   /v1/ping/error:
     get:
+      tags:
+        - Public
       responses:
         "200":
           description: OK
   /products/{id}:
     get:
+      tags:
+        - Public
       responses:
         "200":
           description: OK
@@ -1725,6 +1733,8 @@ paths:
                   - error
   /admin/products:
     get:
+      tags:
+        - Products (Admin)
       parameters:
         - schema:
             type: string
@@ -1857,6 +1867,8 @@ paths:
                   - data
                   - error
     post:
+      tags:
+        - Products (Admin)
       requestBody:
         content:
           application/json:
@@ -1993,6 +2005,8 @@ paths:
                   - error
   /admin/categories/{id}:
     put:
+      tags:
+        - Categories (Admin)
       requestBody:
         content:
           application/json:
@@ -2071,6 +2085,8 @@ paths:
                   - data
                   - error
     delete:
+      tags:
+        - Categories (Admin)
       responses:
         "200":
           description: OK
@@ -2128,6 +2144,8 @@ paths:
                   - data
                   - error
     get:
+      tags:
+        - Categories (Admin)
       responses:
         "200":
           description: OK
@@ -2186,6 +2204,8 @@ paths:
                   - error
   /auth/login:
     post:
+      tags:
+        - Authentication
       requestBody:
         content:
           application/json:
@@ -2213,6 +2233,8 @@ paths:
                   - token
   /admin/orders/{id}:
     get:
+      tags:
+        - Orders (Admin)
       responses:
         "200":
           description: OK
@@ -2343,6 +2365,8 @@ paths:
                   - error
   /admin/categories:
     post:
+      tags:
+        - Categories (Admin)
       requestBody:
         content:
           application/json:
@@ -2426,6 +2450,8 @@ paths:
                   - data
                   - error
     get:
+      tags:
+        - Categories (Admin)
       parameters:
         - schema:
             type: string
@@ -2530,6 +2556,8 @@ paths:
                   - error
   /admin/products/{id}:
     delete:
+      tags:
+        - Products (Admin)
       responses:
         "200":
           description: OK
@@ -2613,6 +2641,8 @@ paths:
                   - data
                   - error
     put:
+      tags:
+        - Products (Admin)
       requestBody:
         content:
           application/json:
@@ -2742,6 +2772,8 @@ paths:
                   - error
   /example/{id}:
     post:
+      tags:
+        - Public
       requestBody:
         content:
           application/json:
@@ -2770,6 +2802,8 @@ paths:
                       type: string
   /admin/orders:
     get:
+      tags:
+        - Orders (Admin)
       responses:
         "200":
           description: OK
@@ -2902,11 +2936,15 @@ paths:
                   - error
   /admin/orders/{id}/status:
     put:
+      tags:
+        - Orders (Admin)
       responses:
         "200":
           description: OK
   /products:
     get:
+      tags:
+        - Public
       responses:
         "200":
           description: OK

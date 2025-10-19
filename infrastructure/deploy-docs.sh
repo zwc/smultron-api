@@ -34,11 +34,6 @@ if command -v bun >/dev/null 2>&1; then
   (cd "$(dirname "$(dirname "$0")")" && bun run generate:openapi) || echo "Warning: generator failed"
 fi
 
-# If generator produced swagger.generated.yaml, copy it to swagger.yaml for uploading
-if [ -f infrastructure/swagger.generated.yaml ]; then
-  cp infrastructure/swagger.generated.yaml infrastructure/swagger.yaml
-fi
-
 aws s3 cp infrastructure/docs.html s3://$BUCKET_NAME/docs.html --content-type "text/html"
 aws s3 cp infrastructure/swagger.yaml s3://$BUCKET_NAME/swagger.yaml --content-type "text/yaml"
 

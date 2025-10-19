@@ -14,7 +14,7 @@ extendZodWithOpenApi(z);
 // --- paths ---
 const HANDLERS_DIR = path.resolve(process.cwd(), "src", "handlers");
 const SCHEMAS_MODULE = path.resolve(process.cwd(), "src", "schemas", "handlers.ts");
-const OUT_PATH = path.resolve(process.cwd(), "infrastructure", "swagger.generated.yaml");
+const OUT_PATH = path.resolve(process.cwd(), "infrastructure", "swagger.yaml");
 
 // --- tiny helpers ---
 function listHandlerFiles() {
