@@ -413,8 +413,7 @@ export const adminGetProducts = async (options: {
     products = products.filter(p => 
       p.title.toLowerCase().includes(query) ||
       p.subtitle.toLowerCase().includes(query) ||
-      p.brand.toLowerCase().includes(query) ||
-      (p.description && p.description.some(d => d.toLowerCase().includes(query)))
+      p.brand.toLowerCase().includes(query)
     );
   }
 
