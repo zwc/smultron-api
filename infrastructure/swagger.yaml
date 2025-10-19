@@ -2,352 +2,91 @@ openapi: 3.0.0
 info:
   title: Smultron API (generated)
   version: 1.0.0
-  description: Generated OpenAPI document from Zod schemas (handler/schema-level
-    metadata preferred)
+  description: Generated OpenAPI from Zod schemas with @asteasolutions/zod-to-openapi
 servers:
   - url: http://localhost:3000/v1
     description: Local development
-paths:
-  /orders:
-    post:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateOrderResponseSchema"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateOrderRequestSchema"
-  /catalog:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListCatalogResponseSchema"
-  /v1/ping/error:
-    get:
-      responses:
-        "200":
-          description: OK
-  /products/{id}:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetProductResponseSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /admin/products:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AdminProductsResponseSchema"
-    post:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateProductResponseSchema"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateProductRequestSchema"
-  /admin/categories/{id}:
-    put:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateCategoryResponseSchema"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateCategoryRequestSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-    delete:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateCategoryResponseSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetCategoryResponseSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /auth/login:
-    post:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LoginResponse"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LoginRequest"
-  /admin/orders/{id}:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/GetOrderResponseSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /admin/categories:
-    post:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateCategoryResponseSchema"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateCategoryRequestSchema"
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListCategoriesResponseSchema"
-  /admin/products/{id}:
-    delete:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateProductResponseSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-    put:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CreateProductResponseSchema"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateProductRequestSchema"
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /example/{id}:
-    post:
-      responses:
-        "200":
-          description: OK
-      summary: Example endpoint demonstrating zod .meta()
-      description: Shows how to attach params and headers via schema.meta()
-      operationId: exampleMeta
-      tags:
-        - example
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /admin/orders:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListOrdersResponseSchema"
-  /admin/orders/{id}/status:
-    put:
-      responses:
-        "200":
-          description: OK
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-  /products:
-    get:
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ListProductsResponseSchema"
 components:
   schemas:
     AdminProductsResponseSchema:
       type: object
       properties:
         data:
+          type: array
           nullable: true
-          type: object
-          properties:
-            items:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  slug:
-                    type: string
-                  category:
-                    type: string
-                  article:
-                    type: string
-                  brand:
-                    type: string
-                  title:
-                    type: string
-                  subtitle:
-                    type: string
-                  price:
-                    type: number
-                  price_reduced:
-                    type: number
-                  description:
-                    type: array
-                    items:
-                      type: string
-                  tag:
-                    type: string
-                  index:
-                    type: number
-                  stock:
-                    type: number
-                  max_order:
-                    type: number
-                  image:
-                    type: string
-                  images:
-                    type: array
-                    items:
-                      type: string
-                  status:
-                    type: string
-                    enum:
-                      - active
-                      - inactive
-                  createdAt:
-                    type: string
-                  updatedAt:
-                    type: string
-                required:
-                  - id
-                  - slug
-                  - brand
-                  - title
-                  - price
-                  - stock
-                  - status
-                  - createdAt
-                  - updatedAt
-                additionalProperties: false
-            total:
-              type: integer
-              minimum: 0
-              maximum: 9007199254740991
-          required:
-            - items
-            - total
-          additionalProperties: false
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              slug:
+                type: string
+              category:
+                type: string
+              article:
+                type: string
+              brand:
+                type: string
+              title:
+                type: string
+              subtitle:
+                type: string
+              price:
+                type: number
+              price_reduced:
+                type: number
+              description:
+                type: array
+                items:
+                  type: string
+              tag:
+                type: string
+              index:
+                type: number
+              stock:
+                type: number
+              max_order:
+                type: number
+              image:
+                type: string
+              images:
+                type: array
+                items:
+                  type: string
+              status:
+                type: string
+                enum:
+                  - active
+                  - inactive
+              createdAt:
+                type: string
+              updatedAt:
+                type: string
+            required:
+              - id
+              - slug
+              - brand
+              - title
+              - price
+              - stock
+              - status
+              - createdAt
+              - updatedAt
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     CreateCategoryRequestSchema:
       type: object
       properties:
@@ -371,13 +110,12 @@ components:
         - title
         - index
         - status
-      additionalProperties: false
     CreateCategoryResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -408,26 +146,21 @@ components:
             - status
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     CreateOrderRequestSchema:
       type: object
       properties:
@@ -437,8 +170,8 @@ components:
             name:
               type: string
             company:
-              default: ""
               type: string
+              default: ""
             address:
               type: string
             zip:
@@ -448,18 +181,15 @@ components:
             email:
               type: string
               format: email
-              pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
             phone:
               type: string
           required:
             - name
-            - company
             - address
             - zip
             - city
             - email
             - phone
-          additionalProperties: false
         cart:
           type: array
           items:
@@ -470,11 +200,9 @@ components:
               number:
                 type: integer
                 minimum: 1
-                maximum: 9007199254740991
             required:
               - id
               - number
-            additionalProperties: false
         order:
           type: object
           properties:
@@ -486,18 +214,16 @@ components:
           required:
             - delivery
             - delivery_cost
-          additionalProperties: false
       required:
         - information
         - cart
         - order
-      additionalProperties: false
     CreateOrderResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -523,8 +249,8 @@ components:
                 name:
                   type: string
                 company:
-                  default: ""
                   type: string
+                  default: ""
                 address:
                   type: string
                 zip:
@@ -534,18 +260,15 @@ components:
                 email:
                   type: string
                   format: email
-                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
                 phone:
                   type: string
               required:
                 - name
-                - company
                 - address
                 - zip
                 - city
                 - email
                 - phone
-              additionalProperties: false
             cart:
               type: array
               items:
@@ -556,7 +279,6 @@ components:
                   number:
                     type: integer
                     minimum: 1
-                    maximum: 9007199254740991
                   slug:
                     type: string
                   category:
@@ -588,7 +310,6 @@ components:
                 required:
                   - id
                   - number
-                additionalProperties: false
             createdAt:
               type: string
             updatedAt:
@@ -605,26 +326,21 @@ components:
             - cart
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     CreateProductRequestSchema:
       type: object
       properties:
@@ -674,13 +390,12 @@ components:
         - price
         - stock
         - status
-      additionalProperties: false
     CreateProductResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -737,32 +452,27 @@ components:
             - status
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     GetCategoryResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -793,32 +503,27 @@ components:
             - status
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     GetOrderResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -844,8 +549,8 @@ components:
                 name:
                   type: string
                 company:
-                  default: ""
                   type: string
+                  default: ""
                 address:
                   type: string
                 zip:
@@ -855,18 +560,15 @@ components:
                 email:
                   type: string
                   format: email
-                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
                 phone:
                   type: string
               required:
                 - name
-                - company
                 - address
                 - zip
                 - city
                 - email
                 - phone
-              additionalProperties: false
             cart:
               type: array
               items:
@@ -877,7 +579,6 @@ components:
                   number:
                     type: integer
                     minimum: 1
-                    maximum: 9007199254740991
                   slug:
                     type: string
                   category:
@@ -909,7 +610,6 @@ components:
                 required:
                   - id
                   - number
-                additionalProperties: false
             createdAt:
               type: string
             updatedAt:
@@ -926,32 +626,27 @@ components:
             - cart
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     GetProductResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -1008,32 +703,27 @@ components:
             - status
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     ListCatalogResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             products:
               type: array
@@ -1095,7 +785,6 @@ components:
                   - status
                   - createdAt
                   - updatedAt
-                additionalProperties: false
             categories:
               type: array
               items:
@@ -1130,36 +819,30 @@ components:
                   - status
                   - createdAt
                   - updatedAt
-                additionalProperties: false
           required:
             - products
             - categories
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     ListCategoriesResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: array
+          nullable: true
           items:
             type: object
             properties:
@@ -1192,32 +875,27 @@ components:
               - status
               - createdAt
               - updatedAt
-            additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     ListOrdersResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: array
+          nullable: true
           items:
             type: object
             properties:
@@ -1245,8 +923,8 @@ components:
                   name:
                     type: string
                   company:
-                    default: ""
                     type: string
+                    default: ""
                   address:
                     type: string
                   zip:
@@ -1256,18 +934,15 @@ components:
                   email:
                     type: string
                     format: email
-                    pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
                   phone:
                     type: string
                 required:
                   - name
-                  - company
                   - address
                   - zip
                   - city
                   - email
                   - phone
-                additionalProperties: false
               cart:
                 type: array
                 items:
@@ -1278,7 +953,6 @@ components:
                     number:
                       type: integer
                       minimum: 1
-                      maximum: 9007199254740991
                     slug:
                       type: string
                     category:
@@ -1310,7 +984,6 @@ components:
                   required:
                     - id
                     - number
-                  additionalProperties: false
               createdAt:
                 type: string
               updatedAt:
@@ -1327,32 +1000,27 @@ components:
               - cart
               - createdAt
               - updatedAt
-            additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     ListProductsResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: array
+          nullable: true
           items:
             type: object
             properties:
@@ -1411,26 +1079,21 @@ components:
               - status
               - createdAt
               - updatedAt
-            additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     LoginRequest:
       type: object
       properties:
@@ -1441,7 +1104,6 @@ components:
       required:
         - username
         - password
-      additionalProperties: false
     LoginResponse:
       type: object
       properties:
@@ -1449,7 +1111,6 @@ components:
           type: string
       required:
         - token
-      additionalProperties: false
     UpdateCategoryRequestSchema:
       type: object
       properties:
@@ -1468,7 +1129,6 @@ components:
           enum:
             - active
             - inactive
-      additionalProperties: false
     UpdateOrderStatusRequestSchema:
       type: object
       properties:
@@ -1480,13 +1140,12 @@ components:
             - invalid
       required:
         - status
-      additionalProperties: false
     UpdateOrderStatusResponseSchema:
       type: object
       properties:
         data:
-          nullable: true
           type: object
+          nullable: true
           properties:
             id:
               type: string
@@ -1512,8 +1171,8 @@ components:
                 name:
                   type: string
                 company:
-                  default: ""
                   type: string
+                  default: ""
                 address:
                   type: string
                 zip:
@@ -1523,18 +1182,15 @@ components:
                 email:
                   type: string
                   format: email
-                  pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
                 phone:
                   type: string
               required:
                 - name
-                - company
                 - address
                 - zip
                 - city
                 - email
                 - phone
-              additionalProperties: false
             cart:
               type: array
               items:
@@ -1545,7 +1201,6 @@ components:
                   number:
                     type: integer
                     minimum: 1
-                    maximum: 9007199254740991
                   slug:
                     type: string
                   category:
@@ -1577,7 +1232,6 @@ components:
                 required:
                   - id
                   - number
-                additionalProperties: false
             createdAt:
               type: string
             updatedAt:
@@ -1594,26 +1248,21 @@ components:
             - cart
             - createdAt
             - updatedAt
-          additionalProperties: false
         meta:
           nullable: true
         links:
           nullable: true
         error:
-          nullable: true
           type: object
+          nullable: true
           properties:
             message:
               type: string
           required:
             - message
-          additionalProperties: false
       required:
         - data
-        - meta
-        - links
         - error
-      additionalProperties: false
     UpdateProductRequestSchema:
       type: object
       properties:
@@ -1656,5 +1305,1689 @@ components:
           enum:
             - active
             - inactive
-      additionalProperties: false
-__schemaMetas: {}
+    ExampleRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        q:
+          type: string
+      required:
+        - id
+      unusedIO: input
+  parameters: {}
+paths:
+  /orders:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                information:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    company:
+                      type: string
+                      default: ""
+                    address:
+                      type: string
+                    zip:
+                      type: string
+                    city:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+                    phone:
+                      type: string
+                  required:
+                    - name
+                    - address
+                    - zip
+                    - city
+                    - email
+                    - phone
+                cart:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      number:
+                        type: integer
+                        minimum: 1
+                    required:
+                      - id
+                      - number
+                order:
+                  type: object
+                  properties:
+                    delivery:
+                      type: string
+                    delivery_cost:
+                      type: number
+                      minimum: 0
+                  required:
+                    - delivery
+                    - delivery_cost
+              required:
+                - information
+                - cart
+                - order
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      number:
+                        type: string
+                      date:
+                        type: number
+                      date_change:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                          - invalid
+                      delivery:
+                        type: string
+                      delivery_cost:
+                        type: number
+                      information:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          company:
+                            type: string
+                            default: ""
+                          address:
+                            type: string
+                          zip:
+                            type: string
+                          city:
+                            type: string
+                          email:
+                            type: string
+                            format: email
+                          phone:
+                            type: string
+                        required:
+                          - name
+                          - address
+                          - zip
+                          - city
+                          - email
+                          - phone
+                      cart:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            number:
+                              type: integer
+                              minimum: 1
+                            slug:
+                              type: string
+                            category:
+                              type: string
+                            article:
+                              type: string
+                            brand:
+                              type: string
+                            title:
+                              type: string
+                            subtitle:
+                              type: string
+                            price:
+                              type: number
+                            price_reduced:
+                              type: number
+                            description:
+                              type: array
+                              items:
+                                type: string
+                            tag:
+                              type: string
+                            image:
+                              type: string
+                            images:
+                              type: array
+                              items:
+                                type: string
+                          required:
+                            - id
+                            - number
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - number
+                      - date
+                      - date_change
+                      - status
+                      - delivery
+                      - delivery_cost
+                      - information
+                      - cart
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /catalog:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            slug:
+                              type: string
+                            category:
+                              type: string
+                            article:
+                              type: string
+                            brand:
+                              type: string
+                            title:
+                              type: string
+                            subtitle:
+                              type: string
+                            price:
+                              type: number
+                            price_reduced:
+                              type: number
+                            description:
+                              type: array
+                              items:
+                                type: string
+                            tag:
+                              type: string
+                            index:
+                              type: number
+                            stock:
+                              type: number
+                            max_order:
+                              type: number
+                            image:
+                              type: string
+                            images:
+                              type: array
+                              items:
+                                type: string
+                            status:
+                              type: string
+                              enum:
+                                - active
+                                - inactive
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                          required:
+                            - id
+                            - slug
+                            - brand
+                            - title
+                            - price
+                            - stock
+                            - status
+                            - createdAt
+                            - updatedAt
+                      categories:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            slug:
+                              type: string
+                            brand:
+                              type: string
+                            title:
+                              type: string
+                            subtitle:
+                              type: string
+                            index:
+                              type: number
+                            status:
+                              type: string
+                              enum:
+                                - active
+                                - inactive
+                            createdAt:
+                              type: string
+                            updatedAt:
+                              type: string
+                          required:
+                            - id
+                            - slug
+                            - title
+                            - index
+                            - status
+                            - createdAt
+                            - updatedAt
+                    required:
+                      - products
+                      - categories
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /v1/ping/error:
+    get:
+      responses:
+        "200":
+          description: OK
+  /products/{id}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      category:
+                        type: string
+                      article:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      price:
+                        type: number
+                      price_reduced:
+                        type: number
+                      description:
+                        type: array
+                        items:
+                          type: string
+                      tag:
+                        type: string
+                      index:
+                        type: number
+                      stock:
+                        type: number
+                      max_order:
+                        type: number
+                      image:
+                        type: string
+                      images:
+                        type: array
+                        items:
+                          type: string
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - brand
+                      - title
+                      - price
+                      - stock
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /admin/products:
+    get:
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - active
+              - inactive
+          required: false
+          name: status
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: q
+          in: query
+        - schema:
+            type: string
+            enum:
+              - createdAt
+              - -createdAt
+              - updatedAt
+              - -updatedAt
+              - id
+              - -id
+              - title
+              - -title
+              - index
+              - -index
+            default: -createdAt
+          required: false
+          name: sort
+          in: query
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: integer
+            nullable: true
+            minimum: 0
+            default: 0
+          required: false
+          name: offset
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        slug:
+                          type: string
+                        category:
+                          type: string
+                        article:
+                          type: string
+                        brand:
+                          type: string
+                        title:
+                          type: string
+                        subtitle:
+                          type: string
+                        price:
+                          type: number
+                        price_reduced:
+                          type: number
+                        description:
+                          type: array
+                          items:
+                            type: string
+                        tag:
+                          type: string
+                        index:
+                          type: number
+                        stock:
+                          type: number
+                        max_order:
+                          type: number
+                        image:
+                          type: string
+                        images:
+                          type: array
+                          items:
+                            type: string
+                        status:
+                          type: string
+                          enum:
+                            - active
+                            - inactive
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                      required:
+                        - id
+                        - slug
+                        - brand
+                        - title
+                        - price
+                        - stock
+                        - status
+                        - createdAt
+                        - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                category:
+                  type: string
+                article:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                price:
+                  type: number
+                price_reduced:
+                  type: number
+                description:
+                  type: array
+                  items:
+                    type: string
+                tag:
+                  type: string
+                index:
+                  type: number
+                stock:
+                  type: number
+                max_order:
+                  type: number
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+              required:
+                - slug
+                - brand
+                - title
+                - price
+                - stock
+                - status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      category:
+                        type: string
+                      article:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      price:
+                        type: number
+                      price_reduced:
+                        type: number
+                      description:
+                        type: array
+                        items:
+                          type: string
+                      tag:
+                        type: string
+                      index:
+                        type: number
+                      stock:
+                        type: number
+                      max_order:
+                        type: number
+                      image:
+                        type: string
+                      images:
+                        type: array
+                        items:
+                          type: string
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - brand
+                      - title
+                      - price
+                      - stock
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /admin/categories/{id}:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                index:
+                  type: number
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      index:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - title
+                      - index
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+    delete:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      index:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - title
+                      - index
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      index:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - title
+                      - index
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /auth/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                required:
+                  - token
+  /admin/orders/{id}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      number:
+                        type: string
+                      date:
+                        type: number
+                      date_change:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                          - invalid
+                      delivery:
+                        type: string
+                      delivery_cost:
+                        type: number
+                      information:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          company:
+                            type: string
+                            default: ""
+                          address:
+                            type: string
+                          zip:
+                            type: string
+                          city:
+                            type: string
+                          email:
+                            type: string
+                            format: email
+                          phone:
+                            type: string
+                        required:
+                          - name
+                          - address
+                          - zip
+                          - city
+                          - email
+                          - phone
+                      cart:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            number:
+                              type: integer
+                              minimum: 1
+                            slug:
+                              type: string
+                            category:
+                              type: string
+                            article:
+                              type: string
+                            brand:
+                              type: string
+                            title:
+                              type: string
+                            subtitle:
+                              type: string
+                            price:
+                              type: number
+                            price_reduced:
+                              type: number
+                            description:
+                              type: array
+                              items:
+                                type: string
+                            tag:
+                              type: string
+                            image:
+                              type: string
+                            images:
+                              type: array
+                              items:
+                                type: string
+                          required:
+                            - id
+                            - number
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - number
+                      - date
+                      - date_change
+                      - status
+                      - delivery
+                      - delivery_cost
+                      - information
+                      - cart
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /admin/categories:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                index:
+                  type: number
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+              required:
+                - slug
+                - title
+                - index
+                - status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      index:
+                        type: number
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - title
+                      - index
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+    get:
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - active
+              - inactive
+          required: false
+          name: status
+          in: query
+        - schema:
+            type: string
+            enum:
+              - id
+              - -id
+              - title
+              - -title
+              - brand
+              - -brand
+              - index
+              - -index
+              - createdAt
+              - -createdAt
+              - updatedAt
+              - -updatedAt
+            default: title
+          required: false
+          name: sort
+          in: query
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: integer
+            nullable: true
+            minimum: 0
+            default: 0
+          required: false
+          name: offset
+          in: query
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        slug:
+                          type: string
+                        brand:
+                          type: string
+                        title:
+                          type: string
+                        subtitle:
+                          type: string
+                        index:
+                          type: number
+                        status:
+                          type: string
+                          enum:
+                            - active
+                            - inactive
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                      required:
+                        - id
+                        - slug
+                        - title
+                        - index
+                        - status
+                        - createdAt
+                        - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /admin/products/{id}:
+    delete:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      category:
+                        type: string
+                      article:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      price:
+                        type: number
+                      price_reduced:
+                        type: number
+                      description:
+                        type: array
+                        items:
+                          type: string
+                      tag:
+                        type: string
+                      index:
+                        type: number
+                      stock:
+                        type: number
+                      max_order:
+                        type: number
+                      image:
+                        type: string
+                      images:
+                        type: array
+                        items:
+                          type: string
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - brand
+                      - title
+                      - price
+                      - stock
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                category:
+                  type: string
+                article:
+                  type: string
+                brand:
+                  type: string
+                title:
+                  type: string
+                subtitle:
+                  type: string
+                price:
+                  type: number
+                price_reduced:
+                  type: number
+                description:
+                  type: array
+                  items:
+                    type: string
+                tag:
+                  type: string
+                index:
+                  type: number
+                stock:
+                  type: number
+                max_order:
+                  type: number
+                image:
+                  type: string
+                images:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum:
+                    - active
+                    - inactive
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                      slug:
+                        type: string
+                      category:
+                        type: string
+                      article:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      price:
+                        type: number
+                      price_reduced:
+                        type: number
+                      description:
+                        type: array
+                        items:
+                          type: string
+                      tag:
+                        type: string
+                      index:
+                        type: number
+                      stock:
+                        type: number
+                      max_order:
+                        type: number
+                      image:
+                        type: string
+                      images:
+                        type: array
+                        items:
+                          type: string
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - inactive
+                      createdAt:
+                        type: string
+                      updatedAt:
+                        type: string
+                    required:
+                      - id
+                      - slug
+                      - brand
+                      - title
+                      - price
+                      - stock
+                      - status
+                      - createdAt
+                      - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /example/{id}:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExampleRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  createdId:
+                    type: string
+                    format: uuid
+                required:
+                  - success
+                outputId: ExampleResponse
+                header:
+                  X-Example-Header:
+                    description: An example header
+                    schema:
+                      type: string
+  /admin/orders:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        number:
+                          type: string
+                        date:
+                          type: number
+                        date_change:
+                          type: number
+                        status:
+                          type: string
+                          enum:
+                            - active
+                            - inactive
+                            - invalid
+                        delivery:
+                          type: string
+                        delivery_cost:
+                          type: number
+                        information:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            company:
+                              type: string
+                              default: ""
+                            address:
+                              type: string
+                            zip:
+                              type: string
+                            city:
+                              type: string
+                            email:
+                              type: string
+                              format: email
+                            phone:
+                              type: string
+                          required:
+                            - name
+                            - address
+                            - zip
+                            - city
+                            - email
+                            - phone
+                        cart:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              number:
+                                type: integer
+                                minimum: 1
+                              slug:
+                                type: string
+                              category:
+                                type: string
+                              article:
+                                type: string
+                              brand:
+                                type: string
+                              title:
+                                type: string
+                              subtitle:
+                                type: string
+                              price:
+                                type: number
+                              price_reduced:
+                                type: number
+                              description:
+                                type: array
+                                items:
+                                  type: string
+                              tag:
+                                type: string
+                              image:
+                                type: string
+                              images:
+                                type: array
+                                items:
+                                  type: string
+                            required:
+                              - id
+                              - number
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                      required:
+                        - id
+                        - number
+                        - date
+                        - date_change
+                        - status
+                        - delivery
+                        - delivery_cost
+                        - information
+                        - cart
+                        - createdAt
+                        - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
+  /admin/orders/{id}/status:
+    put:
+      responses:
+        "200":
+          description: OK
+  /products:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    nullable: true
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        slug:
+                          type: string
+                        category:
+                          type: string
+                        article:
+                          type: string
+                        brand:
+                          type: string
+                        title:
+                          type: string
+                        subtitle:
+                          type: string
+                        price:
+                          type: number
+                        price_reduced:
+                          type: number
+                        description:
+                          type: array
+                          items:
+                            type: string
+                        tag:
+                          type: string
+                        index:
+                          type: number
+                        stock:
+                          type: number
+                        max_order:
+                          type: number
+                        image:
+                          type: string
+                        images:
+                          type: array
+                          items:
+                            type: string
+                        status:
+                          type: string
+                          enum:
+                            - active
+                            - inactive
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+                      required:
+                        - id
+                        - slug
+                        - brand
+                        - title
+                        - price
+                        - stock
+                        - status
+                        - createdAt
+                        - updatedAt
+                  meta:
+                    nullable: true
+                  links:
+                    nullable: true
+                  error:
+                    type: object
+                    nullable: true
+                    properties:
+                      message:
+                        type: string
+                    required:
+                      - message
+                required:
+                  - data
+                  - error
