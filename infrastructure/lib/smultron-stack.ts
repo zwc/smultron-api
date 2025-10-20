@@ -302,14 +302,13 @@ export class SmultronStack extends cdk.Stack {
     });
 
     // API Routes - directly under root since stage is 'api'
-    const v1 = api.root.addResource('v1');
-
-    // Auth routes
-    const auth = v1.addResource('auth');
-    auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(loginFunction));
+    const v1 = api.root.addResource('v1');    
 
     // Admin routes
     const admin = v1.addResource('admin');
+
+    admin.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(loginFunction));
+
     const adminProducts = admin.addResource('products');
     adminProducts.addMethod('GET', new apigateway.LambdaIntegration(adminListProductsFunction));
     adminProducts.addMethod('POST', new apigateway.LambdaIntegration(createProductFunction));
