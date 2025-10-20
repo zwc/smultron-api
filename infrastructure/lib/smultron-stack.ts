@@ -77,6 +77,14 @@ export class SmultronStack extends cdk.Stack {
       removalPolicy: environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
     });
 
+    // Add GSI for filtering orders by status
+    ordersTable.addGlobalSecondaryIndex({
+      indexName: 'StatusIndex',
+      partitionKey: { name: 'status', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'date', type: dynamodb.AttributeType.NUMBER },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Common Lambda environment variables
     // Note: AWS_REGION is automatically set by Lambda runtime
     const commonEnv: Record<string, string> = {

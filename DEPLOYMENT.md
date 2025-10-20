@@ -75,7 +75,7 @@ bun run deploy-docs
 
 #### Login as Admin
 ```bash
-curl -X POST https://smultron.zwc.se/api/v1/auth/login \
+curl -X POST https://smultron.zwc.se/api/v1/admin/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"YourSecurePassword123!"}'
 ```

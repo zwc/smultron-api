@@ -8,7 +8,7 @@ export const requestSchema = LoginRequest;
 export const responseSchema = LoginResponse;
 
 export const method = 'POST';
-export const route = '/auth/login';
+export const route = '/admin/login';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {

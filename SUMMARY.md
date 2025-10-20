@@ -24,7 +24,7 @@
 - ✅ `POST /orders` - Create new order
 
 ### Private Endpoints (Auth Required)
-- ✅ `POST /auth/login` - Admin login (get JWT token)
+- ✅ `POST /admin/login` - Admin login (get JWT token)
 - ✅ `POST /products` - Create product
 - ✅ `PUT /products/{id}` - Update product
 - ✅ `DELETE /products/{id}` - Delete product
@@ -88,7 +88,7 @@ src/
 ### Authentication
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/auth/login` | ❌ | Admin login |
+| POST | `/admin/login` | ❌ | Admin login |
 
 ### Products
 | Method | Endpoint | Auth | Cache | Description |

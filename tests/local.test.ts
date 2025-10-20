@@ -69,7 +69,7 @@ describe('Local Integration Tests - Auth', () => {
   test('should login with valid credentials', async () => {
     const event = createEvent({
       httpMethod: 'POST',
-      path: '/v1/auth/login',
+  path: '/v1/admin/login',
       body: {
         username: process.env.ADMIN_USERNAME,
         password: process.env.ADMIN_PASSWORD,
@@ -87,7 +87,7 @@ describe('Local Integration Tests - Auth', () => {
   test('should reject invalid credentials', async () => {
     const event = createEvent({
       httpMethod: 'POST',
-      path: '/v1/auth/login',
+  path: '/v1/admin/login',
       body: {
         username: 'wrong',
         password: 'wrong',

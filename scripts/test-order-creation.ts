@@ -15,7 +15,7 @@ async function main() {
   
   // 1. Login
   console.log('\n1. Logging in...');
-  const loginRes = await fetch(`${API_URL}/auth/login`, {
+  const loginRes = await fetch(`${API_URL}/admin/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD }),

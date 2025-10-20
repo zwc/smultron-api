@@ -249,7 +249,25 @@ export const getOrder = async (id: string): Promise<Order | null> => {
   return await db.getItem<Order>(ORDERS_TABLE, { id });
 };
 
-export const getAllOrders = async (): Promise<Order[]> => {
+export const getAllOrders = async (status?: 'active' | 'inactive' | 'invalid'): Promise<Order[]> => {
+  if (status) {
+    try {
+      // Use GSI for efficient query when filtering by status
+      return await db.queryItems<Order>(
+        ORDERS_TABLE,
+        'StatusIndex',
+        '#status = :status',
+        { ':status': status },
+        { '#status': 'status' }
+      );
+    } catch (error) {
+      // Fall back to scanning and filtering if GSI is not available
+      console.warn('StatusIndex GSI not available for orders, falling back to table scan with filtering');
+      const allOrders = await db.scanTable<Order>(ORDERS_TABLE);
+      return allOrders.filter(order => order.status === status);
+    }
+  }
+  // No status filter: get all orders via table scan
   return await db.scanTable<Order>(ORDERS_TABLE);
 };
 

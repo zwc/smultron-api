@@ -2204,10 +2204,10 @@ paths:
                 required:
                   - data
                   - error
-  /auth/login:
+  /admin/login:
     post:
       tags:
-        - Authentication
+        - Admin
       requestBody:
         content:
           application/json:
@@ -2811,6 +2811,56 @@ paths:
     get:
       tags:
         - Orders (Admin)
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - active
+              - inactive
+              - invalid
+          required: false
+          name: status
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: q
+          in: query
+        - schema:
+            type: string
+            enum:
+              - date
+              - -date
+              - date_change
+              - -date_change
+              - number
+              - -number
+              - status
+              - -status
+              - createdAt
+              - -createdAt
+              - updatedAt
+              - -updatedAt
+            default: -date
+          required: false
+          name: sort
+          in: query
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: integer
+            nullable: true
+            minimum: 0
+            default: 0
+          required: false
+          name: offset
+          in: query
       responses:
         "200":
           description: OK

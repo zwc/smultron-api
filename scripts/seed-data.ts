@@ -101,7 +101,7 @@ async function apiRequest(
 // Authenticate and get token
 async function login(): Promise<string> {
 	console.log('\n🔐 Authenticating...');
-	const response = await apiRequest('POST', '/auth/login', undefined, {
+	const response = await apiRequest('POST', '/admin/login', undefined, {
 		username: ADMIN_USERNAME,
 		password: ADMIN_PASSWORD,
 	});

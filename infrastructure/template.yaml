@@ -97,7 +97,7 @@ Resources:
         LoginApi:
           Type: Api
           Properties:
-            Path: /api/v1/auth/login
+            Path: /api/v1/admin/login
             Method: POST
             RestApiId: !Ref ApiGateway
 

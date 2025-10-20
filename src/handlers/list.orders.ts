@@ -48,13 +48,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Parse and validate query parameters
     const params = QueryParamsSchema.parse(qs);
 
-    // Get all orders (full table scan)
-    let orders = await getAllOrders();
-
-    // Apply status filter
-    if (params.status) {
-      orders = orders.filter(order => order.status === params.status);
-    }
+    // Get orders - use GSI if filtering by status, otherwise full table scan
+    let orders = await getAllOrders(params.status);
 
     // Apply search filter if query string is provided
     if (params.q) {

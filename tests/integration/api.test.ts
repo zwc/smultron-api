@@ -33,7 +33,7 @@ console.log(`Running integration tests against: ${normalizedApiUrl}`);
 
 describe('Integration Tests - Auth', () => {
   test('should login with valid credentials', async () => {
-    const response = await fetch(`${normalizedApiUrl}/auth/login`, {
+  const response = await fetch(`${normalizedApiUrl}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -49,7 +49,7 @@ describe('Integration Tests - Auth', () => {
   });
 
   test('should reject invalid credentials', async () => {
-    const response = await fetch(`${normalizedApiUrl}/auth/login`, {
+  const response = await fetch(`${normalizedApiUrl}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -62,7 +62,7 @@ describe('Integration Tests - Auth', () => {
   });
 
   test('should reject login without credentials', async () => {
-    const response = await fetch(`${normalizedApiUrl}/auth/login`, {
+  const response = await fetch(`${normalizedApiUrl}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({}),
@@ -72,7 +72,7 @@ describe('Integration Tests - Auth', () => {
   });
 
   test('should reject login with missing password', async () => {
-    const response = await fetch(`${normalizedApiUrl}/auth/login`, {
+  const response = await fetch(`${normalizedApiUrl}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: ADMIN_USERNAME }),

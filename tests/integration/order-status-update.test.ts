@@ -28,7 +28,7 @@ describe('Integration Tests - Order Status Update', () => {
 
   beforeAll(async () => {
     // Login to get auth token
-    const loginResponse = await fetch(`${normalizedApiUrl}/auth/login`, {
+  const loginResponse = await fetch(`${normalizedApiUrl}/admin/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

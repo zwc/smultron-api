@@ -73,7 +73,7 @@ describe('Alphabetical Sorting Tests', () => {
     // Login to get auth token
     const loginEvent = createEvent({
       httpMethod: 'POST',
-      path: '/v1/auth/login',
+  path: '/v1/admin/login',
       body: JSON.stringify({
         username: process.env.ADMIN_USERNAME || 'admin',
         password: process.env.ADMIN_PASSWORD || 'password',

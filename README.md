@@ -151,7 +151,7 @@ Note: Each API endpoint is handled by a dedicated Lambda function for better iso
 
 ### Authentication
 ```
-POST /api/v1/auth/login
+POST /api/v1/admin/login
 ```
 
 ### Products (Public listing, Admin for modifications)
@@ -184,7 +184,7 @@ PUT    /api/v1/orders/{id}/status (Auth required)
 
 1. Login with admin credentials:
 ```bash
-curl -X POST https://smultron.zwc.se/api/v1/auth/login \
+curl -X POST https://smultron.zwc.se/api/v1/admin/login \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"your-password"}'
 ```
