@@ -1111,8 +1111,11 @@ components:
       properties:
         token:
           type: string
+        name:
+          type: string
       required:
         - token
+        - name
     UpdateCategoryRequestSchema:
       type: object
       properties:
@@ -2231,8 +2234,11 @@ paths:
                 properties:
                   token:
                     type: string
+                  name:
+                    type: string
                 required:
                   - token
+                  - name
   /admin/orders/{id}:
     get:
       tags:

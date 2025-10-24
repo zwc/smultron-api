@@ -10,6 +10,14 @@ export const responseSchema = LoginResponse;
 export const method = 'POST';
 export const route = '/admin/login';
 
+// Hardcoded user credentials
+const USERS = [
+  { name: 'Linn Forbes', username: 'linn', password: 'e5uu588hzfwge367' },
+  { name: 'Josefine Montan', username: 'jossan', password: '4jjbfehwagz3wd54' },
+  { name: 'Henrik Lindqvist', username: 'henrik', password: 'ap9sw7djedybkvgd' },
+  { name: 'Bernhard Hettman', username: 'bernhard', password: 'kj1yus9jmq9hdz5f' },
+];
+
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
     if (!event.body) {
@@ -29,16 +37,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       return errorResponse('Username and password are required', 400);
     }
 
+    // Check hardcoded users first
+    const user = USERS.find(u => u.username === username && u.password === password);
+    if (user) {
+      const token = generateToken({ username: user.username });
+      return successResponse({ token, name: user.name });
+    }
+
+    // Fallback to environment variables for backward compatibility
     const adminUsername = process.env.ADMIN_USERNAME;
     const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (username !== adminUsername || password !== adminPassword) {
-      return errorResponse('Invalid credentials', 401);
+    if (username === adminUsername && password === adminPassword) {
+      const token = generateToken({ username });
+      return successResponse({ token, name: 'Admin' });
     }
 
-    const token = generateToken({ username });
-
-  return successResponse({ token });
+    return errorResponse('Invalid credentials', 401);
   } catch (error) {
     console.error('Auth error:', error);
     return errorResponse('Internal server error', 500);
