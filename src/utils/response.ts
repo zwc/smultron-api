@@ -37,7 +37,7 @@ export const successResponse = <T>(
 
 export const errorResponse = (
   message: string,
-  statusCode: number = 400,
+  statusCode: number = 200,
   meta: Record<string, any> | null = null
 ): APIResponse => createResponse(statusCode, { data: null, meta, links: null, error: { message } });
 
