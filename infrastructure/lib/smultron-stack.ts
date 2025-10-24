@@ -473,7 +473,7 @@ function handler(event) {
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         },
         // Auth endpoint - no caching
-        '/v1/auth/*': {
+        '/v1/admin/login': {
           origin: apiOrigin,
           cachePolicy: noCachePolicy,
           originRequestPolicy,
