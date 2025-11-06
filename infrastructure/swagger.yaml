@@ -2567,6 +2567,138 @@ paths:
                 required:
                   - data
                   - error
+  /checkout:
+    post:
+      tags:
+        - Public
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: object
+                  properties:
+                    payment:
+                      type: string
+                      enum:
+                        - swish
+                        - card
+                        - invoice
+                    delivery:
+                      type: string
+                    delivery_cost:
+                      type: number
+                      minimum: 0
+                    name:
+                      type: string
+                    company:
+                      type: string
+                      default: ""
+                    address:
+                      type: string
+                    zip:
+                      type: string
+                    city:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+                    phone:
+                      type: string
+                  required:
+                    - payment
+                    - delivery
+                    - delivery_cost
+                    - name
+                    - address
+                    - zip
+                    - city
+                    - email
+                    - phone
+                cart:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      number:
+                        type: integer
+                        minimum: 1
+                      slug:
+                        type: string
+                      category:
+                        type: string
+                      article:
+                        type: string
+                      brand:
+                        type: string
+                      title:
+                        type: string
+                      subtitle:
+                        type: string
+                      price:
+                        type: number
+                      price_reduced:
+                        type: number
+                      description:
+                        type: array
+                        items:
+                          type: string
+                      tag:
+                        type: string
+                      image:
+                        type: string
+                      images:
+                        type: array
+                        items:
+                          type: string
+                    required:
+                      - id
+                      - number
+              required:
+                - order
+                - cart
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      number:
+                        type: string
+                      status:
+                        type: string
+                    required:
+                      - id
+                      - number
+                      - status
+                  payment:
+                    type: object
+                    properties:
+                      method:
+                        type: string
+                      status:
+                        type: string
+                      reference:
+                        type: string
+                      swishUrl:
+                        type: string
+                    required:
+                      - method
+                      - status
+                required:
+                  - order
+                  - payment
   /admin/products/{id}:
     delete:
       tags:

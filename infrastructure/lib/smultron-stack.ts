@@ -274,6 +274,16 @@ export class SmultronStack extends cdk.Stack {
       code: lambdaCode,
       handler: 'index.updateOrderStatus',
     });
+    ordersTable.grantReadWriteData(updateOrderStatusFunction);
+
+    const checkoutFunction = new lambda.Function(this, 'CheckoutFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-checkout-${environment}`,
+      code: lambdaCode,
+      handler: 'index.checkout',
+    });
+    ordersTable.grantReadWriteData(checkoutFunction);
+    productsTable.grantReadWriteData(checkoutFunction);
     
     // Ping error function - used to generate an intentional 500 for testing alerts
     const pingErrorFunction = new lambda.Function(this, 'PingErrorFunction', {
@@ -345,6 +355,10 @@ export class SmultronStack extends cdk.Stack {
     // Public Orders route (for order creation from the website)
     const orders = v1.addResource('orders');
     orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
+
+    // Checkout route (combined order creation + payment)
+    const checkout = v1.addResource('checkout');
+    checkout.addMethod('POST', new apigateway.LambdaIntegration(checkoutFunction));
 
   // Ping routes for health and error testing
   const ping = v1.addResource('ping');

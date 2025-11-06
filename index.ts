@@ -39,6 +39,7 @@ export const createCategory = wrap(require('./src/handlers/create.category').han
 export const updateCategory = wrap(require('./src/handlers/update.category').handler, 'updateCategory');
 export const deleteCategory = wrap(require('./src/handlers/delete.category').handler, 'deleteCategory');
 export const createOrder = wrap(require('./src/handlers/create.order').handler, 'createOrder');
+export const checkout = wrap(require('./src/handlers/checkout').handler, 'checkout');
 export const listOrders = wrap(require('./src/handlers/list.orders').handler, 'listOrders');
 export const getOrder = wrap(require('./src/handlers/get.order').handler, 'getOrder');
 export const updateOrderStatus = wrap(require('./src/handlers/update.order.status').handler, 'updateOrderStatus');
