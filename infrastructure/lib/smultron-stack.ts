@@ -284,6 +284,15 @@ export class SmultronStack extends cdk.Stack {
     });
     ordersTable.grantReadWriteData(checkoutFunction);
     productsTable.grantReadWriteData(checkoutFunction);
+
+    const swishCallbackFunction = new lambda.Function(this, 'SwishCallbackFunction', {
+      ...commonLambdaProps,
+      functionName: `smultron-swish-callback-${environment}`,
+      code: lambdaCode,
+      handler: 'index.swishCallback',
+    });
+    ordersTable.grantReadWriteData(swishCallbackFunction);
+    productsTable.grantReadWriteData(swishCallbackFunction);
     
     // Ping error function - used to generate an intentional 500 for testing alerts
     const pingErrorFunction = new lambda.Function(this, 'PingErrorFunction', {
@@ -359,6 +368,11 @@ export class SmultronStack extends cdk.Stack {
     // Checkout route (combined order creation + payment)
     const checkout = v1.addResource('checkout');
     checkout.addMethod('POST', new apigateway.LambdaIntegration(checkoutFunction));
+
+    // Swish callback route (receives payment status updates from Swish)
+    const swish = v1.addResource('swish');
+    const swishCallback = swish.addResource('callback');
+    swishCallback.addMethod('POST', new apigateway.LambdaIntegration(swishCallbackFunction));
 
   // Ping routes for health and error testing
   const ping = v1.addResource('ping');
