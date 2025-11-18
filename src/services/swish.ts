@@ -97,10 +97,9 @@ export async function createSwishPayment(
       );
     }
 
-    // Production implementation with actual HTTPS client
+    // Production implementation with actual HTTPS client using fetch
     const fs = require('fs');
     const https = require('https');
-    const axios = require('axios');
 
     // For MSS and Sandbox, use .p12 certificate with passphrase 'swish'
     // For Production, use your merchant certificates from Swish Portal
@@ -120,22 +119,36 @@ export async function createSwishPayment(
     }
 
     const agent = new https.Agent(certConfig);
-    const client = axios.create({ httpsAgent: agent });
 
-    const response = await client.put(
+    const response = await fetch(
       `${SWISH_API_BASE_URL}/paymentrequests/${instructionId}`,
-      paymentRequest
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentRequest),
+        // @ts-ignore - Node.js fetch supports agent option
+        agent,
+      }
     );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Swish API error: ${response.status} ${errorText}`);
+    }
+
+    const location = response.headers.get('location') || `${SWISH_API_BASE_URL}/paymentrequests/${instructionId}`;
 
     console.log('Swish payment created:', {
       status: response.status,
-      location: response.headers.location,
+      location,
       instructionId,
     });
 
     return {
       id: instructionId,
-      location: response.headers.location || `${SWISH_API_BASE_URL}/paymentrequests/${instructionId}`,
+      location,
       status: 'CREATED',
     };
   } catch (error) {
