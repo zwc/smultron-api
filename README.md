@@ -212,6 +212,22 @@ Tests cover:
 - Input validation
 - Error handling
 
+### Swish Payment Testing
+
+The checkout endpoint integrates with Swish for payments. See detailed testing guides:
+
+- **[MSS Testing Guide](docs/SWISH_MSS_TESTING.md)** - Test with Merchant Swish Simulator (recommended first step)
+- **[Swish Integration Guide](docs/SWISH_INTEGRATION.md)** - Complete integration and production setup
+
+**Quick Start for MSS Testing:**
+
+1. Download test certificates from Swish Developer Portal
+2. Extract and configure in Lambda environment
+3. Set `SWISH_ENVIRONMENT=mss`
+4. Test with merchant number `1234679304` and phone `46701234768`
+
+Current environment: **mock** (returns simulated responses without API calls)
+
 ## CloudFront Caching
 
 Product listing endpoints are cached via CloudFront:
