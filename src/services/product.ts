@@ -132,6 +132,25 @@ export const updateProductIndex = async (id: string, index: number): Promise<voi
   );
 };
 
+export const updateProductStock = async (id: string, stockChange: number): Promise<void> => {
+  const now = new Date().toISOString();
+  
+  // Use atomic update to increment/decrement stock
+  await db.updateItem(
+    PRODUCTS_TABLE,
+    { id },
+    'SET #stock = #stock + :change, #updatedAt = :updatedAt',
+    {
+      ':change': stockChange,
+      ':updatedAt': now,
+    },
+    {
+      '#stock': 'stock',
+      '#updatedAt': 'updatedAt',
+    }
+  );
+};
+
 export const deleteProduct = async (id: string): Promise<void> => {
   await db.deleteItem(PRODUCTS_TABLE, { id });
 };
@@ -366,6 +385,48 @@ export const createOrder = async (
     createdAt: isoString,
     updatedAt: isoString,
   };
+};
+
+export const getOrderByNumber = async (orderNumber: string): Promise<Order | null> => {
+  // Since we don't have a GSI on order number, we need to scan
+  const allOrders = await db.scanTable<Order>(ORDERS_TABLE);
+  return allOrders.find(order => order.number === orderNumber) || null;
+};
+
+export const updateOrder = async (
+  id: string,
+  updates: Partial<Omit<Order, 'id' | 'number' | 'createdAt'>>
+): Promise<Order> => {
+  const updateParts: string[] = [];
+  const attributeValues: Record<string, any> = {};
+  const attributeNames: Record<string, string> = {};
+
+  // Add updatedAt timestamp
+  const now = new Date().toISOString();
+  const timestamp = new Date().getTime();
+  const allUpdates = { 
+    ...updates, 
+    updatedAt: now,
+    date_change: timestamp,
+  };
+
+  Object.entries(allUpdates).forEach(([key, value], index) => {
+    const attrName = `#attr${index}`;
+    const attrValue = `:val${index}`;
+    updateParts.push(`${attrName} = ${attrValue}`);
+    attributeNames[attrName] = key;
+    attributeValues[attrValue] = value;
+  });
+
+  const updateExpression = `SET ${updateParts.join(', ')}`;
+
+  return await db.updateItem<Order>(
+    ORDERS_TABLE,
+    { id },
+    updateExpression,
+    attributeValues,
+    attributeNames
+  );
 };
 
 export const updateOrderStatus = async (

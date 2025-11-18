@@ -3,6 +3,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { createOrder, saveOrder, getProduct, updateProduct } from '../services/product';
 import { createSwishPayment } from '../services/swish';
+import { reserveStock, cancelOrderReservations } from '../services/stock-reservation';
 import { successResponse, errorResponse } from '../utils/response';
 import { OrderInformationSchema, OrderCartItemSchema } from '../schemas/order';
 
@@ -76,9 +77,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       phone: orderData.phone,
     };
 
-    // Validate cart items exist and have sufficient stock
-    const stockUpdates: Array<{ id: string; newStock: number }> = [];
+    // Step 1: Validate cart items exist and calculate total
     let totalAmount = orderData.delivery_cost;
+    const cartItems = [];
 
     for (const item of cart) {
       const product = await getProduct(item.id);
@@ -91,26 +92,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         return errorResponse(`Product ${product.title || item.id} is not available`, 400);
       }
 
-      if (product.stock < item.number) {
-        return errorResponse(
-          `Insufficient stock for ${product.title || item.id}. Available: ${product.stock}, Requested: ${item.number}`,
-          400
-        );
-      }
-
-      stockUpdates.push({
-        id: item.id,
-        newStock: product.stock - item.number,
-      });
-
       // Calculate total amount (use item.price from cart or product.price as fallback)
       const itemPrice = item.price || product.price || 0;
       totalAmount += itemPrice * item.number;
+
+      cartItems.push({
+        id: item.id,
+        quantity: item.number,
+      });
     }
 
-    console.log('Creating order with total amount:', totalAmount, 'SEK');
+    console.log('Cart validated. Total amount:', totalAmount, 'SEK');
 
-    // Create order
+    // Step 2: Create order (with pending status)
     const order = await createOrder(
       information,
       cart,
@@ -120,21 +114,29 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     console.log('Order created:', order.id, order.number);
 
-    // Save order to database
-    await saveOrder(order);
+    // Step 3: Reserve stock for 10 minutes
+    let reservationIds: string[] = [];
+    try {
+      reservationIds = await reserveStock(order.id, cartItems);
+      console.log('Stock reserved for order:', order.id, 'Reservations:', reservationIds);
+    } catch (error) {
+      console.error('Stock reservation failed:', error);
+      return errorResponse(
+        error instanceof Error ? error.message : 'Insufficient stock available',
+        400
+      );
+    }
 
-    console.log('Order saved to database');
+    // Step 4: Save order to database with reservation info
+    const orderWithReservations = {
+      ...order,
+      status: 'inactive' as const, // Order is inactive until payment is confirmed
+    };
 
-    // Update stock for all products
-    await Promise.all(
-      stockUpdates.map(({ id, newStock }) => 
-        updateProduct(id, { stock: newStock })
-      )
-    );
+    await saveOrder(orderWithReservations);
+    console.log('Order saved to database with stock reservations');
 
-    console.log('Stock updated for products');
-
-    // Initialize payment based on payment method
+    // Step 5: Initialize payment based on payment method
     let paymentResponse = {
       method: orderData.payment,
       status: 'pending',
@@ -163,8 +165,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         console.log('Swish payment created:', swishPayment.id);
       } catch (error) {
         console.error('Swish payment creation failed:', error);
+        
+        // Cancel stock reservations on payment failure
+        try {
+          await cancelOrderReservations(order.id);
+          console.log('Stock reservations cancelled due to payment failure');
+        } catch (reservationError) {
+          console.error('Failed to cancel stock reservations:', reservationError);
+        }
+        
         return errorResponse(
-          'Order created but payment initialization failed. Please contact support.',
+          'Payment initialization failed. Please try again.',
           500
         );
       }

@@ -85,12 +85,30 @@ export class SmultronStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    // Stock Reservations Table - for temporary inventory holds during payment
+    const stockReservationsTable = new dynamodb.Table(this, 'StockReservationsTable', {
+      tableName: `smultron-stock-reservations-${environment}`,
+      partitionKey: { name: 'productId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'reservationId', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      timeToLiveAttribute: 'expiresAt', // Automatic cleanup of expired reservations
+      removalPolicy: environment === 'prod' ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
+    });
+
+    // Add GSI for querying reservations by order ID
+    stockReservationsTable.addGlobalSecondaryIndex({
+      indexName: 'OrderIndex',
+      partitionKey: { name: 'orderId', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     // Common Lambda environment variables
     // Note: AWS_REGION is automatically set by Lambda runtime
     const commonEnv: Record<string, string> = {
       PRODUCTS_TABLE: productsTable.tableName,
       CATEGORIES_TABLE: categoriesTable.tableName,
       ORDERS_TABLE: ordersTable.tableName,
+      STOCK_RESERVATIONS_TABLE: stockReservationsTable.tableName,
       ADMIN_USERNAME: adminUsername,
       ADMIN_PASSWORD: adminPassword,
       JWT_SECRET: jwtSecret,
@@ -284,6 +302,7 @@ export class SmultronStack extends cdk.Stack {
     });
     ordersTable.grantReadWriteData(checkoutFunction);
     productsTable.grantReadWriteData(checkoutFunction);
+    stockReservationsTable.grantReadWriteData(checkoutFunction);
 
     const swishCallbackFunction = new lambda.Function(this, 'SwishCallbackFunction', {
       ...commonLambdaProps,
@@ -293,6 +312,18 @@ export class SmultronStack extends cdk.Stack {
     });
     ordersTable.grantReadWriteData(swishCallbackFunction);
     productsTable.grantReadWriteData(swishCallbackFunction);
+    stockReservationsTable.grantReadWriteData(swishCallbackFunction);
+
+    // Grant SES permissions for email notifications
+    checkoutFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*'], // SES resources are region-specific
+    }));
+
+    swishCallbackFunction.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*'], // SES resources are region-specific
+    }));
     
     // Ping error function - used to generate an intentional 500 for testing alerts
     const pingErrorFunction = new lambda.Function(this, 'PingErrorFunction', {
