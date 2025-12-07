@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   slug: string;
-  categorySlug?: string;
+  category: string;
   article?: string;
   brand: string;
   title: string;

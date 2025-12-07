@@ -8,7 +8,7 @@ export const responseSchema = ListCatalogResponseSchema;
 
 export const method = 'GET';
 export const route = '/catalog';
-import { formatCategories, formatProducts } from '../utils/transform';
+import { stripCategoryIds, stripProductIds } from '../utils/transform';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
@@ -19,12 +19,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       getActiveProducts()
     ]);
 
-    const formattedCategories = formatCategories(categories);
-    const formattedProducts = formatProducts(products);
+    // Strip internal IDs from public responses - use slug for identification
+    const publicCategories = stripCategoryIds(categories);
+    const publicProducts = stripProductIds(products);
 
     return successResponse(
-      { products: formattedProducts, categories: formattedCategories },
-      { productsTotal: formattedProducts.length, categoriesTotal: formattedCategories.length }
+      { products: publicProducts, categories: publicCategories },
+      { productsTotal: publicProducts.length, categoriesTotal: publicCategories.length }
     );
   } catch (error) {
     console.error('List catalog error:', error);

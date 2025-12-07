@@ -37,7 +37,7 @@ export const formatProduct = (product: Product): Product => {
   return {
     id: product.id,
     slug: product.slug,
-    categorySlug: product.categorySlug,
+    category: product.categorySlug,
     article: product.article,
     brand: product.brand,
     title: product.title,
