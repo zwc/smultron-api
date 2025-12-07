@@ -44,7 +44,7 @@ describe('Integration Tests - Order Status Update', () => {
     // Create a test product to use in orders
     const productPayload = {
       slug: `test-status-product-${Date.now()}`,
-      category: 'test',
+      categorySlug: 'test',
       article: 'TEST-STATUS-001',
       brand: 'Test Brand',
       title: 'Test Product for Status Updates',

@@ -96,7 +96,7 @@ describe('Admin Products Index Sorting Tests', () => {
         httpMethod: 'POST',
         path: '/v1/products',
         body: JSON.stringify({
-          category: 'test-category',
+          categorySlug: 'test-category',
           article: `TEST-INDEX-${Date.now()}-${Math.random()}`,
           brand: 'Test Brand',
           title: product.title,

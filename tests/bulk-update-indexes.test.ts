@@ -95,7 +95,7 @@ describe('Bulk Update Indexes Tests', () => {
         httpMethod: 'POST',
         path: '/v1/products',
         body: JSON.stringify({
-          category: 'test-category',
+          categorySlug: 'test-category',
           article: `TEST-BULK-${Date.now()}-${i}`,
           brand: 'Test Brand',
           title: `Bulk Test Product ${i}`,

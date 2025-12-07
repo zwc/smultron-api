@@ -36,7 +36,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
 
     const product = createProduct({
       slug: body.slug,
-      category: body.category,
+      categorySlug: body.categorySlug,
       article: body.article,
       brand: body.brand,
       title: body.title,

@@ -16,7 +16,7 @@ export const method = 'PUT';
 export const route = '/admin/products/{id}';
 const UpdateProductSchema = z.object({
   slug: z.string().min(1).optional(),
-  category: z.string().optional(),
+  categorySlug: z.string().optional(),
   article: z.string().optional(),
   brand: z.string().optional(),
   title: z.string().min(1).optional(),

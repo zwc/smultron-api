@@ -11,10 +11,10 @@ export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedA
   // Generate GUID for id
   const id = crypto.randomUUID();
   
-  // Use provided slug or auto-generate from category and title
+  // Use provided slug or auto-generate from categorySlug and title
   const slug = data.slug || (() => {
-    const slugBase = data.category 
-      ? `${data.category}-${data.title}` 
+    const slugBase = data.categorySlug 
+      ? `${data.categorySlug}-${data.title}` 
       : data.title;
     return slugBase.toLowerCase().replace(/\s+/g, '-');
   })();
@@ -24,7 +24,7 @@ export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedA
   
   return {
     // Default values for optional fields
-    category: restData.category || '',
+    categorySlug: restData.categorySlug || '',
     article: restData.article || '',
     price_reduced: restData.price_reduced ?? 0,
     description: restData.description || [],
@@ -357,7 +357,7 @@ export const createOrder = async (
         number: item.number,
         // Freeze all product data
         slug: product.slug,
-        category: product.category,
+        categorySlug: product.categorySlug,
         article: product.article,
         brand: product.brand,
         title: product.title,

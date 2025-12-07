@@ -130,7 +130,7 @@ describe('Get Product Public Endpoint Tests', () => {
       httpMethod: 'POST',
       path: '/v1/products',
       body: JSON.stringify({
-        category: testCategoryId1,
+        categorySlug: testCategoryId1,
         article: 'TEST-BIG-ENERGY',
         brand: 'Pop mart',
         title: 'Labubu',

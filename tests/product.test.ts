@@ -3,7 +3,7 @@ import type { Product } from '../src/types';
 
 describe('Product Service', () => {
   const mockProduct: Omit<Product, 'id'> = {
-    category: 'labubu',
+    categorySlug: 'labubu',
     article: '',
     brand: 'Pop Mart',
     title: 'Test Product',

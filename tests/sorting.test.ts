@@ -98,7 +98,7 @@ describe('Alphabetical Sorting Tests', () => {
         httpMethod: 'POST',
         path: '/v1/products',
         body: JSON.stringify({
-          category: 'test-category',
+          categorySlug: 'test-category',
           article: `TEST-${Date.now()}-${Math.random()}`,
           brand: product.brand,
           title: product.title,

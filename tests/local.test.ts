@@ -177,7 +177,7 @@ describe('Local Integration Tests - Products', () => {
       httpMethod: 'POST',
       path: '/v1/products',
       body: {
-        category: testCategoryId,
+        categorySlug: testCategoryId,
         article: 'TEST001',
         brand: 'Test Brand',
         title: 'Test Product',
@@ -212,7 +212,7 @@ describe('Local Integration Tests - Products', () => {
       httpMethod: 'POST',
       path: '/v1/products',
       body: {
-        category: testCategoryId,
+        categorySlug: testCategoryId,
         article: 'TEST002',
         brand: 'Test Brand',
         title: 'Test Product 2',

@@ -14,7 +14,7 @@ export const OrderCartItemSchema = z.object({
   id: z.string(),
   number: z.number().int().min(1),
   slug: z.string().optional(),
-  category: z.string().optional(),
+  categorySlug: z.string().optional(),
   article: z.string().optional(),
   brand: z.string().optional(),
   title: z.string().optional(),

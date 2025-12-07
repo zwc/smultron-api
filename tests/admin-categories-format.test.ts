@@ -134,7 +134,7 @@ describe('Admin Categories Response Format Tests', () => {
     expect(body.data.length).toBe(body.meta.total);
     
     // Verify categories have proper structure
-    body.data.forEach((category: any) => {
+    body.data.forEach((categorySlug: any) => {
       expect(category.id).toBeDefined();
       expect(category.title).toBeDefined();
       expect(category.brand).toBeDefined();

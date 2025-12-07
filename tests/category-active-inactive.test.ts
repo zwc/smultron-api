@@ -137,7 +137,7 @@ describe('Category Active/Inactive Tests', () => {
       path: '/v1/admin/products',
       body: JSON.stringify({
         id: `test-product-${Date.now()}`,
-        category: activeCategoryId,
+        categorySlug: activeCategoryId,
         article: 'TEST001',
         brand: 'Test Brand',
         title: 'Test Product',

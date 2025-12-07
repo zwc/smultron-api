@@ -94,7 +94,7 @@ describe('Update with Protected Fields Tests', () => {
       httpMethod: 'POST',
       path: '/v1/products',
       body: JSON.stringify({
-        category: 'test-category',
+        categorySlug: 'test-category',
         article: `TEST-PROTECT-${Date.now()}`,
         brand: 'Test Brand',
         title: 'Protected Fields Test Product',

@@ -42,7 +42,7 @@ describe('Integration Tests - Order Creation', () => {
     // Create a test product to use in orders
     const productPayload = {
       slug: `test-order-product-${Date.now()}`,
-      category: 'test',
+      categorySlug: 'test',
       article: 'TEST-001',
       brand: 'Test Brand',
       title: 'Test Product for Orders',

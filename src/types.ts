@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   slug: string;
-  category?: string;
+  categorySlug?: string;
   article?: string;
   brand: string;
   title: string;
@@ -111,7 +111,7 @@ export interface OrderCartItem {
   number: number; // Quantity
   // Frozen product data at time of order
   slug: string;
-  category?: string;
+  categorySlug?: string;
   article?: string;
   brand: string;
   title: string;

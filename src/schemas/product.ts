@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const ProductSchema = z.object({
   id: z.string(),
   slug: z.string(),
-  category: z.string().optional(),
+  categorySlug: z.string().optional(),
   article: z.string().optional(),
   brand: z.string(),
   title: z.string(),
