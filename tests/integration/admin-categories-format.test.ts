@@ -81,7 +81,7 @@ describe('Admin Categories Response Format Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create a test category
     const categoryEvent = createEvent({

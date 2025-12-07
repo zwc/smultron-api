@@ -84,7 +84,7 @@ describe('Get Product Public Endpoint Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create test categories
     const category1Event = createEvent({

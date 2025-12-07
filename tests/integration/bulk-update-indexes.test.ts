@@ -87,7 +87,7 @@ describe('Bulk Update Indexes Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create test products
     for (let i = 1; i <= 3; i++) {

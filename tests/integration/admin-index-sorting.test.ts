@@ -81,7 +81,7 @@ describe('Admin Products Index Sorting Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create test products with specific index values
     const testProducts = [

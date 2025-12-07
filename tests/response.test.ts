@@ -12,37 +12,59 @@ describe('Response Utils', () => {
     const response = successResponse(data);
 
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toEqual(data);
+    const body = JSON.parse(response.body);
+    expect(body.data).toEqual(data);
+    expect(body.meta).toBeNull();
+    expect(body.links).toBeNull();
+    expect(body.error).toBeNull();
     expect(response.headers?.['Content-Type']).toBe('application/json');
   });
 
   test('should create success response with custom status code', () => {
     const data = { id: '123' };
-    const response = successResponse(data, 201);
+    const response = successResponse(data, null, null, 201);
 
     expect(response.statusCode).toBe(201);
-    expect(JSON.parse(response.body)).toEqual(data);
+    const body = JSON.parse(response.body);
+    expect(body.data).toEqual(data);
+  });
+
+  test('should create success response with meta and links', () => {
+    const data = { id: '123' };
+    const meta = { total: 10 };
+    const links = { self: '/api/resource' };
+    const response = successResponse(data, meta, links);
+
+    expect(response.statusCode).toBe(200);
+    const body = JSON.parse(response.body);
+    expect(body.data).toEqual(data);
+    expect(body.meta).toEqual(meta);
+    expect(body.links).toEqual(links);
   });
 
   test('should create error response', () => {
     const response = errorResponse('Something went wrong', 500);
 
     expect(response.statusCode).toBe(500);
-    expect(JSON.parse(response.body)).toEqual({ error: 'Something went wrong' });
+    const body = JSON.parse(response.body);
+    expect(body.data).toBeNull();
+    expect(body.error).toEqual({ message: 'Something went wrong' });
   });
 
   test('should create unauthorized response', () => {
     const response = unauthorizedResponse();
 
     expect(response.statusCode).toBe(401);
-    expect(JSON.parse(response.body)).toEqual({ error: 'Unauthorized' });
+    const body = JSON.parse(response.body);
+    expect(body.error).toEqual({ message: 'Unauthorized' });
   });
 
   test('should create not found response', () => {
     const response = notFoundResponse('Product');
 
     expect(response.statusCode).toBe(404);
-    expect(JSON.parse(response.body)).toEqual({ error: 'Product not found' });
+    const body = JSON.parse(response.body);
+    expect(body.error).toEqual({ message: 'Product not found' });
   });
 
   test('should include CORS headers', () => {

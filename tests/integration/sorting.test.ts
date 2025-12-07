@@ -82,7 +82,7 @@ describe('Alphabetical Sorting Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
   });
 
   test('should create test products with names for sorting', async () => {

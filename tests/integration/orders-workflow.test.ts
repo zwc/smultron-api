@@ -40,7 +40,7 @@ describe('Order Workflow Integration Tests', () => {
     }
 
     const loginData: any = await loginResponse.json();
-    authToken = loginData.token;
+    authToken = loginData.data.token;
     console.log('✓ Authenticated successfully');
 
     // Get an existing product to use in the test order

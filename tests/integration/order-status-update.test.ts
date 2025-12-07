@@ -39,7 +39,7 @@ describe('Integration Tests - Order Status Update', () => {
 
     expect(loginResponse.status).toBe(200);
     const loginData: any = await loginResponse.json();
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create a test product to use in orders
     const productPayload = {

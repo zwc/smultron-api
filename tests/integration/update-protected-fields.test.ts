@@ -87,7 +87,7 @@ describe('Update with Protected Fields Tests', () => {
 
     const loginResponse = await loginHandler(loginEvent);
     const loginData = JSON.parse(loginResponse.body);
-    authToken = loginData.token;
+    authToken = loginData.data.token;
 
     // Create test product
     const productEvent = createEvent({
