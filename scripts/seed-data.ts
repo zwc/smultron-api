@@ -130,7 +130,7 @@ async function deleteAllCategories(token: string): Promise<void> {
 		for (const category of categories) {
 			try {
 				await apiRequest('DELETE', `/admin/categories/${category.id}`, token);
-				console.log(`  ✓ Deleted category: ${category.title} (${category.id})`);
+				console.log(`  ✓ Deleted categorySlug: ${category.title} (${category.id})`);
 			} catch (error) {
 				console.error(`  ✗ Failed to delete category ${category.id}:`, error);
 			}
@@ -183,7 +183,7 @@ async function seedCategories(token: string): Promise<void> {
 		try {
 			await apiRequest('POST', '/admin/categories', token, category);
 			successCount++;
-			console.log(`  ✓ Created category: ${category.title} (${category.id})`);
+			console.log(`  ✓ Created categorySlug: ${category.title} (${category.id})`);
 		} catch (error) {
 			errorCount++;
 			console.error(`  ✗ Failed to create category ${category.id}:`, error);

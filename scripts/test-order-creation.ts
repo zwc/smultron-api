@@ -39,7 +39,7 @@ async function main() {
     },
     body: JSON.stringify({
       slug: `test-order-debug-${Date.now()}`,
-      category: 'test',
+      categorySlug: 'test',
       article: 'TEST-DEBUG',
       brand: 'Test',
       title: 'Debug Test Product',
