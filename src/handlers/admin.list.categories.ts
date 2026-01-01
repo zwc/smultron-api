@@ -2,8 +2,7 @@ import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse, AdminCategoriesResponse, Category } from '../types';
 import { getAllCategories } from '../services/product';
-import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
-import { verifyAuthToken } from '../middleware/auth';
+import { successResponse, errorResponse } from '../utils/response';
 import { formatCategories } from '../utils/transform';
 import { ListCategoriesResponseSchema } from '../schemas/handlers';
 
@@ -32,10 +31,7 @@ export const requestSchema = QueryParamsSchema;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
-    // Verify authentication for admin endpoint
-    if (!verifyAuthToken(event.headers)) {
-      return unauthorizedResponse();
-    }
+    // No authentication required for listing categories (public read-only)
 
     // Parse and validate query parameters
     const rawParams = event.queryStringParameters || {};
