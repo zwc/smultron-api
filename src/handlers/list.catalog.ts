@@ -19,9 +19,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       getActiveProducts()
     ]);
 
-    // Strip internal IDs from public responses - use slug for identification
+    // Format responses for public API
+    // Categories include id, products get categoryId looked up from categories
     const publicCategories = stripCategoryIds(categories);
-    const publicProducts = stripProductIds(products);
+    const publicProducts = stripProductIds(products, categories);
 
     return successResponse(
       { products: publicProducts, categories: publicCategories },
