@@ -19,12 +19,11 @@ export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedA
     return slugBase.toLowerCase().replace(/\s+/g, '-');
   })();
   
-  // Remove slug from data to avoid duplication
-  const { slug: _slug, ...restData } = data;
+  // Remove slug and categorySlug from restData to set them explicitly
+  const { slug: _slug, categorySlug: _catSlug, ...restData } = data;
   
   return {
     // Default values for optional fields
-    categorySlug: restData.categorySlug || '',
     article: restData.article || '',
     price_reduced: restData.price_reduced ?? 0,
     description: restData.description || [],
@@ -36,6 +35,7 @@ export const createProduct = (data: Omit<Product, 'id' | 'createdAt' | 'updatedA
     // Required and computed fields
     id,
     slug,
+    categorySlug: data.categorySlug || '',
     ...restData,
     status: data.status || 'active',
     createdAt: now,

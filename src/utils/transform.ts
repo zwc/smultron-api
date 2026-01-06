@@ -1,39 +1,46 @@
 import type { Product, Category } from '../types';
 
-/**
- * Remove internal ID from product for public API responses
- */
-export const stripProductId = (product: Product): Omit<Product, 'id'> => {
-  const { id, ...rest } = product;
-  return rest;
-};
+// Public product type with 'category' (slug) and 'categoryId' instead of 'categorySlug'
+export type PublicProduct = Omit<Product, 'categorySlug'> & { category: string; categoryId: string };
+
+// Admin product type with 'category' (slug value) instead of 'categorySlug'
+export type AdminProduct = Omit<Product, 'categorySlug'> & { category: string };
 
 /**
- * Remove internal ID from category for public API responses
+ * Transform product for public API responses
+ * Keeps id, renames categorySlug to category, and adds categoryId
  */
-export const stripCategoryId = (category: Category): Omit<Category, 'id'> => {
-  const { id, ...rest } = category;
-  return rest;
+export const stripProductId = (product: Product, categories: Category[]): PublicProduct => {
+  const { categorySlug, ...rest } = product;
+  const category = categories.find(c => c.slug === categorySlug);
+  return {
+    ...rest,
+    category: categorySlug || '',
+    categoryId: category?.id || '',
+  };
 };
 
 /**
  * Remove internal IDs from array of products
+ * Categories are required to look up categoryId for each product
  */
-export const stripProductIds = (products: Product[]): Omit<Product, 'id'>[] => {
-  return products.map(stripProductId);
+export const stripProductIds = (products: Product[], categories: Category[]): PublicProduct[] => {
+  return products.map(product => stripProductId(product, categories));
 };
 
 /**
+ * @deprecated Use formatCategories instead - categories now include id
  * Remove internal IDs from array of categories
  */
-export const stripCategoryIds = (categories: Category[]): Omit<Category, 'id'>[] => {
-  return categories.map(stripCategoryId);
+export const stripCategoryIds = (categories: Category[]): Category[] => {
+  return formatCategories(categories);
 };
 
 /**
  * Format product with consistent field ordering
+ * Returns 'category' (slug value) instead of 'categorySlug' for API responses
  */
-export const formatProduct = (product: Product): Product => {
+export const formatProduct = (product: Product): AdminProduct => {
   return {
     id: product.id,
     slug: product.slug,
@@ -60,7 +67,7 @@ export const formatProduct = (product: Product): Product => {
 /**
  * Format products with consistent field ordering
  */
-export const formatProducts = (products: Product[]): Product[] => {
+export const formatProducts = (products: Product[]): AdminProduct[] => {
   return products.map(formatProduct);
 };
 
