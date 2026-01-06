@@ -10,6 +10,7 @@
     "test:all": "bun test",
     "test:order-flow": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts",
     "test:order-flow:declined": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts --test-declined",
+    "format": "prettier --write .",
     "dev": "bun run --watch index.ts",
     "build": "bun build index.ts --outdir ./dist --target node --format esm --minify --external @aws-sdk/* && echo '{\"type\":\"module\"}' > dist/package.json",
     "generate:openapi": "bun run scripts/generate-openapi.ts",
@@ -27,8 +28,8 @@
     "cdk:deploy:prod": "cd infrastructure && ./deploy-cdk.sh prod",
     "cdk:destroy:dev": "bunx --no-install cdk destroy --context environment=dev --force --all",
     "cdk:destroy:stage": "bunx --no-install cdk destroy --context environment=stage --force --all",
-    "cdk:destroy:prod": "bunx --no-install cdk destroy --context environment=prod --force --all"
-    ,"copy:dynamo": "bun run scripts/copy-dynamodb-dev-to-stage.ts"
+    "cdk:destroy:prod": "bunx --no-install cdk destroy --context environment=prod --force --all",
+    "copy:dynamo": "bun run scripts/copy-dynamodb-dev-to-stage.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.1.0",
@@ -37,6 +38,7 @@
     "@aws-sdk/lib-dynamodb": "^3.637.0",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2",
+    "prettier": "^3.7.4",
     "zod": "^4.1.12",
     "zod-openapi": "^5.4.3",
     "zod-to-openapi": "^0.2.1"
