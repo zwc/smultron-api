@@ -1,7 +1,7 @@
 export interface Product {
   id: string;
   slug: string;
-  category: string;
+  categorySlug: string;  // Stored as categorySlug in DB, mapped to 'category' in public API
   article?: string;
   brand: string;
   title: string;
