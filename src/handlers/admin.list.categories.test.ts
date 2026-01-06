@@ -8,6 +8,7 @@ const mockGetAllCategories = mock<
 mock.module('../services/product', () => ({
   getAllCategories: mockGetAllCategories,
   getActiveProducts: async () => [],
+  adminGetProducts: async () => ({ items: [], total: 0 }),
 }))
 
 const { handler } = await import('./admin.list.categories')
