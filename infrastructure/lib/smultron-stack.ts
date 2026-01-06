@@ -539,7 +539,7 @@ function handler(event) {
           viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
           allowedMethods: cloudfront.AllowedMethods.ALLOW_ALL,
         },
-        // Catalog endpoint - public read-only, cache enabled
+        // Catalog endpoint - use CACHING_OPTIMIZED for stage/prod, disabled for dev
         '/v1/catalog': {
           origin: apiOrigin,
           cachePolicy,
@@ -615,6 +615,12 @@ function handler(event) {
       value: `https://${distribution.distributionDomainName}`,
       description: 'CloudFront Distribution URL',
       exportName: `smultron-cloudfront-url-${environment}`,
+    });
+
+    new cdk.CfnOutput(this, 'CloudFrontDistributionId', {
+      value: distribution.distributionId,
+      description: 'CloudFront Distribution ID (for cache invalidation)',
+      exportName: `smultron-cloudfront-distribution-id-${environment}`,
     });
 
     new cdk.CfnOutput(this, 'CustomDomainUrl', {
