@@ -14,8 +14,8 @@
     "build": "bun build index.ts --outdir ./dist --target node --format esm --minify --external @aws-sdk/* && echo '{\"type\":\"module\"}' > dist/package.json",
     "generate:openapi": "bun run scripts/generate-openapi.ts",
     "seed:dev": "PRODUCTS_TABLE=smultron-products-dev CATEGORIES_TABLE=smultron-categories-dev ORDERS_TABLE=smultron-orders-dev API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/seed-data.ts",
-    "cdk": "cdk",
-    "cdk:bootstrap": "cdk bootstrap",
+    "cdk": "bunx cdk",
+    "cdk:bootstrap": "bunx cdk bootstrap",
     "cdk:synth:dev": "cdk synth --context environment=dev",
     "cdk:synth:stage": "cdk synth --context environment=stage",
     "cdk:synth:prod": "cdk synth --context environment=prod",
@@ -25,9 +25,9 @@
     "cdk:deploy:dev": "cd infrastructure && ./deploy-cdk.sh dev",
     "cdk:deploy:stage": "cd infrastructure && ./deploy-cdk.sh stage",
     "cdk:deploy:prod": "cd infrastructure && ./deploy-cdk.sh prod",
-    "cdk:destroy:dev": "npx cdk destroy --context environment=dev --force --all",
-    "cdk:destroy:stage": "npx cdk destroy --context environment=stage --force --all",
-    "cdk:destroy:prod": "npx cdk destroy --context environment=prod --force --all"
+    "cdk:destroy:dev": "bunx --no-install cdk destroy --context environment=dev --force --all",
+    "cdk:destroy:stage": "bunx --no-install cdk destroy --context environment=stage --force --all",
+    "cdk:destroy:prod": "bunx --no-install cdk destroy --context environment=prod --force --all"
     ,"copy:dynamo": "bun run scripts/copy-dynamodb-dev-to-stage.ts"
   },
   "dependencies": {
@@ -50,7 +50,8 @@
     "zod-to-json-schema": "^3.21.0",
     "yaml": "^2.3.1",
     "aws-cdk-lib": "^2.219.0",
-    "constructs": "^10.4.2"
+    "constructs": "^10.4.2",
+    "aws-cdk": "^2.219.0"
   },
   "peerDependencies": {
     "typescript": "^5"

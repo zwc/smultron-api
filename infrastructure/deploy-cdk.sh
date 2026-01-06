@@ -68,17 +68,16 @@ echo -e "${YELLOW}🔨 Building application${NC}"
 # Change to root directory for CDK commands (cdk.json is there)
 cd ..
 
-# CDK Bootstrap (only needed once per account/region)
-echo -e "${YELLOW}🔧 Checking CDK bootstrap${NC}"
-npx cdk bootstrap
+# NOTE: CDK CLI is expected to be installed as a dev dependency and invoked via bunx
+# Bootstrapping is a one-time operation per account/region. We avoid running
+# `cdk bootstrap` on every deploy to reduce latency. If you truly need to
+# bootstrap from CI, run `bunx cdk bootstrap` in a separate step.
 
-# Synthesize CDK template
 echo -e "${YELLOW}📝 Synthesizing CDK template${NC}"
-npx cdk synth --context environment=$ENVIRONMENT
+bunx --no-install cdk synth --context environment=$ENVIRONMENT
 
-# Deploy to AWS
 echo -e "${YELLOW}☁️  Deploying to AWS${NC}"
-npx cdk deploy \
+bunx --no-install cdk deploy \
   --context environment=$ENVIRONMENT \
   --context adminUsername=$ADMIN_USERNAME \
   --context adminPassword=$ADMIN_PASSWORD \
