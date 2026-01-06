@@ -1,12 +1,9 @@
 import { z } from 'zod';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import type { APIResponse, AdminCategoriesResponse, Category } from '../types';
+import type { APIResponse, Category } from '../types';
 import { getAllCategories } from '../services/product';
 import { successResponse, errorResponse } from '../utils/response';
 import { formatCategories } from '../utils/transform';
-import { ListCategoriesResponseSchema } from '../schemas/handlers';
-
-export const responseSchema = ListCategoriesResponseSchema;
 
 export const method = 'GET';
 export const route = '/admin/categories';
@@ -31,9 +28,6 @@ export const requestSchema = QueryParamsSchema;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
-    // No authentication required for listing categories (public read-only)
-
-    // Parse and validate query parameters
     const rawParams = event.queryStringParameters || {};
     let params;
     
