@@ -1,12 +1,7 @@
 import { z } from 'zod';
 import { adminGetProducts, getAllCategories } from '../services/product';
-import type { AdminProductsResponse } from '../types';
-import { verifyAuthToken } from '../middleware/auth';
-import { unauthorizedResponse, errorResponse, successResponse } from '../utils/response';
+import { successResponse } from '../utils/response';
 import { formatProducts } from '../utils/transform';
-import { AdminProductsResponseSchema } from '../schemas/handlers';
-
-export const responseSchema = AdminProductsResponseSchema;
 
 export const method = 'GET';
 export const route = '/admin/products';
@@ -29,11 +24,6 @@ const QueryParamsSchema = z.object({
 export const requestSchema = QueryParamsSchema;
 
 export const handler = async (event: any) => {
-  // Verify authentication
-  if (!verifyAuthToken(event.headers || {})) {
-    return unauthorizedResponse();
-  }
-
   try {
     // Parse and validate query parameters
     const params = QueryParamsSchema.parse(event.queryStringParameters || {});
