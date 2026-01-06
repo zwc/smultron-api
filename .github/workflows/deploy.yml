@@ -41,7 +41,7 @@ jobs:
     name: Deploy to Dev
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev')
     concurrency:
       group: deploy-dev
       cancel-in-progress: false
@@ -70,7 +70,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Build Lambda functions
         run: bun run build
@@ -80,7 +80,7 @@ jobs:
         env:
           HOSTED_ZONE_ID: ${{ secrets.HOSTED_ZONE_ID }}
           ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
-          ADMIN_PASSWORD: ${{ vars.ADMIN_PASSWORD }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
   deploy-stage:
@@ -132,7 +132,7 @@ jobs:
   deploy-prod:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    needs: [test, deploy-stage]
+    needs: test
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'prod'
     concurrency:
       group: deploy-prod
