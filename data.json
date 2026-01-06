@@ -59,7 +59,7 @@
   "products": [
     {
       "id": "big-into-energy",
-      "category": "labubu",
+      "categorySlug": "labubu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Labubu",
@@ -85,7 +85,7 @@
     },
     {
       "id": "exciting-macarons",
-      "category": "labubu",
+      "categorySlug": "labubu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Labubu",
@@ -112,7 +112,7 @@
     },
     {
       "id": "wacky-mart",
-      "category": "labubu",
+      "categorySlug": "labubu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Labubu",
@@ -138,7 +138,7 @@
     },
     {
       "id": "pin-for-love",
-      "category": "labubu",
+      "categorySlug": "labubu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Labubu",
@@ -164,7 +164,7 @@
     },
     {
       "id": "bear-flavor",
-      "category": "hacipupu",
+      "categorySlug": "hacipupu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Hacipupu",
@@ -190,7 +190,7 @@
     },
     {
       "id": "the-constellation",
-      "category": "hacipupu",
+      "categorySlug": "hacipupu",
       "article": "",
       "brand": "Pop Mart",
       "title": "Hacipupu",
@@ -216,7 +216,7 @@
     },
     {
       "id": "l-impressionnisme",
-      "category": "skullpanda",
+      "categorySlug": "skullpanda",
       "article": "",
       "brand": "Pop Mart",
       "title": "Skullpanda",
@@ -243,7 +243,7 @@
     },
     {
       "id": "you-found-me",
-      "category": "skullpanda",
+      "categorySlug": "skullpanda",
       "article": "",
       "brand": "Pop Mart",
       "title": "Skullpanda",
@@ -269,7 +269,7 @@
     },
     {
       "id": "kiss-kiss",
-      "category": "sonny-angel",
+      "categorySlug": "sonny-angel",
       "article": "",
       "brand": "Dreams",
       "title": "Sonny Angel",
@@ -296,7 +296,7 @@
     },
     {
       "id": "christmas",
-      "category": "sonny-angel",
+      "categorySlug": "sonny-angel",
       "article": "",
       "brand": "Dreams",
       "title": "Sonny Angel",
@@ -322,7 +322,7 @@
     },
     {
       "id": "rainy-day",
-      "category": "sonny-angel",
+      "categorySlug": "sonny-angel",
       "article": "",
       "brand": "Dreams",
       "title": "Sonny Angel",
@@ -350,7 +350,7 @@
     },
     {
       "id": "sweets",
-      "category": "sonny-angel",
+      "categorySlug": "sonny-angel",
       "article": "",
       "brand": "Dreams",
       "title": "Sonny Angel",
@@ -376,7 +376,7 @@
     },
     {
       "id": "birthday-cake",
-      "category": "sonny-angel",
+      "categorySlug": "sonny-angel",
       "article": "",
       "brand": "Dreams",
       "title": "Sonny Angel",
@@ -402,7 +402,7 @@
     },
     {
       "id": "animal-kingdom",
-      "category": "getahug",
+      "categorySlug": "getahug",
       "article": "",
       "brand": "Getahug",
       "title": "Getahug",
