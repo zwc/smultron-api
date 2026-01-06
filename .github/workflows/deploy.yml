@@ -35,7 +35,7 @@ jobs:
         run: bun install
 
       - name: Run unit tests
-        run: bun test tests/*.test.ts
+        run: bun test
 
   deploy-dev:
     name: Deploy to Dev
@@ -174,4 +174,3 @@ jobs:
           ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-
