@@ -96,19 +96,23 @@ aws cloudformation describe-stacks \
   --query 'Stacks[0].Outputs' \
   --output table
 
-# Invalidate CloudFront cache
-echo -e "${YELLOW}🔄 Invalidating CloudFront cache${NC}"
-DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
-  --stack-name smultron-$ENVIRONMENT \
-  --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
-  --output text)
-
-if [ -n "$DISTRIBUTION_ID" ] && [ "$DISTRIBUTION_ID" != "None" ]; then
-  aws cloudfront create-invalidation \
-    --distribution-id $DISTRIBUTION_ID \
-    --paths "/*" \
-    --output table
-  echo -e "${GREEN}✅ CloudFront cache invalidation created for distribution ${DISTRIBUTION_ID}${NC}"
+if [ "$ENVIRONMENT" = "dev" ]; then
+  echo -e "${YELLOW}⏭️  Dev environment - skipping CloudFront cache invalidation (caching disabled)${NC}"
 else
-  echo -e "${RED}⚠️  Could not find CloudFront Distribution ID, skipping cache invalidation${NC}"
+  # Invalidate CloudFront cache
+  echo -e "${YELLOW}🔄 Invalidating CloudFront cache${NC}"
+  DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+    --stack-name smultron-$ENVIRONMENT \
+    --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
+    --output text)
+
+  if [ -n "$DISTRIBUTION_ID" ] && [ "$DISTRIBUTION_ID" != "None" ]; then
+    aws cloudfront create-invalidation \
+      --distribution-id $DISTRIBUTION_ID \
+      --paths "/*" \
+      --output table
+    echo -e "${GREEN}✅ CloudFront cache invalidation created for distribution ${DISTRIBUTION_ID}${NC}"
+  else
+    echo -e "${RED}⚠️  Could not find CloudFront Distribution ID, skipping cache invalidation${NC}"
+  fi
 fi
