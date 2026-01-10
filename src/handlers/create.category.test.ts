@@ -1,8 +1,9 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
+import { createProduct, createCategory } from '../services/product'
 
-// Mock only DynamoDB network calls
+// Mock DynamoDB network calls
 mock.module('../services/dynamodb', () => ({
   putItem: async () => undefined,
   getItem: async () => null,
@@ -10,6 +11,17 @@ mock.module('../services/dynamodb', () => ({
   scanTable: async () => [],
   queryItems: async () => [],
   updateItem: async () => ({}),
+}))
+
+// Mock product service - use real create functions, mock only save functions
+mock.module('../services/product', () => ({
+  createProduct,
+  createCategory,
+  saveProduct: async () => undefined,
+  saveCategory: async () => undefined,
+  getAllCategories: async () => [],
+  getActiveProducts: async () => [],
+  adminGetProducts: async () => ({ items: [], total: 0 }),
 }))
 
 const { handler } = await import('./create.category')

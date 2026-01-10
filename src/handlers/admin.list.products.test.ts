@@ -1,5 +1,6 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { createProduct, createCategory } from '../services/product'
 
 // Define mocks first
 const mockAdminGetProducts = mock(async () => ({ items: [], total: 0 }))
@@ -21,18 +22,8 @@ mock.module('../services/product', () => ({
   getActiveProducts: async () => [],
   saveProduct: async () => undefined,
   saveCategory: async () => undefined,
-  createCategory: (data: any) => ({
-    ...data,
-    id: 'mock-id',
-    createdAt: 'mock',
-    updatedAt: 'mock',
-  }),
-  createProduct: (data: any) => ({
-    ...data,
-    id: 'mock-id',
-    createdAt: 'mock',
-    updatedAt: 'mock',
-  }),
+  createCategory,
+  createProduct,
 }))
 
 // Import the handler
