@@ -20,7 +20,7 @@
         "@types/aws-lambda": "^8.10.143",
         "@types/bcryptjs": "^2.4.6",
         "@types/bun": "latest",
-        "@types/jsonwebtoken": "^9.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
         "@types/node": "^24.7.0",
         "aws-cdk": "^2.219.0",
         "aws-cdk-lib": "^2.219.0",

@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const ProductSchema = z.object({
   id: z.string(),
   slug: z.string(),
-  categorySlug: z.string().optional(),
+  category: z.string().optional(),
   article: z.string().optional(),
   brand: z.string(),
   title: z.string(),
@@ -20,9 +20,9 @@ export const ProductSchema = z.object({
   status: z.enum(['active', 'inactive']),
   createdAt: z.string(),
   updatedAt: z.string(),
-});
+})
 
-export const PublicProductSchema = ProductSchema.omit({ id: true });
+export const PublicProductSchema = ProductSchema.omit({ id: true })
 
-export type Product = z.infer<typeof ProductSchema>;
-export type PublicProduct = z.infer<typeof PublicProductSchema>;
+export type Product = z.infer<typeof ProductSchema>
+export type PublicProduct = z.infer<typeof PublicProductSchema>

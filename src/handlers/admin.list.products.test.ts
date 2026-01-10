@@ -5,11 +5,34 @@ import type { APIGatewayProxyEvent } from 'aws-lambda'
 const mockAdminGetProducts = mock(async () => ({ items: [], total: 0 }))
 const mockGetAllCategories = mock(async () => [])
 
+mock.module('../services/dynamodb', () => ({
+  putItem: async () => undefined,
+  getItem: async () => null,
+  deleteItem: async () => undefined,
+  scanTable: async () => [],
+  queryItems: async () => [],
+  updateItem: async () => ({}),
+}))
+
 // Mock the module
 mock.module('../services/product', () => ({
   adminGetProducts: mockAdminGetProducts,
   getAllCategories: mockGetAllCategories,
   getActiveProducts: async () => [],
+  saveProduct: async () => undefined,
+  saveCategory: async () => undefined,
+  createCategory: (data: any) => ({
+    ...data,
+    id: 'mock-id',
+    createdAt: 'mock',
+    updatedAt: 'mock',
+  }),
+  createProduct: (data: any) => ({
+    ...data,
+    id: 'mock-id',
+    createdAt: 'mock',
+    updatedAt: 'mock',
+  }),
 }))
 
 // Import the handler

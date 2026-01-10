@@ -1,19 +1,45 @@
-import { describe, test, expect, mock } from 'bun:test'
+import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 
 const mockGetAllCategories = mock<
   (status?: 'active' | 'inactive') => Promise<any[]>
 >(() => Promise.resolve([]))
 
+mock.module('../services/dynamodb', () => ({
+  putItem: async () => undefined,
+  getItem: async () => null,
+  deleteItem: async () => undefined,
+  scanTable: async () => [],
+  queryItems: async () => [],
+  updateItem: async () => ({}),
+}))
+
 mock.module('../services/product', () => ({
   getAllCategories: mockGetAllCategories,
   getActiveProducts: async () => [],
   adminGetProducts: async () => ({ items: [], total: 0 }),
+  saveCategory: async () => undefined,
+  saveProduct: async () => undefined,
+  createCategory: (data: any) => ({
+    ...data,
+    id: 'mock-id',
+    createdAt: 'mock',
+    updatedAt: 'mock',
+  }),
+  createProduct: (data: any) => ({
+    ...data,
+    id: 'mock-id',
+    createdAt: 'mock',
+    updatedAt: 'mock',
+  }),
 }))
 
 const { handler } = await import('./admin.list.categories')
 
 describe('Admin List Categories Handler (unit)', () => {
+  beforeEach(() => {
+    mockGetAllCategories.mockClear()
+  })
   test('validates query params and returns 400 on invalid', async () => {
     const event = {
       queryStringParameters: { limit: '0' }, // invalid: min 1
