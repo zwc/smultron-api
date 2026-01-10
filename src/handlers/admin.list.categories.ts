@@ -6,6 +6,7 @@ import { successResponse, errorResponse } from '../utils/response'
 import { formatCategories } from '../utils/transform'
 import { buildPaginationUrl } from '../utils/url'
 import { sortByField } from '../utils/sort'
+import { buildPaginationEnvelope } from '../utils/pagination'
 
 export const method = 'GET'
 export const route = '/admin/categories'
@@ -41,34 +42,20 @@ export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIResponse> => {
   try {
-    const rawParams = event.queryStringParameters || {}
+    const rawParams = event.queryStringParameters ?? {}
+    const parsed = QueryParamsSchema.safeParse(rawParams)
 
-    const paramsResult = (() => {
-      try {
-        return {
-          success: true as const,
-          data: QueryParamsSchema.parse(rawParams),
-        }
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          return {
-            success: false as const,
-            error: `Invalid query parameters: ${error.issues.map((e: any) => e.message).join(', ')}`,
-          }
-        }
-        throw error
-      }
-    })()
-
-    if (!paramsResult.success) {
-      return errorResponse(paramsResult.error, 400)
+    if (!parsed.success) {
+      return errorResponse(
+        `Invalid query parameters: ${parsed.error.issues.map((i) => i.message).join(', ')}`,
+        400,
+      )
     }
 
-    const params = paramsResult.data
+    const params = parsed.data
 
     const allCategories = await getAllCategories(params.status)
 
-    // Apply search filter if query string is provided
     const searchFiltered = params.q
       ? (() => {
           const searchQuery = params.q.toLowerCase()
@@ -100,30 +87,14 @@ export const handler = async (
         },
       )
 
-    // Prepare envelope parts (don't wrap twice)
-    const data = formatCategories(paginatedCategories)
-    const meta = {
-      total: total,
-      limit: params.limit,
-      offset: params.offset,
-      sort: params.sort,
-      filters: {
-        status: params.status || null,
-        q: params.q || null,
-      },
-    }
+    const { meta, links } = buildPaginationEnvelope(
+      total,
+      { limit: params.limit, offset: params.offset, sort: params.sort },
+      buildUrl,
+      { status: params.status, q: params.q },
+    )
 
-    const links = {
-      self: buildUrl(params.offset),
-      next:
-        params.offset + params.limit < total
-          ? buildUrl(params.offset + params.limit)
-          : null,
-      prev:
-        params.offset > 0
-          ? buildUrl(Math.max(0, params.offset - params.limit))
-          : null,
-    }
+    const data = formatCategories(paginatedCategories)
 
     return successResponse(data, meta, links, 200)
   } catch (error) {
