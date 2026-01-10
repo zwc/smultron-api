@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import type { APIResponse, Category } from '../types'
+import type { APIResponse } from '../types'
 import { getAllCategories } from '../services/product'
 import { successResponse, errorResponse } from '../utils/response'
 import { formatCategories } from '../utils/transform'
 import { buildPaginationUrl } from '../utils/url'
+import { sortByField } from '../utils/sort'
 
 export const method = 'GET'
 export const route = '/admin/categories'
@@ -77,25 +78,7 @@ export const handler = async (
         })()
       : allCategories
 
-    const sortField = params.sort.startsWith('-')
-      ? params.sort.slice(1)
-      : params.sort
-    const sortDirection = params.sort.startsWith('-') ? -1 : 1
-
-    const sorted = [...searchFiltered].sort((a, b) => {
-      const aVal = (() => {
-        const val = a[sortField as keyof Category]
-        return typeof val === 'string' ? val.toLowerCase() : val
-      })()
-      const bVal = (() => {
-        const val = b[sortField as keyof Category]
-        return typeof val === 'string' ? val.toLowerCase() : val
-      })()
-
-      if (aVal < bVal) return -1 * sortDirection
-      if (aVal > bVal) return 1 * sortDirection
-      return 0
-    })
+    const sorted = sortByField(searchFiltered, params.sort)
 
     const total = sorted.length
 
