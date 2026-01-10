@@ -364,6 +364,10 @@ describe('Update Product Handler (unit)', () => {
   })
 
   test('handles service errors gracefully', async () => {
+    const consoleErrorMock = mock(() => {})
+    const originalConsoleError = console.error
+    console.error = consoleErrorMock
+
     const token = generateToken({ username: 'admin' })
     mockUpdateProduct.mockRejectedValue(new Error('Database error'))
 
@@ -374,6 +378,8 @@ describe('Update Product Handler (unit)', () => {
     } as unknown as APIGatewayProxyEvent
 
     const response = await handler(event)
+
+    console.error = originalConsoleError
 
     expect(response.statusCode).toBe(500)
     const body = JSON.parse(response.body)

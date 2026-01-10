@@ -65,7 +65,9 @@ describe('Update Category Handler (unit)', () => {
 
   test('returns 400 when body is missing', async () => {
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: null,
     } as unknown as APIGatewayProxyEvent
@@ -90,7 +92,9 @@ describe('Update Category Handler (unit)', () => {
     mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({
         title: 'Updated Title',
@@ -127,7 +131,9 @@ describe('Update Category Handler (unit)', () => {
     mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({ status: 'inactive' }),
     } as unknown as APIGatewayProxyEvent
@@ -155,7 +161,9 @@ describe('Update Category Handler (unit)', () => {
     mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({
         title: 'Updated Title',
@@ -175,7 +183,9 @@ describe('Update Category Handler (unit)', () => {
 
   test('returns 400 for invalid status value', async () => {
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({ status: 'invalid-status' }),
     } as unknown as APIGatewayProxyEvent
@@ -189,7 +199,9 @@ describe('Update Category Handler (unit)', () => {
 
   test('returns 400 for invalid index value', async () => {
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({ index: -1 }),
     } as unknown as APIGatewayProxyEvent
@@ -203,7 +215,9 @@ describe('Update Category Handler (unit)', () => {
 
   test('returns 400 for unknown fields', async () => {
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({
         title: 'Updated Title',
@@ -220,7 +234,9 @@ describe('Update Category Handler (unit)', () => {
 
   test('returns 400 for empty title', async () => {
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({ title: '' }),
     } as unknown as APIGatewayProxyEvent
@@ -233,15 +249,23 @@ describe('Update Category Handler (unit)', () => {
   })
 
   test('handles service errors gracefully', async () => {
+    const consoleErrorMock = mock(() => {})
+    const originalConsoleError = console.error
+    console.error = consoleErrorMock
+
     mockUpdateCategory.mockRejectedValue(new Error('Database error'))
 
     const event = {
-      headers: { authorization: `Bearer ${generateToken({ username: 'admin' })}` },
+      headers: {
+        authorization: `Bearer ${generateToken({ username: 'admin' })}`,
+      },
       pathParameters: { id: 'test-id' },
       body: JSON.stringify({ title: 'Updated Title' }),
     } as unknown as APIGatewayProxyEvent
 
     const response = await handler(event)
+
+    console.error = originalConsoleError
 
     expect(response.statusCode).toBe(500)
     const body = JSON.parse(response.body)

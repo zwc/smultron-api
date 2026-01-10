@@ -152,11 +152,17 @@ describe('List Catalog Handler (unit)', () => {
   })
 
   test('handles service errors gracefully', async () => {
+    const consoleErrorMock = mock(() => {})
+    const originalConsoleError = console.error
+    console.error = consoleErrorMock
+
     mockGetAllCategories.mockRejectedValue(new Error('Database error'))
     mockGetActiveProducts.mockResolvedValue([])
 
     const event = {} as APIGatewayProxyEvent
     const response = await handler(event)
+
+    console.error = originalConsoleError
 
     expect(response.statusCode).toBe(500)
     const body = JSON.parse(response.body)
