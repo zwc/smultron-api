@@ -22,6 +22,7 @@ If compliance is not possible, stop and ask for explicit instructions.
 ## Functional Programming (Strict Enforcement)
 
 ### REQUIRED
+
 - All code must be **100% functional**.
 - Prefer:
   - pure functions
@@ -31,6 +32,7 @@ If compliance is not possible, stop and ask for explicit instructions.
 - All logic must be referentially transparent.
 
 ### FORBIDDEN
+
 - Classes
 - `this`
 - Prototypes
@@ -43,6 +45,7 @@ If compliance is not possible, stop and ask for explicit instructions.
 ## Immutability Rules (Critical)
 
 ### ABSOLUTELY FORBIDDEN
+
 - Variable reassignment
   ```ts
   let x = 1
@@ -64,6 +67,7 @@ If compliance is not possible, stop and ask for explicit instructions.
   - `reverse`
 
 ### REQUIRED INSTEAD
+
 - Always create new values:
   ```ts
   const next = [...arr, value]
@@ -110,6 +114,55 @@ const calculate = (x: number) => {
   - deterministic
   - isolated
   - order‑independent
+  - runnable in parallel
+  - runnable in any order
+
+### Test Isolation (Critical)
+
+- **All mocks must be reset** in `beforeEach` or `afterEach` hooks.
+- Tests **must not share state** between runs.
+- Tests **must not depend on execution order**.
+- Tests **must work correctly when run in parallel**.
+- Each test must set up its own preconditions.
+- Each test must clean up its own side effects.
+
+```ts
+// ✅ correct: isolated test with mock reset
+import { describe, test, expect, mock, beforeEach } from 'bun:test'
+
+const mockFn = mock(() => 'value')
+
+describe('example', () => {
+  beforeEach(() => {
+    mockFn.mockClear() // Reset mock between tests
+  })
+
+  test('first test', () => {
+    mockFn()
+    expect(mockFn).toHaveBeenCalledTimes(1)
+  })
+
+  test('second test', () => {
+    mockFn()
+    expect(mockFn).toHaveBeenCalledTimes(1) // Still passes
+  })
+})
+```
+
+```ts
+// ❌ forbidden: shared state between tests
+let sharedValue = 0
+
+test('first', () => {
+  sharedValue++
+  expect(sharedValue).toBe(1)
+})
+
+test('second', () => {
+  sharedValue++
+  expect(sharedValue).toBe(2) // Fails if run in different order
+})
+```
 
 ---
 
@@ -122,6 +175,7 @@ const calculate = (x: number) => {
 - Only modify tests if explicitly instructed.
 
 If a test appears incorrect:
+
 - Stop and ask for clarification.
 
 ---
@@ -129,6 +183,7 @@ If a test appears incorrect:
 ## Anti‑Patterns (Never Generate These)
 
 ### ❌ Object‑Oriented Code
+
 ```ts
 class User {
   constructor(private name: string) {}
@@ -136,6 +191,7 @@ class User {
 ```
 
 ### ❌ Hidden Mutation
+
 ```ts
 const add = (arr: number[]) => {
   arr.push(1)
@@ -144,16 +200,19 @@ const add = (arr: number[]) => {
 ```
 
 ### ❌ Shared State
+
 ```ts
 let cache: Record<string, string> = {}
 ```
 
 ### ❌ Weak or Loosened Tests
+
 ```ts
 expect(result).toBeDefined()
 ```
 
 ### ❌ Conditional Test Logic
+
 ```ts
 if (process.env.CI) {
   expect(result).toBe(1)
