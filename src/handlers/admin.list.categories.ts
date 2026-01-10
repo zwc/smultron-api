@@ -4,6 +4,7 @@ import type { APIResponse, Category } from '../types'
 import { getAllCategories } from '../services/product'
 import { successResponse, errorResponse } from '../utils/response'
 import { formatCategories } from '../utils/transform'
+import { buildPaginationUrl } from '../utils/url'
 
 export const method = 'GET'
 export const route = '/admin/categories'
@@ -40,72 +41,81 @@ export const handler = async (
 ): Promise<APIResponse> => {
   try {
     const rawParams = event.queryStringParameters || {}
-    let params
 
-    try {
-      params = QueryParamsSchema.parse(rawParams)
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return errorResponse(
-          `Invalid query parameters: ${error.issues.map((e: any) => e.message).join(', ')}`,
-          400,
-        )
+    const paramsResult = (() => {
+      try {
+        return {
+          success: true as const,
+          data: QueryParamsSchema.parse(rawParams),
+        }
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return {
+            success: false as const,
+            error: `Invalid query parameters: ${error.issues.map((e: any) => e.message).join(', ')}`,
+          }
+        }
+        throw error
       }
-      throw error
+    })()
+
+    if (!paramsResult.success) {
+      return errorResponse(paramsResult.error, 400)
     }
 
-    // Get categories with optional status filter
-    let categories = await getAllCategories(params.status)
+    const params = paramsResult.data
+
+    const allCategories = await getAllCategories(params.status)
 
     // Apply search filter if query string is provided
-    if (params.q) {
-      const searchQuery = params.q.toLowerCase()
-      categories = categories.filter((cat) =>
-        cat.title.toLowerCase().includes(searchQuery),
-      )
-    }
+    const searchFiltered = params.q
+      ? (() => {
+          const searchQuery = params.q.toLowerCase()
+          return allCategories.filter((cat) =>
+            cat.title.toLowerCase().includes(searchQuery),
+          )
+        })()
+      : allCategories
 
-    // Apply sorting
     const sortField = params.sort.startsWith('-')
       ? params.sort.slice(1)
       : params.sort
     const sortDirection = params.sort.startsWith('-') ? -1 : 1
 
-    categories = categories.sort((a, b) => {
-      let aVal: any = a[sortField as keyof Category]
-      let bVal: any = b[sortField as keyof Category]
-
-      // Handle string comparison (case-insensitive)
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        aVal = aVal.toLowerCase()
-        bVal = bVal.toLowerCase()
-      }
+    const sorted = [...searchFiltered].sort((a, b) => {
+      const aVal = (() => {
+        const val = a[sortField as keyof Category]
+        return typeof val === 'string' ? val.toLowerCase() : val
+      })()
+      const bVal = (() => {
+        const val = b[sortField as keyof Category]
+        return typeof val === 'string' ? val.toLowerCase() : val
+      })()
 
       if (aVal < bVal) return -1 * sortDirection
       if (aVal > bVal) return 1 * sortDirection
       return 0
     })
 
-    // Store total before pagination
-    const total = categories.length
+    const total = sorted.length
 
-    // Apply pagination
-    const paginatedCategories = categories.slice(
+    const paginatedCategories = sorted.slice(
       params.offset,
       params.offset + params.limit,
     )
 
-    // Build pagination links
-    const baseUrl = `https://${event.requestContext.domainName}${event.requestContext.path}`
-    const buildUrl = (offset: number) => {
-      const urlParams = new URLSearchParams()
-      if (params.status) urlParams.set('status', params.status)
-      if (params.q) urlParams.set('q', params.q)
-      urlParams.set('sort', params.sort)
-      urlParams.set('limit', params.limit.toString())
-      urlParams.set('offset', offset.toString())
-      return `${baseUrl}?${urlParams.toString()}`
-    }
+    const buildUrl = (offset: number) =>
+      buildPaginationUrl(
+        event.requestContext.domainName,
+        event.requestContext.path,
+        {
+          status: params.status,
+          q: params.q,
+          sort: params.sort,
+          limit: params.limit,
+          offset,
+        },
+      )
 
     // Prepare envelope parts (don't wrap twice)
     const data = formatCategories(paginatedCategories)
