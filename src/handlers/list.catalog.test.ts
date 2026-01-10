@@ -141,10 +141,10 @@ describe('List Catalog Handler (unit)', () => {
     const body = JSON.parse(response.body)
     expect(body.data.categories).toHaveLength(2)
     expect(body.data.products).toHaveLength(2)
-    
+
     const prod1 = body.data.products.find((p: any) => p.slug === 'product-1')
     const prod2 = body.data.products.find((p: any) => p.slug === 'product-2')
-    
+
     expect(prod1.category).toBe('category-1')
     expect(prod1.categoryId).toBe(category1.id)
     expect(prod2.category).toBe('category-2')
