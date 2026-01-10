@@ -1,4 +1,3 @@
-import { z } from 'zod'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { APIResponse } from '../types'
 import { getAllCategories } from '../services/product'
@@ -8,42 +7,18 @@ import { buildPaginationUrl } from '../utils/url'
 import { sortByField } from '../utils/sort'
 import { buildPaginationEnvelope } from '../utils/pagination'
 
+export { AdminListCategoriesQuerySchema as requestSchema } from '../schemas/handlers'
+import { AdminListCategoriesQuerySchema } from '../schemas/handlers'
+
 export const method = 'GET'
 export const route = '/admin/categories'
-
-// Query parameter validation schema
-const QueryParamsSchema = z.object({
-  status: z.enum(['active', 'inactive']).optional(),
-  q: z.string().optional(),
-  sort: z
-    .enum([
-      'id',
-      '-id',
-      'title',
-      '-title',
-      'brand',
-      '-brand',
-      'index',
-      '-index',
-      'createdAt',
-      '-createdAt',
-      'updatedAt',
-      '-updatedAt',
-    ])
-    .optional()
-    .default('title'),
-  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
-  offset: z.coerce.number().int().min(0).optional().default(0),
-})
-
-export const requestSchema = QueryParamsSchema
 
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIResponse> => {
   try {
     const rawParams = event.queryStringParameters ?? {}
-    const parsed = QueryParamsSchema.safeParse(rawParams)
+    const parsed = AdminListCategoriesQuerySchema.safeParse(rawParams)
 
     if (!parsed.success) {
       return errorResponse(

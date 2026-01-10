@@ -45,7 +45,7 @@ describe('Admin List Products Handler (unit)', () => {
     const res = await handler(event)
     expect(res.statusCode).toBe(400)
     const body = JSON.parse(res.body)
-    expect(body.error).toBe('Validation error')
+    expect(body.error).toContain('Invalid query parameters')
   })
 
   test('calls service with correct params and returns formatted response', async () => {

@@ -5,6 +5,62 @@ import { envelope } from './common'
 import { ProductSchema } from './product'
 import { CategorySchema } from './category'
 
+// Pagination query parameters
+export const PaginationQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+})
+
+// List query parameters (pagination + filters)
+export const createListQuerySchema = <TSortFields extends readonly string[]>(
+  sortFields: TSortFields,
+  defaultSort: TSortFields[number],
+) =>
+  PaginationQuerySchema.extend({
+    status: z.enum(['active', 'inactive']).optional(),
+    q: z.string().optional(),
+    sort: z
+      .enum(sortFields as any)
+      .optional()
+      .default(defaultSort),
+  })
+
+// Admin Categories List Query Parameters
+export const AdminListCategoriesQuerySchema = createListQuerySchema(
+  [
+    'id',
+    '-id',
+    'title',
+    '-title',
+    'brand',
+    '-brand',
+    'index',
+    '-index',
+    'createdAt',
+    '-createdAt',
+    'updatedAt',
+    '-updatedAt',
+  ] as const,
+  'title',
+)
+
+// Admin Products List Query Parameters
+export const AdminListProductsQuerySchema = createListQuerySchema(
+  [
+    'createdAt',
+    '-createdAt',
+    'updatedAt',
+    '-updatedAt',
+    'id',
+    '-id',
+    'title',
+    '-title',
+    'index',
+    '-index',
+  ] as const,
+  '-createdAt',
+)
+
 // Orders
 export const CreateOrderRequestSchema = z.object({
   information: OrderInformationSchema,
