@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const OrderInformationSchema = z.object({
   name: z.string(),
@@ -8,12 +8,13 @@ export const OrderInformationSchema = z.object({
   city: z.string(),
   email: z.string().email(),
   phone: z.string(),
-});
+})
 
 export const OrderCartItemSchema = z.object({
   id: z.string(),
   number: z.number().int().min(1),
   slug: z.string().optional(),
+  category: z.string().optional(),
   categorySlug: z.string().optional(),
   article: z.string().optional(),
   brand: z.string().optional(),
@@ -25,7 +26,7 @@ export const OrderCartItemSchema = z.object({
   tag: z.string().optional(),
   image: z.string().optional(),
   images: z.array(z.string()).optional(),
-});
+})
 
 export const OrderSchema = z.object({
   id: z.string(),
@@ -39,6 +40,6 @@ export const OrderSchema = z.object({
   cart: z.array(OrderCartItemSchema),
   createdAt: z.string(),
   updatedAt: z.string(),
-});
+})
 
-export type Order = z.infer<typeof OrderSchema>;
+export type Order = z.infer<typeof OrderSchema>

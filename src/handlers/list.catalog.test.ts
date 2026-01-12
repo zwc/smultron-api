@@ -59,7 +59,7 @@ describe('List Catalog Handler (unit)', () => {
 
     const product = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',
@@ -109,7 +109,7 @@ describe('List Catalog Handler (unit)', () => {
 
     const product1 = createProduct({
       slug: 'product-1',
-      categorySlug: 'category-1',
+      category: 'category-1',
       article: 'ART-001',
       brand: 'Brand 1',
       title: 'Product 1',
@@ -121,7 +121,7 @@ describe('List Catalog Handler (unit)', () => {
 
     const product2 = createProduct({
       slug: 'product-2',
-      categorySlug: 'category-2',
+      category: 'category-2',
       article: 'ART-002',
       brand: 'Brand 2',
       title: 'Product 2',

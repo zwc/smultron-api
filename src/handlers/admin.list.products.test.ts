@@ -53,14 +53,14 @@ describe('Admin List Products Handler (unit)', () => {
       {
         id: '1',
         title: 'Product 1',
-        categorySlug: 'cat1',
+        category: 'cat1',
         index: 1,
         createdAt: 100,
       },
       {
         id: '2',
         title: 'Product 2',
-        categorySlug: 'cat2',
+        category: 'cat2',
         index: 2,
         createdAt: 200,
       },
@@ -127,7 +127,7 @@ describe('Admin List Products Handler (unit)', () => {
       {
         id: 'p1',
         title: 'Snapshot Product 1',
-        categorySlug: 'cat1',
+        category: 'cat1',
         price: 100,
         index: 1,
         createdAt: 1234567890,
@@ -137,7 +137,7 @@ describe('Admin List Products Handler (unit)', () => {
       {
         id: 'p2',
         title: 'Snapshot Product 2',
-        categorySlug: 'cat2',
+        category: 'cat2',
         price: 200,
         index: 2,
         createdAt: 1234567890,

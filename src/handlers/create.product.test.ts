@@ -128,7 +128,7 @@ describe('Create Product Handler (integration)', () => {
         price: 99,
         stock: 10,
         status: 'active',
-        categorySlug: 'test-category',
+        category: 'test-category',
         description: ['Test description'],
       }),
     } as APIGatewayProxyEvent

@@ -44,7 +44,7 @@ describe('List Products Handler (unit)', () => {
   test('returns active products', async () => {
     const product1 = createProduct({
       slug: 'product-1',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Product 1',
@@ -56,7 +56,7 @@ describe('List Products Handler (unit)', () => {
 
     const product2 = createProduct({
       slug: 'product-2',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-002',
       brand: 'Test Brand',
       title: 'Product 2',
@@ -110,7 +110,7 @@ describe('List Products Handler (unit)', () => {
   test('returns products with correct structure', async () => {
     const product = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',
@@ -137,7 +137,7 @@ describe('List Products Handler (unit)', () => {
     expect(body.data).toHaveLength(1)
     const returnedProduct = body.data[0]
     expect(returnedProduct.slug).toBe('test-product')
-    expect(returnedProduct.categorySlug).toBe('test-category')
+    expect(returnedProduct.category).toBe('test-category')
     expect(returnedProduct.title).toBe('Test Product')
     expect(returnedProduct.subtitle).toBe('Test Subtitle')
     expect(returnedProduct.price).toBe(99)

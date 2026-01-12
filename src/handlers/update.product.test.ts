@@ -82,7 +82,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'updated-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-002',
       brand: 'Updated Brand',
       title: 'Updated Title',
@@ -126,7 +126,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',
@@ -158,7 +158,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'test-product',
-      categorySlug: 'new-category',
+      category: 'new-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',
@@ -173,14 +173,14 @@ describe('Update Product Handler (unit)', () => {
     const event = {
       headers: { authorization: `Bearer ${token}` },
       pathParameters: { id: 'test-id' },
-      body: JSON.stringify({ categorySlug: 'new-category' }),
+      body: JSON.stringify({ category: 'new-category' }),
     } as unknown as APIGatewayProxyEvent
 
     const response = await handler(event)
 
     expect(response.statusCode).toBe(200)
     expect(mockUpdateProduct).toHaveBeenCalledWith('test-id', {
-      categorySlug: 'new-category',
+      category: 'new-category',
     })
   })
 
@@ -188,7 +188,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Updated Title',
@@ -301,7 +301,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',
@@ -334,7 +334,7 @@ describe('Update Product Handler (unit)', () => {
     const token = generateToken({ username: 'admin' })
     const updatedProduct = createProduct({
       slug: 'test-product',
-      categorySlug: 'test-category',
+      category: 'test-category',
       article: 'ART-001',
       brand: 'Test Brand',
       title: 'Test Product',

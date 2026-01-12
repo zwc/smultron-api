@@ -24,6 +24,7 @@ export const route = '/admin/products/{id}'
 const UpdateProductSchema = z
   .object({
     slug: z.string().min(1).optional(),
+    category: z.string().optional(),
     categorySlug: z.string().optional(),
     article: z.string().optional(),
     brand: z.string().optional(),
@@ -84,7 +85,14 @@ export const handler = async (
       throw error
     }
 
-    const updatedProduct = await updateProduct(id, validatedData)
+    const normalizedUpdates = {
+      ...validatedData,
+      category: validatedData.category ?? validatedData.categorySlug,
+    }
+    const { categorySlug: _categorySlug, ...persistedUpdates } =
+      normalizedUpdates
+
+    const updatedProduct = await updateProduct(id, persistedUpdates)
 
     return successResponse(formatProduct(updatedProduct))
   } catch (error) {

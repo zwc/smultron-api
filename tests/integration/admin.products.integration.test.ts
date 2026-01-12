@@ -39,7 +39,7 @@ describe('Admin Products Integration Tests', () => {
       brand: 'Test Brand',
       price: 99.99,
       status: 'active',
-      categoryId: 'test-category',
+      category: 'test-category',
       stock: 10,
       description: ['Test product created by integration test'],
       images: [],
