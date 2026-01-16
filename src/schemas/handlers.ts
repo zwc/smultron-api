@@ -106,7 +106,7 @@ export const UpdateCategoryRequestSchema = CategorySchema.partial().omit({
 // Catalog (combined)
 export const ListCatalogResponseSchema = envelope(
   z.object({
-    products: z.array(ProductSchema),
+    products: z.array(ProductSchema.extend({ categoryId: z.string() })),
     categories: z.array(CategorySchema),
   }),
 )

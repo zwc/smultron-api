@@ -81,6 +81,7 @@ describe('List Catalog Handler (unit)', () => {
     expect(body.data.categories[0].slug).toBe('test-category')
     expect(body.data.categories[0].title).toBe('Test Category')
     expect(body.data.products).toHaveLength(1)
+    expect(body.data.products[0].id).toBe(product.id)
     expect(body.data.products[0].title).toBe('Test Product')
     expect(body.data.products[0].category).toBe('test-category')
     expect(body.data.products[0].categoryId).toBe(category.id)
@@ -145,8 +146,10 @@ describe('List Catalog Handler (unit)', () => {
     const prod1 = body.data.products.find((p: any) => p.slug === 'product-1')
     const prod2 = body.data.products.find((p: any) => p.slug === 'product-2')
 
+    expect(prod1.id).toBe(product1.id)
     expect(prod1.category).toBe('category-1')
     expect(prod1.categoryId).toBe(category1.id)
+    expect(prod2.id).toBe(product2.id)
     expect(prod2.category).toBe('category-2')
     expect(prod2.categoryId).toBe(category2.id)
   })

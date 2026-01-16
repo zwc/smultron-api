@@ -1,6 +1,6 @@
 import type { Product, Category } from '../types'
 
-export type PublicProduct = Omit<Product, 'id'> & { categoryId: string }
+export type PublicProduct = Product & { categoryId: string }
 export type AdminProduct = Product
 
 const getProductCategory = (product: Product): string =>
@@ -18,7 +18,9 @@ export const stripProductId = (
 ): PublicProduct => {
   const category = getProductCategory(product)
   const categoryId = categories.find((c) => c.slug === category)?.id || ''
-  const { id: _id, ...rest } = product
+  const { categorySlug: _categorySlug, ...rest } = product as Product & {
+    categorySlug?: string
+  }
 
   return {
     ...rest,
