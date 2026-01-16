@@ -7,7 +7,7 @@
     "test": "bun test src/",
     "test:integration": "bun test tests/integration/",
     "test:integration:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/integration/",
-    "test:all": "bun test",
+    "test:all": "bun test src/ && bun test tests/integration/",
     "test:order-flow": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts",
     "test:order-flow:declined": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts --test-declined",
     "format": "prettier --write .",
