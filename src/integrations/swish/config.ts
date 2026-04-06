@@ -18,7 +18,7 @@ export function loadSwishConfig(): SwishConfig {
     payeeAlias: process.env.SWISH_PAYEE_ALIAS ?? '1236166490',
     callbackUrl:
       process.env.SWISH_CALLBACK_URL ??
-      'https://smultron.zwc.se/api/v1/swish/callback',
+      'https://smultron.zwc.se/v1/swish/callback',
   }
 
   validateConfig(config)
