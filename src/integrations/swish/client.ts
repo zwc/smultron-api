@@ -160,11 +160,15 @@ export async function createPaymentRequest(
 
   console.log('Swish payment request payload:', JSON.stringify(payload))
 
-  const res = await swishFetch({
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+  const res = await swishFetch(
+    client,
+    `/swish-cpcapi/api/v2/paymentrequests/${instructionId}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  )
 
   if (!res.ok) {
     let errors: SwishError[] = []
