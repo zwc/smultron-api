@@ -26,7 +26,7 @@ mock.module('../services/product', () => ({
 
 const { handler } = await import('./create.product')
 
-describe('Create Product Handler (integration)', () => {
+describe('Create Product Handler (unit)', () => {
   beforeEach(() => {
     process.env.JWT_SECRET = 'very-secure-dev-jwt-secret'
     process.env.PRODUCTS_TABLE = 'smultron-products-prod'

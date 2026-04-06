@@ -26,7 +26,7 @@ mock.module('../services/product', () => ({
 
 const { handler } = await import('./create.category')
 
-describe('Create Category Handler (integration)', () => {
+describe('Create Category Handler (unit)', () => {
   beforeEach(() => {
     process.env.JWT_SECRET = 'very-secure-dev-jwt-secret'
     process.env.CATEGORIES_TABLE = 'smultron-categories-prod'
