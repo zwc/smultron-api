@@ -103,6 +103,17 @@ export class SmultronStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     })
 
+    // Swish Requests Table - logs every outgoing payment request for auditing
+    const swishRequestsTable = new dynamodb.Table(this, 'SwishRequestsTable', {
+      tableName: `smultron-swish-${environment}`,
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy:
+        environment === 'prod'
+          ? cdk.RemovalPolicy.RETAIN
+          : cdk.RemovalPolicy.DESTROY,
+    })
+
     // Stock Reservations Table - for temporary inventory holds during payment
     const stockReservationsTable = new dynamodb.Table(
       this,
@@ -142,6 +153,7 @@ export class SmultronStack extends cdk.Stack {
       JWT_SECRET: jwtSecret,
       ENVIRONMENT: environment,
       SWISH_CALLBACK_URL: `https://${subdomainName}/api/v1/swish/callback`,
+      SWISH_REQUESTS_TABLE: swishRequestsTable.tableName,
       // Slack webhook for error notifications (optional)
       SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL || '',
     }
@@ -394,6 +406,7 @@ export class SmultronStack extends cdk.Stack {
     ordersTable.grantReadWriteData(checkoutFunction)
     productsTable.grantReadWriteData(checkoutFunction)
     stockReservationsTable.grantReadWriteData(checkoutFunction)
+    swishRequestsTable.grantWriteData(checkoutFunction)
 
     const swishCallbackFunction = new lambda.Function(
       this,
@@ -408,6 +421,7 @@ export class SmultronStack extends cdk.Stack {
     ordersTable.grantReadWriteData(swishCallbackFunction)
     productsTable.grantReadWriteData(swishCallbackFunction)
     stockReservationsTable.grantReadWriteData(swishCallbackFunction)
+    swishRequestsTable.grantWriteData(swishCallbackFunction)
 
     const swishStatusFunction = new lambda.Function(
       this,
