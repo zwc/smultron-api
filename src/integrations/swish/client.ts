@@ -74,13 +74,19 @@ const swishFetch = (
 ): Promise<SwishResponse> => {
   const target = new URL(`${client.config.baseUrl}${path}`)
   return new Promise((resolve, reject) => {
+    const bodyBuffer = init?.body ? Buffer.from(init.body, 'utf-8') : undefined
+    const headers = {
+      ...init?.headers,
+      ...(bodyBuffer && { 'Content-Length': String(bodyBuffer.length) }),
+    }
+
     const req = https.request(
       {
         hostname: target.hostname,
         port: target.port || 443,
         path: target.pathname + target.search,
         method: init?.method ?? 'GET',
-        headers: init?.headers,
+        headers,
         cert: client.tls.cert,
         key: client.tls.key,
         ...(client.tls.ca && { ca: client.tls.ca }),
@@ -113,7 +119,7 @@ const swishFetch = (
       },
     )
     req.on('error', reject)
-    if (init?.body) req.write(init.body)
+    if (bodyBuffer) req.write(bodyBuffer)
     req.end()
   })
 }
@@ -152,15 +158,13 @@ export async function createPaymentRequest(
     console.error('Failed to persist Swish payment request:', err)
   }
 
-  const res = await swishFetch(
-    client,
-    `/swish-cpcapi/api/v2/paymentrequests/${instructionId}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  )
+  console.log('Swish payment request payload:', JSON.stringify(payload))
+
+  const res = await swishFetch({
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
 
   if (!res.ok) {
     let errors: SwishError[] = []
