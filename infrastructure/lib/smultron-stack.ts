@@ -409,6 +409,20 @@ export class SmultronStack extends cdk.Stack {
     productsTable.grantReadWriteData(swishCallbackFunction)
     stockReservationsTable.grantReadWriteData(swishCallbackFunction)
 
+    const swishStatusFunction = new lambda.Function(
+      this,
+      'SwishStatusFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-swish-status-${environment}`,
+        code: lambdaCode,
+        handler: 'index.getSwishStatus',
+      },
+    )
+    // Allow the status function to read orders and products
+    ordersTable.grantReadData(swishStatusFunction)
+    productsTable.grantReadData(swishStatusFunction)
+
     // Grant SES permissions for email notifications
     checkoutFunction.addToRolePolicy(
       new iam.PolicyStatement({
@@ -558,6 +572,14 @@ export class SmultronStack extends cdk.Stack {
     swishCallback.addMethod(
       'POST',
       new apigateway.LambdaIntegration(swishCallbackFunction),
+    )
+
+    // Swish status route to query payment status by instruction id
+    const swishStatus = swish.addResource('status')
+    const swishStatusId = swishStatus.addResource('{id}')
+    swishStatusId.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(swishStatusFunction),
     )
 
     // Ping routes for health and error testing
