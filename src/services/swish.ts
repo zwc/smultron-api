@@ -31,6 +31,7 @@ export const createSwishPayment = async (
   message?: string,
 ): Promise<{ id: string; location: string; status: string }> => {
   const payerAlias = phoneNumber ? formatPhoneNumber(phoneNumber) : undefined
+  const paymentReference = orderNumber.replace(/\./g, '')
 
   console.log('Creating Swish payment request:', {
     orderNumber,
@@ -48,8 +49,7 @@ export const createSwishPayment = async (
       amount: amount.toString(),
       currency: 'SEK',
       message: message ?? null,
-      payeePaymentReference: orderNumber,
-      payerAlias: payerAlias ?? null,
+      payeePaymentReference: paymentReference,
       payeeAlias: process.env.SWISH_PAYEE_ALIAS ?? '1236166490',
       callbackUrl: process.env.SWISH_CALLBACK_URL ?? '',
       status: 'CREATED',
@@ -66,7 +66,7 @@ export const createSwishPayment = async (
   const result = await createPaymentRequest(client, {
     amount: amount.toString(),
     payerAlias,
-    payeePaymentReference: orderNumber,
+    payeePaymentReference: paymentReference,
     message: message || `Order ${orderNumber}`,
   })
 
