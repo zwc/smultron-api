@@ -21,6 +21,32 @@ import { putItem } from '../../services/dynamodb'
 
 const SWISH_TABLE = process.env.SWISH_REQUESTS_TABLE ?? 'smultron-swish'
 
+export interface SwishRequestLog {
+  instructionId: string
+  amount: string
+  currency: string
+  message: string | null
+  payeePaymentReference: string | null
+  payerAlias: string | null
+  payeeAlias: string
+  callbackUrl: string
+  status: string
+}
+
+export const logPaymentRequest = async (
+  log: SwishRequestLog,
+): Promise<void> => {
+  try {
+    await putItem(SWISH_TABLE, {
+      id: log.instructionId,
+      ...log,
+      createdAt: new Date().toISOString(),
+    })
+  } catch (err) {
+    console.error('Failed to persist Swish payment request:', err)
+  }
+}
+
 export function createSwishClient(config: SwishConfig): SwishClient {
   return {
     config,
@@ -63,7 +89,21 @@ export async function createPaymentRequest(
     ...(input.message && { message: input.message }),
   }
 
-  // Logging is handled at the service layer; client performs the external request only.
+  try {
+    await logPaymentRequest({
+      instructionId,
+      amount: payload.amount,
+      currency: payload.currency,
+      message: payload.message ?? null,
+      payeePaymentReference: payload.payeePaymentReference ?? null,
+      payerAlias: payload.payerAlias ?? null,
+      payeeAlias: payload.payeeAlias,
+      callbackUrl: payload.callbackUrl,
+      status: 'CREATED',
+    })
+  } catch (err) {
+    console.error('Failed to persist Swish payment request:', err)
+  }
 
   const res = await swishFetch(
     client,
