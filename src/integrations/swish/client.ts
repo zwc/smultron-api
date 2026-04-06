@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import https from 'node:https'
 import type { SwishConfig } from './config.ts'
 import type {
   PaymentRequestInput,
@@ -11,9 +13,9 @@ import type {
 export interface SwishClient {
   config: SwishConfig
   tls: {
-    cert: BunFile
-    key: BunFile
-    ca?: BunFile
+    cert: Buffer
+    key: Buffer
+    ca?: Buffer
   }
 }
 
@@ -51,24 +53,69 @@ export function createSwishClient(config: SwishConfig): SwishClient {
   return {
     config,
     tls: {
-      cert: Bun.file(config.certPath),
-      key: Bun.file(config.keyPath),
-      ...(config.caPath && { ca: Bun.file(config.caPath) }),
+      cert: fs.readFileSync(config.certPath),
+      key: fs.readFileSync(config.keyPath),
+      ...(config.caPath && { ca: fs.readFileSync(config.caPath) }),
     },
   }
 }
 
-async function swishFetch(
+interface SwishResponse {
+  ok: boolean
+  status: number
+  headers: { get: (name: string) => string | null }
+  json: () => Promise<unknown>
+}
+
+const swishFetch = (
   client: SwishClient,
   path: string,
-  init?: RequestInit,
-): Promise<Response> {
-  const url = `${client.config.baseUrl}${path}`
-  return fetch(url, {
-    ...init,
-    tls: client.tls,
-    verbose: true,
-  } as RequestInit)
+  init?: { method?: string; headers?: Record<string, string>; body?: string },
+): Promise<SwishResponse> => {
+  const target = new URL(`${client.config.baseUrl}${path}`)
+  return new Promise((resolve, reject) => {
+    const req = https.request(
+      {
+        hostname: target.hostname,
+        port: target.port || 443,
+        path: target.pathname + target.search,
+        method: init?.method ?? 'GET',
+        headers: init?.headers,
+        cert: client.tls.cert,
+        key: client.tls.key,
+        ...(client.tls.ca && { ca: client.tls.ca }),
+        rejectUnauthorized: true,
+      },
+      (res) => {
+        const chunks: Buffer[] = []
+        res.on('data', (chunk: Buffer) => chunks.push(chunk))
+        res.on('end', () => {
+          const body = Buffer.concat(chunks).toString('utf-8')
+          const status = res.statusCode ?? 0
+          resolve({
+            ok: status >= 200 && status < 300,
+            status,
+            headers: {
+              get: (name: string) => {
+                const val = res.headers[name.toLowerCase()]
+                return Array.isArray(val) ? val[0] : (val ?? null)
+              },
+            },
+            json: () => {
+              try {
+                return Promise.resolve(JSON.parse(body))
+              } catch {
+                return Promise.reject(new Error('Invalid JSON response'))
+              }
+            },
+          })
+        })
+      },
+    )
+    req.on('error', reject)
+    if (init?.body) req.write(init.body)
+    req.end()
+  })
 }
 
 export async function createPaymentRequest(
