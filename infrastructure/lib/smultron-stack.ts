@@ -153,6 +153,8 @@ export class SmultronStack extends cdk.Stack {
       JWT_SECRET: jwtSecret,
       ENVIRONMENT: environment,
       SWISH_CALLBACK_URL: `https://${subdomainName}/v1/swish/callback`,
+      SWISH_CERT_PATH: '/var/task/ssl/public.pem',
+      SWISH_KEY_PATH: '/var/task/ssl/private.key',
       SWISH_REQUESTS_TABLE: swishRequestsTable.tableName,
       // Slack webhook for error notifications (optional)
       SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL || '',

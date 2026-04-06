@@ -12,7 +12,7 @@
     "test:order-flow:declined": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts --test-declined",
     "format": "prettier --write .",
     "dev": "bun run --watch index.ts",
-    "build": "bun build index.ts --outdir ./dist --target node --format esm --minify --external @aws-sdk/* && echo '{\"type\":\"module\"}' > dist/package.json",
+    "build": "bun build index.ts --outdir ./dist --target node --format esm --minify --external @aws-sdk/* && echo '{\"type\":\"module\"}' > dist/package.json && cp -r ssl dist/ssl",
     "generate:openapi": "bun run scripts/generate-openapi.ts",
     "seed:dev": "PRODUCTS_TABLE=smultron-products-dev CATEGORIES_TABLE=smultron-categories-dev ORDERS_TABLE=smultron-orders-dev API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/seed-data.ts",
     "cdk": "bunx cdk",
