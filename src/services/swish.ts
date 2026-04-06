@@ -7,7 +7,7 @@ import {
   type SwishClient,
 } from '../integrations/swish/index'
 
-const SWISH_ENVIRONMENT = process.env.SWISH_ENVIRONMENT || 'mock'
+const SWISH_ENVIRONMENT = process.env.SWISH_ENVIRONMENT || 'production'
 
 const formatPhoneNumber = (phone: string): string => {
   const digits = phone.replace(/[^0-9]/g, '')
