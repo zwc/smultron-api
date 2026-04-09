@@ -5,6 +5,10 @@ const mockCancelSwishPayment = mock(() => Promise.resolve())
 
 mock.module('../services/swish', () => ({
   cancelSwishPayment: mockCancelSwishPayment,
+  createSwishPayment: mock(() =>
+    Promise.resolve({ id: '', location: '', status: 'CREATED' }),
+  ),
+  getSwishPaymentStatus: mock(() => Promise.resolve(null)),
 }))
 
 const { handler } = await import('./cancel.swish')
