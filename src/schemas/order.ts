@@ -3,9 +3,9 @@ import { z } from 'zod'
 export const OrderInformationSchema = z.object({
   name: z.string(),
   company: z.string().optional().default(''),
-  address: z.string(),
-  zip: z.string(),
-  city: z.string(),
+  address: z.string().optional().default(''),
+  zip: z.string().optional().default(''),
+  city: z.string().optional().default(''),
   email: z.string().email(),
   phone: z.string(),
 })

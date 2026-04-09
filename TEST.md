@@ -26,6 +26,10 @@ curl -s -X POST https://dev.smultron.zwc.se/v1/checkout \
   }' | jq
 ```
 
+```
+curl -s -X PATCH https://dev.smultron.zwc.se/v1/cancel/A7F6FDB3F5E740DF8B4744E0907650B2
+```
+
 ### Activate the Order
 
 ```

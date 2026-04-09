@@ -99,9 +99,9 @@ export interface Order {
 export interface OrderInformation {
   name: string
   company: string
-  address: string
-  zip: string
-  city: string
+  address?: string
+  zip?: string
+  city?: string
   email: string
   phone: string
 }
@@ -134,9 +134,9 @@ export interface CartItem {
 export interface OrderDetails {
   name: string
   company?: string
-  address: string
-  zip: string
-  city: string
+  address?: string
+  zip?: string
+  city?: string
   phone: string
   email?: string
   delivery: string
