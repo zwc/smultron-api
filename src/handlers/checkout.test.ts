@@ -81,6 +81,7 @@ mock.module('../services/product', () => ({
 
 mock.module('../services/swish', () => ({
   createSwishPayment: mockCreateSwishPayment,
+  cancelSwishPayment: mock(() => Promise.resolve()),
 }))
 
 mock.module('../services/stock-reservation', () => ({
