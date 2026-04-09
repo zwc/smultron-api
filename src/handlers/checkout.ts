@@ -199,7 +199,7 @@ export const handler = async (
         if (error instanceof SwishPaymentError && error.errors.length > 0) {
           const { errorCode, errorMessage, additionalInformation } =
             error.errors[0]
-          return errorResponse('Swish payment failed', 402, {
+          return errorResponse('Swish payment failed', 200, {
             errorCode,
             errorMessage,
             additionalInformation,
