@@ -211,6 +211,40 @@ export async function getPaymentRequest(
   return (await res.json()) as PaymentStatus
 }
 
+export async function cancelPaymentRequest(
+  client: SwishClient,
+  instructionId: string,
+): Promise<void> {
+  const body = JSON.stringify([
+    { op: 'replace', path: '/status', value: 'cancelled' },
+  ])
+
+  const res = await swishFetch(
+    client,
+    `/swish-cpcapi/api/v1/paymentrequests/${instructionId}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json-patch+json' },
+      body,
+    },
+  )
+
+  if (!res.ok) {
+    let errors: SwishError[] = []
+    try {
+      errors = (await res.json()) as SwishError[]
+    } catch {
+      // response body may not be JSON
+    }
+    throw new SwishPaymentError(
+      `Swish cancel request failed (HTTP ${res.status})`,
+      instructionId,
+      res.status,
+      errors,
+    )
+  }
+}
+
 export function handleSwishCallback(payload: SwishCallbackPayload): {
   id: string
   status: SwishCallbackPayload['status']

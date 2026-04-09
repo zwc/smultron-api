@@ -439,6 +439,17 @@ export class SmultronStack extends cdk.Stack {
     ordersTable.grantReadData(swishStatusFunction)
     productsTable.grantReadData(swishStatusFunction)
 
+    const cancelSwishFunction = new lambda.Function(
+      this,
+      'CancelSwishFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-cancel-swish-${environment}`,
+        code: lambdaCode,
+        handler: 'index.cancelSwish',
+      },
+    )
+
     // Grant SES permissions for email notifications
     checkoutFunction.addToRolePolicy(
       new iam.PolicyStatement({
@@ -596,6 +607,14 @@ export class SmultronStack extends cdk.Stack {
     swishStatusId.addMethod(
       'GET',
       new apigateway.LambdaIntegration(swishStatusFunction),
+    )
+
+    // Cancel Swish payment route
+    const cancel = v1.addResource('cancel')
+    const cancelId = cancel.addResource('{id}')
+    cancelId.addMethod(
+      'PATCH',
+      new apigateway.LambdaIntegration(cancelSwishFunction),
     )
 
     // Ping routes for health and error testing

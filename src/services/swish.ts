@@ -3,6 +3,7 @@ import {
   createSwishClient,
   createPaymentRequest,
   getPaymentRequest,
+  cancelPaymentRequest,
   logPaymentRequest,
   type SwishClient,
 } from '../integrations/swish/index'
@@ -95,4 +96,16 @@ export const getSwishPaymentStatus = async (
   const client = getSwishClient()
   const result = await getPaymentRequest(client, paymentId)
   return { id: result.id, status: result.status }
+}
+
+export const cancelSwishPayment = async (paymentId: string): Promise<void> => {
+  console.log('Cancelling Swish payment:', paymentId)
+
+  if (SWISH_ENVIRONMENT === 'mock') {
+    console.log('Using mock Swish cancel (mock mode - no API call)')
+    return
+  }
+
+  const client = getSwishClient()
+  await cancelPaymentRequest(client, paymentId)
 }

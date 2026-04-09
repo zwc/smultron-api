@@ -3,6 +3,7 @@ export {
   createSwishClient,
   createPaymentRequest,
   getPaymentRequest,
+  cancelPaymentRequest,
   handleSwishCallback,
   logPaymentRequest,
   SwishPaymentError,

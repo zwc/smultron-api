@@ -87,6 +87,10 @@ export const getSwishStatus = wrap(
   require('./src/handlers/get.swish.status').handler,
   'getSwishStatus',
 )
+export const cancelSwish = wrap(
+  require('./src/handlers/cancel.swish').handler,
+  'cancelSwish',
+)
 export const listOrders = wrap(
   require('./src/handlers/list.orders').handler,
   'listOrders',
