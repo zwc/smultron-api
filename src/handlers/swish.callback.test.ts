@@ -54,6 +54,7 @@ mock.module('../services/product', () => ({
 }))
 
 mock.module('../services/stock-reservation', () => ({
+  reserveStock: async () => [],
   confirmReservations: async () => undefined,
   cancelOrderReservations: mockCancelOrderReservations,
   cancelReservations: async () => undefined,
