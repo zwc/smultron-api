@@ -18,6 +18,19 @@ export API_BASE="https://<your-dev-subdomain>/api/v1"
 export TOKEN="<ADMIN_JWT>"
 ```
 
+Create a token
+export API_BASE="https://dev.smultron.zwc.se/v1"
+
+# Get token (extract with jq)
+
+export TOKEN=$(curl -s -X POST "$API_BASE/admin/login" \
+ -H "Content-Type: application/json" \
+ -d '{"username":"linn","password":"e5uu588hzfwge367"}' | jq -r '.data.token')
+
+# Verify token was returned
+
+echo "$TOKEN"
+
 Create the shipment option with curl:
 
 ```bash

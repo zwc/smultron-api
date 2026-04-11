@@ -170,7 +170,7 @@ export const handler = async (
       console.error('Stock reservation failed:', error)
       return errorResponse(
         error instanceof Error ? error.message : 'Insufficient stock available',
-        400,
+        200,
       )
     }
 
