@@ -425,6 +425,7 @@ export class SmultronStack extends cdk.Stack {
     productsTable.grantReadWriteData(checkoutFunction)
     stockReservationsTable.grantReadWriteData(checkoutFunction)
     swishRequestsTable.grantWriteData(checkoutFunction)
+    shipmentOptionsTable.grantReadData(checkoutFunction)
 
     const swishCallbackFunction = new lambda.Function(
       this,

@@ -73,6 +73,9 @@ export const handler = async (
     try {
       validatedData = CheckoutRequestSchema.parse(JSON.parse(event.body))
     } catch (error) {
+      if (error instanceof SyntaxError) {
+        return errorResponse('Invalid JSON in request body', 400)
+      }
       if (error instanceof ZodError) {
         return errorResponse(
           `Validation error: ${error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,

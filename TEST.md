@@ -18,7 +18,7 @@ curl -s -X POST https://dev.smultron.zwc.se/v1/checkout \
     "cart": [
       {
         "id": "2450ae47-a8cf-411b-b51a-ec2a76d00d3c",
-        "number": 1,
+        "number": 1
       }
     ]
   }' | jq
