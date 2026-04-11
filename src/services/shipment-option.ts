@@ -65,3 +65,10 @@ export const updateShipmentOption = async (
 export const deleteShipmentOption = async (id: string): Promise<void> => {
   await db.deleteItem(SHIPMENT_OPTIONS_TABLE, { id })
 }
+
+export const getShipmentOptionByName = async (
+  name: string,
+): Promise<ShipmentOption | null> => {
+  const all = await db.scanTable<ShipmentOption>(SHIPMENT_OPTIONS_TABLE)
+  return all.find((o) => o.name.toLowerCase() === name.toLowerCase()) ?? null
+}

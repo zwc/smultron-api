@@ -24,6 +24,7 @@ mock.module('../services/dynamodb', () => ({
 mock.module('../services/shipment-option', () => ({
   getAllShipmentOptions: mockGetAllShipmentOptions,
   getShipmentOption: async () => null,
+  getShipmentOptionByName: async () => null,
   createShipmentOption: () => seedOption,
   saveShipmentOption: async () => undefined,
   updateShipmentOption: async () => ({}),

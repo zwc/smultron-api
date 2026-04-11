@@ -28,6 +28,7 @@ mock.module('../services/shipment-option', () => ({
   saveShipmentOption: async () => undefined,
   getAllShipmentOptions: async () => [],
   getShipmentOption: async () => null,
+  getShipmentOptionByName: async () => null,
   updateShipmentOption: async () => ({}),
   deleteShipmentOption: async () => undefined,
 }))

@@ -7,6 +7,7 @@ import {
   getProduct,
   updateProduct,
 } from '../services/product'
+import { getShipmentOptionByName } from '../services/shipment-option'
 import { createSwishPayment } from '../services/swish'
 import { SwishPaymentError } from '../integrations/swish/index'
 import {
@@ -14,23 +15,29 @@ import {
   cancelOrderReservations,
 } from '../services/stock-reservation'
 import { successResponse, errorResponse } from '../utils/response'
-import { OrderInformationSchema, OrderCartItemSchema } from '../schemas/order'
+import { OrderInformationSchema } from '../schemas/order'
+
+// Cart input: only id + quantity — prices are always read from the database
+const CheckoutCartItemSchema = z.object({
+  id: z.string(),
+  number: z.number().int().min(1),
+})
 
 // Schema for the checkout request payload
 const CheckoutRequestSchema = z.object({
   order: z.object({
     payment: z.enum(['swish', 'card', 'invoice']),
-    delivery: z.string(),
-    delivery_cost: z.number().min(0),
+    // Name of the shipment option (e.g. "postnord"). Required only when an address is supplied.
+    delivery: z.string().optional().default(''),
     name: z.string(),
     company: z.string().optional().default(''),
-    address: z.string(),
-    zip: z.string(),
-    city: z.string(),
+    address: z.string().optional().default(''),
+    zip: z.string().optional().default(''),
+    city: z.string().optional().default(''),
     email: z.string().email(),
     phone: z.string(),
   }),
-  cart: z.array(OrderCartItemSchema),
+  cart: z.array(CheckoutCartItemSchema),
 })
 
 // Response schema
@@ -81,15 +88,34 @@ export const handler = async (
     const information = {
       name: orderData.name,
       company: orderData.company || '',
-      address: orderData.address,
-      zip: orderData.zip,
-      city: orderData.city,
+      address: orderData.address || '',
+      zip: orderData.zip || '',
+      city: orderData.city || '',
       email: orderData.email,
       phone: orderData.phone,
     }
 
-    // Step 1: Validate cart items exist and calculate total
-    let totalAmount = orderData.delivery_cost
+    // Determine shipping cost:
+    // - Only charged when the customer has provided a delivery address
+    // - Cost is looked up from the shipment-options table by delivery name
+    const hasAddress = Boolean(
+      orderData.address && orderData.zip && orderData.city,
+    )
+
+    let deliveryCost = 0
+    if (hasAddress && orderData.delivery) {
+      const shipmentOption = await getShipmentOptionByName(orderData.delivery)
+      if (!shipmentOption) {
+        return errorResponse(
+          `Shipment option "${orderData.delivery}" not found`,
+          400,
+        )
+      }
+      deliveryCost = shipmentOption.cost
+    }
+
+    // Step 1: Validate cart items exist and calculate total from DB prices only
+    let totalAmount = deliveryCost
     const cartItems = []
 
     for (const item of cart) {
@@ -106,9 +132,8 @@ export const handler = async (
         )
       }
 
-      // Calculate total amount (use item.price from cart or product.price as fallback)
-      const itemPrice = item.price || product.price || 0
-      totalAmount += itemPrice * item.number
+      // Always use the DB price — never the client-supplied price
+      totalAmount += product.price * item.number
 
       cartItems.push({
         id: item.id,
@@ -123,7 +148,7 @@ export const handler = async (
       information,
       cart,
       orderData.delivery,
-      orderData.delivery_cost,
+      deliveryCost,
     )
 
     console.log('Order created:', order.id, order.number)

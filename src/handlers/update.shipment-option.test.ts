@@ -29,6 +29,7 @@ mock.module('../services/shipment-option', () => ({
   getAllShipmentOptions: async () => [existingOption],
   getShipmentOption: async (id: string) =>
     id === 'option-1' ? existingOption : null,
+  getShipmentOptionByName: async () => null,
   updateShipmentOption: async (_id: string, updates: object) => ({
     ...existingOption,
     ...updates,

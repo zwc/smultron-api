@@ -98,6 +98,26 @@ mock.module('../services/email', () => ({
   sendAdminOrderNotification: async () => undefined,
 }))
 
+mock.module('../services/shipment-option', () => ({
+  getShipmentOptionByName: async (name: string) =>
+    name === 'postnord'
+      ? {
+          id: '1',
+          name: 'postnord',
+          description: 'spårbart med postnord',
+          cost: 49,
+          createdAt: '',
+          updatedAt: '',
+        }
+      : null,
+  getAllShipmentOptions: async () => [],
+  getShipmentOption: async () => null,
+  createShipmentOption: () => ({}),
+  saveShipmentOption: async () => undefined,
+  updateShipmentOption: async () => ({}),
+  deleteShipmentOption: async () => undefined,
+}))
+
 const { handler } = await import('./checkout')
 
 const makeCheckoutEvent = (
@@ -112,8 +132,7 @@ const makeCheckoutEvent = (
 const validCheckoutBody = {
   order: {
     payment: 'swish',
-    delivery: 'shipping',
-    delivery_cost: 49,
+    delivery: 'postnord',
     name: 'Test User',
     company: '',
     address: 'Testgatan 1',

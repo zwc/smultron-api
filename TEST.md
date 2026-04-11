@@ -1,13 +1,12 @@
 # Example Request
 
 ```
-curl -s -X POST https://stage.smultron.zwc.se/v1/checkout \
+curl -s -X POST https://dev.smultron.zwc.se/v1/checkout \
   -H "Content-Type: application/json" \
   -d '{
     "order": {
       "payment": "swish",
       "delivery": "postnord",
-      "delivery_cost": 0,
       "name": "Bernhard Hettman",
       "company": "",
       "address": "Varmfrontsgatan 18",
@@ -20,7 +19,6 @@ curl -s -X POST https://stage.smultron.zwc.se/v1/checkout \
       {
         "id": "2450ae47-a8cf-411b-b51a-ec2a76d00d3c",
         "number": 1,
-        "price": 5
       }
     ]
   }' | jq
