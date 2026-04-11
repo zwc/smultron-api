@@ -427,6 +427,18 @@ export class SmultronStack extends cdk.Stack {
     swishRequestsTable.grantWriteData(checkoutFunction)
     shipmentOptionsTable.grantReadData(checkoutFunction)
 
+    const getOrderStatusFunction = new lambda.Function(
+      this,
+      'GetOrderStatusFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-get-order-status-${environment}`,
+        code: lambdaCode,
+        handler: 'index.getOrderStatus',
+      },
+    )
+    ordersTable.grantReadData(getOrderStatusFunction)
+
     const swishCallbackFunction = new lambda.Function(
       this,
       'SwishCallbackFunction',
@@ -656,6 +668,15 @@ export class SmultronStack extends cdk.Stack {
     checkout.addMethod(
       'POST',
       new apigateway.LambdaIntegration(checkoutFunction),
+    )
+
+    // Public order status polling route (for frontend to check payment result)
+    const order = v1.addResource('order')
+    const orderStatus = order.addResource('status')
+    const orderStatusId = orderStatus.addResource('{id}')
+    orderStatusId.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(getOrderStatusFunction),
     )
 
     // Swish callback route (receives payment status updates from Swish)

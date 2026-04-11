@@ -79,6 +79,10 @@ export const checkout = wrap(
   require('./src/handlers/checkout').handler,
   'checkout',
 )
+export const getOrderStatus = wrap(
+  require('./src/handlers/get.order.status').handler,
+  'getOrderStatus',
+)
 export const swishCallback = wrap(
   require('./src/handlers/swish.callback').handler,
   'swishCallback',
