@@ -7,7 +7,7 @@ const mockSendOrderConfirmationEmails = mock(() => Promise.resolve())
 
 const mockOrder = {
   id: 'order-123',
-  number: '2604.001',
+  number: '2604001',
   date: Date.now(),
   date_change: Date.now(),
   status: 'inactive' as const,
@@ -79,14 +79,14 @@ const makeCallbackEvent = (
 
 const paidCallback = {
   id: 'SWISH-PAYMENT-ID-001',
-  payeePaymentReference: '2604.001',
+  payeePaymentReference: '2604001',
   paymentReference: 'REF123',
   callbackUrl: 'https://smultron.zwc.se/api/v1/swish/callback',
   payerAlias: '46701234567',
   payeeAlias: '1236166490',
   amount: 249,
   currency: 'SEK',
-  message: 'Order 2604.001',
+  message: 'Order 2604001',
   status: 'PAID',
   dateCreated: '2025-01-01T00:00:00Z',
   datePaid: '2025-01-01T00:01:00Z',
@@ -123,7 +123,7 @@ describe('Swish Callback Handler', () => {
     expect(body.data.received).toBe(true)
     expect(body.data.status).toBe('PAID')
 
-    expect(mockGetOrderByNumber).toHaveBeenCalledWith('2604.001')
+    expect(mockGetOrderByNumber).toHaveBeenCalledWith('2604001')
     expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', {
       status: 'active',
     })
@@ -136,7 +136,7 @@ describe('Swish Callback Handler', () => {
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
     const emailData = mockSendOrderConfirmationEmails.mock
       .calls[0][0] as Record<string, unknown>
-    expect(emailData.orderId).toBe('2604.001')
+    expect(emailData.orderId).toBe('2604001')
     expect(emailData.paymentMethod).toBe('swish')
     expect(emailData.customerEmail).toBe('test@example.com')
   })

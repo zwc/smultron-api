@@ -84,7 +84,7 @@ export interface AdminCategoriesResponse {
 
 export interface Order {
   id: string
-  number: string // Format: YYMM.XXX (e.g., "2510.001")
+  number: string // Format: YYMMXXX (e.g., "2510001")
   date: number // Timestamp
   date_change: number // Timestamp
   status: 'active' | 'inactive' | 'invalid'

@@ -30,7 +30,7 @@ const mockProduct = {
 
 const mockOrder = {
   id: 'order-123',
-  number: '2604.001',
+  number: '2604001',
   date: Date.now(),
   date_change: Date.now(),
   status: 'active' as const,
@@ -173,7 +173,7 @@ describe('Checkout Handler', () => {
 
     expect(response.statusCode).toBe(201)
     expect(body.data.order.id).toBe('order-123')
-    expect(body.data.order.number).toBe('2604.001')
+    expect(body.data.order.number).toBe('2604001')
     expect(body.data.payment.method).toBe('swish')
     expect(body.data.payment.status).toBe('created')
     expect(body.data.payment.reference).toBe('MOCK-SWISH-ID-001')
@@ -186,10 +186,10 @@ describe('Checkout Handler', () => {
     expect(mockCreateSwishPayment).toHaveBeenCalledTimes(1)
     const [orderNumber, amount, phone, message] =
       mockCreateSwishPayment.mock.calls[0]
-    expect(orderNumber).toBe('2604.001')
+    expect(orderNumber).toBe('2604001')
     expect(amount).toBe(249) // 100 * 2 + 49 delivery
     expect(phone).toBe('0701234567')
-    expect(message).toBe('Order 2604.001')
+    expect(message).toBe('Order 2604001')
   })
 
   test('reserves stock before payment', async () => {

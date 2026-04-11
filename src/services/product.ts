@@ -328,7 +328,7 @@ export const getAllOrders = async (
   return await db.scanTable<Order>(ORDERS_TABLE)
 }
 
-// Generate order number in format YYMM.XXX
+// Generate order number in format YYMMXXX (e.g. "2604001")
 const generateOrderNumber = async (): Promise<string> => {
   const now = new Date()
   const year = now.getFullYear().toString().slice(-2) // Last 2 digits of year
@@ -346,21 +346,18 @@ const generateOrderNumber = async (): Promise<string> => {
   )
   console.log('Orders this month:', monthOrders.length)
 
-  // Find the highest number for this month
+  // Find the highest sequence number for this month (digits after the 4-char prefix)
   let maxNumber = 0
   for (const order of monthOrders) {
-    const parts = order.number.split('.')
-    if (parts.length === 2 && parts[1]) {
-      const num = parseInt(parts[1], 10)
-      if (num > maxNumber) {
-        maxNumber = num
-      }
+    const seq = parseInt(order.number.slice(4), 10)
+    if (!isNaN(seq) && seq > maxNumber) {
+      maxNumber = seq
     }
   }
 
-  // Increment and format
+  // Increment and format: YYMMXXX (3-digit zero-padded sequence)
   const nextNumber = (maxNumber + 1).toString().padStart(3, '0')
-  const orderNumber = `${prefix}.${nextNumber}`
+  const orderNumber = `${prefix}${nextNumber}`
   console.log('Generated order number:', orderNumber)
   return orderNumber
 }

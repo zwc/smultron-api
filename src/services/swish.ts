@@ -32,7 +32,7 @@ export const createSwishPayment = async (
   message?: string,
 ): Promise<{ id: string; location: string; status: string }> => {
   const payerAlias = phoneNumber ? formatPhoneNumber(phoneNumber) : undefined
-  const paymentReference = orderNumber.replace(/\./g, '')
+  const paymentReference = orderNumber
 
   console.log('Creating Swish payment request:', {
     orderNumber,

@@ -17,7 +17,7 @@ const makeEvent = (id?: string): APIGatewayProxyEvent =>
 
 const baseOrder = {
   id: 'order-abc',
-  number: '2604.001',
+  number: '2604001',
   date: 0,
   date_change: 0,
   delivery: 'postnord',
@@ -56,7 +56,7 @@ describe('Get Order Status Handler', () => {
     const body = JSON.parse(res.body)
     expect(body.data.status).toBe('pending')
     expect(body.data.orderId).toBe('order-abc')
-    expect(body.data.orderNumber).toBe('2604.001')
+    expect(body.data.orderNumber).toBe('2604001')
   })
 
   test('returns paid when order status is active', async () => {
