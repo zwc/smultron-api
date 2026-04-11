@@ -124,6 +124,15 @@ export interface OrderCartItem {
   images?: string[]
 }
 
+export interface ShipmentOption {
+  id: string
+  name: string
+  description: string
+  cost: number
+  createdAt: string
+  updatedAt: string
+}
+
 // Legacy interfaces (keep for backwards compatibility if needed)
 export interface CartItem {
   id: string // Required: product ID

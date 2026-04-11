@@ -1,7 +1,7 @@
 # Example Request
 
 ```
-curl -s -X POST https://dev.smultron.zwc.se/v1/checkout \
+curl -s -X POST https://stage.smultron.zwc.se/v1/checkout \
   -H "Content-Type: application/json" \
   -d '{
     "order": {
@@ -27,7 +27,7 @@ curl -s -X POST https://dev.smultron.zwc.se/v1/checkout \
 ```
 
 ```
-curl -s -X PATCH https://dev.smultron.zwc.se/v1/cancel/A7F6FDB3F5E740DF8B4744E0907650B2
+curl -s -X PATCH https://stage.smultron.zwc.se/v1/cancel/335F08817C9A4521B62D6664DAE560C3
 ```
 
 ### Activate the Order

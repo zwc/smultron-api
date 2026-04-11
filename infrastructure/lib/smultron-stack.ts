@@ -114,6 +114,21 @@ export class SmultronStack extends cdk.Stack {
           : cdk.RemovalPolicy.DESTROY,
     })
 
+    // Shipment Options Table
+    const shipmentOptionsTable = new dynamodb.Table(
+      this,
+      'ShipmentOptionsTable',
+      {
+        tableName: `smultron-shipment-${environment}`,
+        partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+        billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+        removalPolicy:
+          environment === 'prod'
+            ? cdk.RemovalPolicy.RETAIN
+            : cdk.RemovalPolicy.DESTROY,
+      },
+    )
+
     // Stock Reservations Table - for temporary inventory holds during payment
     const stockReservationsTable = new dynamodb.Table(
       this,
@@ -148,6 +163,7 @@ export class SmultronStack extends cdk.Stack {
       CATEGORIES_TABLE: categoriesTable.tableName,
       ORDERS_TABLE: ordersTable.tableName,
       STOCK_RESERVATIONS_TABLE: stockReservationsTable.tableName,
+      SHIPMENT_OPTIONS_TABLE: shipmentOptionsTable.tableName,
       ADMIN_USERNAME: adminUsername,
       ADMIN_PASSWORD: adminPassword,
       JWT_SECRET: jwtSecret,
@@ -474,6 +490,54 @@ export class SmultronStack extends cdk.Stack {
     })
     ordersTable.grantReadWriteData(updateOrderStatusFunction)
 
+    const listShipmentOptionsFunction = new lambda.Function(
+      this,
+      'ListShipmentOptionsFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-list-shipment-options-${environment}`,
+        code: lambdaCode,
+        handler: 'index.listShipmentOptions',
+      },
+    )
+    shipmentOptionsTable.grantReadData(listShipmentOptionsFunction)
+
+    const createShipmentOptionFunction = new lambda.Function(
+      this,
+      'CreateShipmentOptionFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-create-shipment-option-${environment}`,
+        code: lambdaCode,
+        handler: 'index.createShipmentOption',
+      },
+    )
+    shipmentOptionsTable.grantWriteData(createShipmentOptionFunction)
+
+    const updateShipmentOptionFunction = new lambda.Function(
+      this,
+      'UpdateShipmentOptionFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-update-shipment-option-${environment}`,
+        code: lambdaCode,
+        handler: 'index.updateShipmentOption',
+      },
+    )
+    shipmentOptionsTable.grantReadWriteData(updateShipmentOptionFunction)
+
+    const deleteShipmentOptionFunction = new lambda.Function(
+      this,
+      'DeleteShipmentOptionFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-delete-shipment-option-${environment}`,
+        code: lambdaCode,
+        handler: 'index.deleteShipmentOption',
+      },
+    )
+    shipmentOptionsTable.grantReadWriteData(deleteShipmentOptionFunction)
+
     // API Gateway
     const api = new apigateway.RestApi(this, 'SmultronApi', {
       restApiName: `smultron-api-${environment}`,
@@ -630,6 +694,26 @@ export class SmultronStack extends cdk.Stack {
     catalog.addMethod(
       'GET',
       new apigateway.LambdaIntegration(listCatalogFunction),
+    )
+
+    // Shipment options routes
+    const shipmentOptions = v1.addResource('shipment-options')
+    shipmentOptions.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(listShipmentOptionsFunction),
+    )
+    shipmentOptions.addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(createShipmentOptionFunction),
+    )
+    const shipmentOption = shipmentOptions.addResource('{id}')
+    shipmentOption.addMethod(
+      'PATCH',
+      new apigateway.LambdaIntegration(updateShipmentOptionFunction),
+    )
+    shipmentOption.addMethod(
+      'DELETE',
+      new apigateway.LambdaIntegration(deleteShipmentOptionFunction),
     )
 
     // CloudFront Distribution

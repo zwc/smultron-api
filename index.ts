@@ -119,3 +119,19 @@ export const pingError = wrap(
   require('./src/handlers/ping.error').handler,
   'pingError',
 )
+export const listShipmentOptions = wrap(
+  require('./src/handlers/list.shipment-options').handler,
+  'listShipmentOptions',
+)
+export const createShipmentOption = wrap(
+  require('./src/handlers/create.shipment-option').handler,
+  'createShipmentOption',
+)
+export const updateShipmentOption = wrap(
+  require('./src/handlers/update.shipment-option').handler,
+  'updateShipmentOption',
+)
+export const deleteShipmentOption = wrap(
+  require('./src/handlers/delete.shipment-option').handler,
+  'deleteShipmentOption',
+)
