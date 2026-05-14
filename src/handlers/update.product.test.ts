@@ -1,6 +1,5 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import { createProduct, createCategory } from '../services/product'
 import { generateToken } from '../utils/jwt'
 
 const mockUpdateProduct = mock(async () => ({}))
@@ -16,13 +15,6 @@ mock.module('../services/dynamodb', () => ({
 
 mock.module('../services/product', () => ({
   updateProduct: mockUpdateProduct,
-  getAllCategories: async () => [],
-  getActiveProducts: async () => [],
-  adminGetProducts: async () => ({ items: [], total: 0 }),
-  saveCategory: async () => undefined,
-  saveProduct: async () => undefined,
-  createCategory,
-  createProduct,
 }))
 
 const { handler } = await import('./update.product')
@@ -80,7 +72,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('updates product with valid data', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'updated-product',
       category: 'test-category',
       article: 'ART-002',
@@ -88,11 +81,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Updated Title',
       subtitle: 'Updated Subtitle',
       price: 199,
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
       stock: 20,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },
@@ -124,7 +124,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('updates product status', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-product',
       category: 'test-category',
       article: 'ART-001',
@@ -132,11 +133,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Test Product',
       subtitle: 'Test Subtitle',
       price: 99,
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
       stock: 10,
       status: 'inactive',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },
@@ -156,7 +164,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('updates product category', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-product',
       category: 'new-category',
       article: 'ART-001',
@@ -164,11 +173,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Test Product',
       subtitle: 'Test Subtitle',
       price: 99,
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
       stock: 10,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },
@@ -186,7 +202,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('filters out protected fields from update', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-product',
       category: 'test-category',
       article: 'ART-001',
@@ -194,11 +211,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Updated Title',
       subtitle: 'Test Subtitle',
       price: 99,
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
       stock: 10,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },
@@ -299,7 +323,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('updates product with description array', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-product',
       category: 'test-category',
       article: 'ART-001',
@@ -307,12 +332,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Test Product',
       subtitle: 'Test Subtitle',
       price: 99,
+      price_reduced: 0,
       description: ['Line 1', 'Line 2', 'Line 3'],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
       stock: 10,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },
@@ -332,7 +363,8 @@ describe('Update Product Handler (unit)', () => {
 
   test('updates product with images array', async () => {
     const token = generateToken({ username: 'admin' })
-    const updatedProduct = createProduct({
+    mockUpdateProduct.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-product',
       category: 'test-category',
       article: 'ART-001',
@@ -340,12 +372,18 @@ describe('Update Product Handler (unit)', () => {
       title: 'Test Product',
       subtitle: 'Test Subtitle',
       price: 99,
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
       images: ['img1.jpg', 'img2.jpg'],
       stock: 10,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateProduct.mockResolvedValue(updatedProduct)
 
     const event = {
       headers: { authorization: `Bearer ${token}` },

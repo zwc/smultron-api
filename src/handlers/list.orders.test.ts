@@ -1,5 +1,6 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { generateToken } from '../utils/jwt'
 
 const paidOrder = {
   id: 'order-paid',
@@ -42,16 +43,14 @@ mock.module('../services/product', () => ({
   getOrder: mockGetOrder,
 }))
 
-mock.module('../middleware/auth', () => ({
-  verifyAuthToken: () => true,
-}))
-
 const { handler } = await import('./list.orders')
 
-const makeEvent = (qs: Record<string, string> = {}): APIGatewayProxyEvent =>
+const makeEvent = (qs: Record<string, string> = {}, withAuth = true): APIGatewayProxyEvent =>
   ({
     queryStringParameters: qs,
-    headers: { authorization: 'Bearer test-token' },
+    headers: withAuth
+      ? { authorization: `Bearer ${generateToken({ username: 'admin' })}` }
+      : {},
     pathParameters: null,
     requestContext: { domainName: 'api.example.com', path: '/admin/orders' },
   }) as unknown as APIGatewayProxyEvent
@@ -60,6 +59,8 @@ describe('List Orders Handler', () => {
   beforeEach(() => {
     mockGetAllOrders.mockClear()
     mockGetOrder.mockClear()
+    process.env.JWT_SECRET = 'very-secure-dev-jwt-secret'
+    process.env.DISABLE_AUTH = 'false'
   })
 
   test('defaults to active (paid) orders only — unpaid orders not shown', async () => {
@@ -93,12 +94,7 @@ describe('List Orders Handler', () => {
   })
 
   test('returns 401 when auth token is missing', async () => {
-    mock.module('../middleware/auth', () => ({
-      verifyAuthToken: () => false,
-    }))
-    // Re-import to pick up updated mock
-    const { handler: h } = await import('./list.orders')
-    const response = await h(makeEvent())
+    const response = await handler(makeEvent({}, false))
     expect(response.statusCode).toBe(401)
   })
 })

@@ -1,6 +1,5 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import { createProduct, createCategory } from '../services/product'
 import { generateToken } from '../utils/jwt'
 
 const mockUpdateCategory = mock(async () => ({}))
@@ -16,13 +15,6 @@ mock.module('../services/dynamodb', () => ({
 
 mock.module('../services/product', () => ({
   updateCategory: mockUpdateCategory,
-  getAllCategories: async () => [],
-  getActiveProducts: async () => [],
-  adminGetProducts: async () => ({ items: [], total: 0 }),
-  saveCategory: async () => undefined,
-  saveProduct: async () => undefined,
-  createCategory,
-  createProduct,
 }))
 
 const { handler } = await import('./update.category')
@@ -80,16 +72,17 @@ describe('Update Category Handler (unit)', () => {
   })
 
   test('updates category with valid data', async () => {
-    const updatedCategory = createCategory({
+    mockUpdateCategory.mockResolvedValue({
+      id: 'test-id',
       slug: 'updated-slug',
       title: 'Updated Title',
       brand: 'Updated Brand',
       subtitle: 'Updated Subtitle',
       index: 5,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
       headers: {
@@ -119,16 +112,17 @@ describe('Update Category Handler (unit)', () => {
   })
 
   test('updates category status', async () => {
-    const updatedCategory = createCategory({
+    mockUpdateCategory.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-category',
       title: 'Test Category',
       brand: 'Test Brand',
       subtitle: 'Test Subtitle',
       index: 0,
       status: 'inactive',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
       headers: {
@@ -149,16 +143,17 @@ describe('Update Category Handler (unit)', () => {
   })
 
   test('filters out protected fields from update', async () => {
-    const updatedCategory = createCategory({
+    mockUpdateCategory.mockResolvedValue({
+      id: 'test-id',
       slug: 'test-category',
       title: 'Updated Title',
       brand: 'Test Brand',
       subtitle: 'Test Subtitle',
       index: 0,
       status: 'active',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-01T00:00:00.000Z',
     })
-
-    mockUpdateCategory.mockResolvedValue(updatedCategory)
 
     const event = {
       headers: {
