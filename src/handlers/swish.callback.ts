@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { getOrder, updateOrder, assignOrderNumber } from '../services/product';
-import { cancelOrderReservations } from '../services/stock-reservation';
+import { cancelOrderReservations, confirmOrderReservations } from '../services/stock-reservation';
 import { sendOrderConfirmationEmails, type OrderConfirmationData } from '../services/email';
 import { successResponse } from '../utils/response';
 
@@ -66,6 +66,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
             console.error(`Order ${orderId} not found`);
             break;
           }
+
+          // Permanently reduce stock and mark reservations as confirmed
+          await confirmOrderReservations(order.id);
 
           // Assign the order number now that payment is confirmed. This is the
           // first and only time a number is generated, keeping the sequence gap-free.

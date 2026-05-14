@@ -483,6 +483,27 @@ export class SmultronStack extends cdk.Stack {
     ordersTable.grantReadWriteData(cancelSwishFunction)
     stockReservationsTable.grantReadWriteData(cancelSwishFunction)
 
+    // TEST ONLY — remove before launch
+    const testConfirmPaymentFunction = new lambda.Function(
+      this,
+      'TestConfirmPaymentFunction',
+      {
+        ...commonLambdaProps,
+        functionName: `smultron-test-confirm-payment-${environment}`,
+        code: lambdaCode,
+        handler: 'index.testConfirmPayment',
+      },
+    )
+    ordersTable.grantReadWriteData(testConfirmPaymentFunction)
+    stockReservationsTable.grantReadWriteData(testConfirmPaymentFunction)
+    productsTable.grantReadWriteData(testConfirmPaymentFunction)
+    testConfirmPaymentFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+        resources: ['*'],
+      }),
+    )
+
     // Grant SES permissions for email notifications
     checkoutFunction.addToRolePolicy(
       new iam.PolicyStatement({
@@ -709,6 +730,15 @@ export class SmultronStack extends cdk.Stack {
 
     // Ping routes for health and error testing
     const ping = v1.addResource('ping')
+
+    // TEST ONLY — remove before launch
+    const testResource = v1.addResource('test')
+    const testConfirmPayment = testResource.addResource('confirm-payment')
+    const testConfirmPaymentId = testConfirmPayment.addResource('{id}')
+    testConfirmPaymentId.addMethod(
+      'POST',
+      new apigateway.LambdaIntegration(testConfirmPaymentFunction),
+    )
     const pingError = ping.addResource('error')
     pingError.addMethod(
       'GET',

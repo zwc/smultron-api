@@ -94,6 +94,7 @@ mock.module('../services/stock-reservation', () => ({
   reserveStock: mockReserveStock,
   cancelOrderReservations: mockCancelOrderReservations,
   confirmReservations: async () => undefined,
+  confirmOrderReservations: async () => undefined,
   cancelReservations: async () => undefined,
 }))
 
@@ -196,7 +197,7 @@ describe('Checkout Handler', () => {
     expect(paymentReference).toBe('123')
     expect(amount).toBe(249) // 100 * 2 + 49 delivery
     expect(phone).toBe('0701234567')
-    expect(message).toBe('Order 123')
+    expect(message).toBe('Beställning 123')
   })
 
   test('reserves stock before payment', async () => {
@@ -226,5 +227,19 @@ describe('Checkout Handler', () => {
 
     expect(response.statusCode).toBe(500)
     expect(mockCancelOrderReservations).toHaveBeenCalledTimes(1)
+  })
+
+  test('returns INSUFFICIENT_STOCK errorCode when stock reservation fails', async () => {
+    mockReserveStock.mockImplementationOnce(() =>
+      Promise.reject(new Error('Insufficient stock for product prod-1. Available: 0, Requested: 2')),
+    )
+
+    const event = makeCheckoutEvent(validCheckoutBody)
+    const response = await handler(event)
+    const body = JSON.parse(response.body)
+
+    expect(response.statusCode).toBe(200)
+    expect(body.error.message).toContain('Insufficient stock')
+    expect(body.meta.errorCode).toBe('INSUFFICIENT_STOCK')
   })
 })

@@ -126,13 +126,20 @@ export const handler = async (
       const product = await getProduct(item.id)
 
       if (!product) {
-        return errorResponse(`Product ${item.id} not found`, 404)
+        return errorResponse(`Product ${item.id} not found`, 404, {
+          errorCode: 'PRODUCT_NOT_FOUND',
+          productId: item.id,
+        })
       }
 
       if (product.status !== 'active') {
         return errorResponse(
           `Product ${product.title || item.id} is not available`,
           400,
+          {
+            errorCode: 'PRODUCT_UNAVAILABLE',
+            productId: item.id,
+          },
         )
       }
 
@@ -172,6 +179,7 @@ export const handler = async (
       return errorResponse(
         error instanceof Error ? error.message : 'Insufficient stock available',
         200,
+        { errorCode: 'INSUFFICIENT_STOCK' },
       )
     }
 
@@ -197,7 +205,7 @@ export const handler = async (
           order.id,
           totalAmount,
           orderData.phone,
-          `Order ${order.id}`,
+          `Beställning ${order.id}`,
         )
 
         // Persist the Swish instruction ID so the cancel endpoint can cancel it

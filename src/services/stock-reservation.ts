@@ -205,6 +205,34 @@ export async function cancelReservations(reservationIds: string[]): Promise<void
 }
 
 /**
+ * Confirm reservations for an entire order (convert to permanent stock reduction)
+ * This is called when payment is successful
+ */
+export async function confirmOrderReservations(orderId: string): Promise<void> {
+  const reservations = await getOrderReservations(orderId)
+  const activeReservations = reservations.filter(r => r.status === 'active')
+
+  if (activeReservations.length === 0) {
+    console.log(`No active reservations to confirm for order ${orderId}`)
+    return
+  }
+
+  console.log(`Confirming ${activeReservations.length} stock reservations for order ${orderId}`)
+
+  for (const reservation of activeReservations) {
+    await client.send(new PutCommand({
+      TableName: STOCK_RESERVATIONS_TABLE,
+      Item: {
+        ...reservation,
+        status: 'confirmed',
+        confirmedAt: Date.now(),
+      },
+    }))
+    await permanentlyReduceStock(reservation.productId, reservation.quantity)
+  }
+}
+
+/**
  * Cancel reservations for an entire order
  */
 export async function cancelOrderReservations(orderId: string): Promise<void> {

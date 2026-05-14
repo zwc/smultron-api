@@ -139,3 +139,8 @@ export const deleteShipmentOption = wrap(
   require('./src/handlers/delete.shipment-option').handler,
   'deleteShipmentOption',
 )
+// TEST ONLY — remove before launch
+export const testConfirmPayment = wrap(
+  require('./src/handlers/test.confirm-payment').handler,
+  'testConfirmPayment',
+)

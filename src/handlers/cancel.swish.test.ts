@@ -50,6 +50,7 @@ mock.module('../services/stock-reservation', () => ({
   cancelOrderReservations: mockCancelOrderReservations,
   reserveStock: async () => [],
   confirmReservations: async () => undefined,
+  confirmOrderReservations: async () => undefined,
 }))
 
 const { handler } = await import('./cancel.swish')

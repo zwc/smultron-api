@@ -68,7 +68,7 @@ export const createSwishPayment = async (
     amount: amount.toString(),
     payerAlias,
     payeePaymentReference: paymentReference,
-    message: message || `Order ${orderNumber}`,
+    message: message || `Beställning ${orderNumber}`,
   })
 
   console.log('Swish payment created:', {

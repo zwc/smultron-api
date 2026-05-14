@@ -4,6 +4,7 @@ import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 const mockUpdateOrder = mock(() => Promise.resolve({}))
 const mockCancelOrderReservations = mock(() => Promise.resolve())
+const mockConfirmOrderReservations = mock(() => Promise.resolve())
 const mockSendOrderConfirmationEmails = mock(() => Promise.resolve())
 const mockAssignOrderNumber = mock(() => Promise.resolve('2605.001'))
 
@@ -61,6 +62,7 @@ mock.module('../services/product', () => ({
 mock.module('../services/stock-reservation', () => ({
   reserveStock: async () => [],
   confirmReservations: async () => undefined,
+  confirmOrderReservations: mockConfirmOrderReservations,
   cancelOrderReservations: mockCancelOrderReservations,
   cancelReservations: async () => undefined,
 }))
@@ -104,6 +106,7 @@ describe('Swish Callback Handler', () => {
   beforeEach(() => {
     mockUpdateOrder.mockClear()
     mockCancelOrderReservations.mockClear()
+    mockConfirmOrderReservations.mockClear()
     mockSendOrderConfirmationEmails.mockClear()
     mockAssignOrderNumber.mockClear()
     mockAssignOrderNumber.mockImplementation(() => Promise.resolve('2605.001'))
@@ -160,6 +163,38 @@ describe('Swish Callback Handler', () => {
     expect(emailData.orderId).toBe('2605.001')
     expect(emailData.paymentMethod).toBe('swish')
     expect(emailData.customerEmail).toBe('test@example.com')
+  })
+
+  test('confirms stock reservations when payment is PAID', async () => {
+    const event = makeCallbackEvent(paidCallback)
+    await handler(event)
+
+    expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
+    expect(mockConfirmOrderReservations).toHaveBeenCalledWith('123')
+  })
+
+  test('does not confirm reservations on DECLINED', async () => {
+    const event = makeCallbackEvent({ ...paidCallback, status: 'DECLINED' })
+    await handler(event)
+
+    expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+  })
+
+  test('does not confirm reservations on ERROR', async () => {
+    const event = makeCallbackEvent({ ...paidCallback, status: 'ERROR', errorCode: 'RF07', errorMessage: 'Declined' })
+    await handler(event)
+
+    expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+  })
+
+  test('does not confirm reservations on CANCELLED', async () => {
+    const event = makeCallbackEvent({ ...paidCallback, status: 'CANCELLED' })
+    await handler(event)
+
+    expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
   })
 
   test('never assigns order number on DECLINED', async () => {
