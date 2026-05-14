@@ -48,14 +48,16 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Parse and validate query parameters
     const params = QueryParamsSchema.parse(qs);
 
-    // Get orders - use GSI if filtering by status, otherwise full table scan
-    let orders = await getAllOrders(params.status);
+    // Get orders — default to 'active' (paid/confirmed) so unpaid checkout attempts
+    // are not shown as real orders. Pass ?status=inactive to inspect checkout attempts.
+    const statusFilter = params.status ?? 'active'
+    let orders = await getAllOrders(statusFilter);
 
     // Apply search filter if query string is provided
     if (params.q) {
       const searchQuery = params.q.toLowerCase();
       orders = orders.filter(order => 
-        order.number.toLowerCase().includes(searchQuery) ||
+        (order.number ?? '').toLowerCase().includes(searchQuery) ||
         order.information.name.toLowerCase().includes(searchQuery)
       );
     }

@@ -17,7 +17,7 @@ const makeEvent = (id?: string): APIGatewayProxyEvent =>
 
 const baseOrder = {
   id: 'order-abc',
-  number: '2604001',
+  number: '2604001', // present on paid orders
   date: 0,
   date_change: 0,
   delivery: 'postnord',
@@ -49,22 +49,24 @@ describe('Get Order Status Handler', () => {
     expect(res.statusCode).toBe(404)
   })
 
-  test('returns pending when order status is inactive', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'inactive' })
+  test('returns pending with null orderNumber when order status is inactive', async () => {
+    // Inactive (unpaid) orders have no order number yet
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, number: null, status: 'inactive' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
     expect(body.data.status).toBe('pending')
     expect(body.data.orderId).toBe('order-abc')
-    expect(body.data.orderNumber).toBe('2604001')
+    expect(body.data.orderNumber).toBeNull()
   })
 
-  test('returns paid when order status is active', async () => {
+  test('returns paid with orderNumber when order status is active', async () => {
     mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'active' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
     expect(body.data.status).toBe('paid')
+    expect(body.data.orderNumber).toBe('2604001')
   })
 
   test('returns cancelled when order status is invalid', async () => {

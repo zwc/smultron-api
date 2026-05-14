@@ -5,7 +5,7 @@ import {
   createOrder,
   saveOrder,
   getProduct,
-  updateProduct,
+  updateOrder,
 } from '../services/product'
 import { getShipmentOptionByName } from '../services/shipment-option'
 import { createSwishPayment } from '../services/swish'
@@ -44,7 +44,8 @@ const CheckoutRequestSchema = z.object({
 const CheckoutResponseSchema = z.object({
   order: z.object({
     id: z.string(),
-    number: z.string(),
+    // null until payment is confirmed; the frontend should poll /v1/order/status/{id}
+    number: z.string().nullable(),
     status: z.string(),
   }),
   payment: z.object({
@@ -146,7 +147,7 @@ export const handler = async (
 
     console.log('Cart validated. Total amount:', totalAmount, 'SEK')
 
-    // Step 2: Create order (with pending status)
+    // Step 2: Create order (inactive, no order number yet)
     const order = await createOrder(
       information,
       cart,
@@ -154,7 +155,7 @@ export const handler = async (
       deliveryCost,
     )
 
-    console.log('Order created:', order.id, order.number)
+    console.log('Order created:', order.id, '(number pending payment confirmation)')
 
     // Step 3: Reserve stock for 10 minutes
     let reservationIds: string[] = []
@@ -174,13 +175,8 @@ export const handler = async (
       )
     }
 
-    // Step 4: Save order to database with reservation info
-    const orderWithReservations = {
-      ...order,
-      status: 'inactive' as const, // Order is inactive until payment is confirmed
-    }
-
-    await saveOrder(orderWithReservations)
+    // Step 4: Save order to database (inactive until payment confirmed, no order number)
+    await saveOrder(order)
     console.log('Order saved to database with stock reservations')
 
     // Step 5: Initialize payment based on payment method
@@ -193,14 +189,20 @@ export const handler = async (
 
     if (orderData.payment === 'swish') {
       try {
-        console.log('Initiating Swish payment for order:', order.number)
+        // Use the internal order ID as payeePaymentReference so the callback can
+        // look up the order directly without needing an order number at this stage.
+        console.log('Initiating Swish payment for order:', order.id)
 
         const swishPayment = await createSwishPayment(
-          order.number,
+          order.id,
           totalAmount,
           orderData.phone,
-          `Order ${order.number}`,
+          `Order ${order.id}`,
         )
+
+        // Persist the Swish instruction ID so the cancel endpoint can cancel it
+        // without the caller having to supply a separate payment reference.
+        await updateOrder(order.id, { swish_payment_id: swishPayment.id })
 
         paymentResponse = {
           method: 'swish',
@@ -244,6 +246,7 @@ export const handler = async (
     const response = {
       order: {
         id: order.id,
+        // null at this point — the number is assigned only after payment is confirmed
         number: order.number,
         status: order.status,
       },

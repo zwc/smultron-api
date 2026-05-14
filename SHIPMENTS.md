@@ -19,7 +19,7 @@ export TOKEN="<ADMIN_JWT>"
 ```
 
 Create a token
-export API_BASE="https://dev.smultron.zwc.se/v1"
+export API_BASE="https://stage.smultron.zwc.se/v1"
 
 # Get token (extract with jq)
 

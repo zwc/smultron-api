@@ -4,10 +4,11 @@ import type { APIGatewayProxyEvent } from 'aws-lambda'
 const mockUpdateOrder = mock(() => Promise.resolve({}))
 const mockCancelOrderReservations = mock(() => Promise.resolve())
 const mockSendOrderConfirmationEmails = mock(() => Promise.resolve())
+const mockAssignOrderNumber = mock(() => Promise.resolve('2605.001'))
 
 const mockOrder = {
-  id: 'order-123',
-  number: '2604001',
+  id: '123',
+  number: null, // null until payment confirmed
   date: Date.now(),
   date_change: Date.now(),
   status: 'inactive' as const,
@@ -37,7 +38,8 @@ const mockOrder = {
   updatedAt: '2025-01-01T00:00:00Z',
 }
 
-const mockGetOrderByNumber = mock(() => Promise.resolve({ ...mockOrder }))
+// payeePaymentReference is now the order ID (not order number)
+const mockGetOrder = mock(() => Promise.resolve({ ...mockOrder }))
 
 mock.module('../services/dynamodb', () => ({
   putItem: async () => undefined,
@@ -49,8 +51,9 @@ mock.module('../services/dynamodb', () => ({
 }))
 
 mock.module('../services/product', () => ({
-  getOrderByNumber: mockGetOrderByNumber,
+  getOrder: mockGetOrder,
   updateOrder: mockUpdateOrder,
+  assignOrderNumber: mockAssignOrderNumber,
 }))
 
 mock.module('../services/stock-reservation', () => ({
@@ -77,16 +80,17 @@ const makeCallbackEvent = (
     pathParameters: null,
   }) as unknown as APIGatewayProxyEvent
 
+// payeePaymentReference is now the order ID
 const paidCallback = {
   id: 'SWISH-PAYMENT-ID-001',
-  payeePaymentReference: '2604001',
+  payeePaymentReference: '123', // order ID (not order number)
   paymentReference: 'REF123',
   callbackUrl: 'https://smultron.zwc.se/api/v1/swish/callback',
   payerAlias: '46701234567',
   payeeAlias: '1236166490',
   amount: 249,
   currency: 'SEK',
-  message: 'Order 2604001',
+  message: 'Order 123',
   status: 'PAID',
   dateCreated: '2025-01-01T00:00:00Z',
   datePaid: '2025-01-01T00:01:00Z',
@@ -99,10 +103,10 @@ describe('Swish Callback Handler', () => {
     mockUpdateOrder.mockClear()
     mockCancelOrderReservations.mockClear()
     mockSendOrderConfirmationEmails.mockClear()
-    mockGetOrderByNumber.mockClear()
-    mockGetOrderByNumber.mockImplementation(() =>
-      Promise.resolve({ ...mockOrder }),
-    )
+    mockAssignOrderNumber.mockClear()
+    mockAssignOrderNumber.mockImplementation(() => Promise.resolve('2605.001'))
+    mockGetOrder.mockClear()
+    mockGetOrder.mockImplementation(() => Promise.resolve({ ...mockOrder }))
   })
 
   test('returns 200 when body is missing', async () => {
@@ -114,6 +118,21 @@ describe('Swish Callback Handler', () => {
     expect(response.statusCode).toBe(200)
   })
 
+  test('looks up order by ID (payeePaymentReference) on PAID', async () => {
+    const event = makeCallbackEvent(paidCallback)
+    await handler(event)
+
+    expect(mockGetOrder).toHaveBeenCalledWith('123')
+  })
+
+  test('assigns order number only after payment is PAID', async () => {
+    const event = makeCallbackEvent(paidCallback)
+    await handler(event)
+
+    expect(mockAssignOrderNumber).toHaveBeenCalledTimes(1)
+    expect(mockAssignOrderNumber).toHaveBeenCalledWith('123')
+  })
+
   test('updates order to active when payment is PAID', async () => {
     const event = makeCallbackEvent(paidCallback)
     const response = await handler(event)
@@ -123,35 +142,36 @@ describe('Swish Callback Handler', () => {
     expect(body.data.received).toBe(true)
     expect(body.data.status).toBe('PAID')
 
-    expect(mockGetOrderByNumber).toHaveBeenCalledWith('2604001')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', {
+    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
       status: 'active',
     })
   })
 
-  test('sends confirmation emails on PAID', async () => {
+  test('sends confirmation emails after number assigned on PAID', async () => {
     const event = makeCallbackEvent(paidCallback)
     await handler(event)
 
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
     const emailData = mockSendOrderConfirmationEmails.mock
       .calls[0][0] as Record<string, unknown>
-    expect(emailData.orderId).toBe('2604001')
+    // Email uses the assigned order number, not the order ID
+    expect(emailData.orderId).toBe('2605.001')
     expect(emailData.paymentMethod).toBe('swish')
     expect(emailData.customerEmail).toBe('test@example.com')
   })
 
-  test('cancels reservations and marks order invalid on DECLINED', async () => {
+  test('never assigns order number on DECLINED', async () => {
     const event = makeCallbackEvent({ ...paidCallback, status: 'DECLINED' })
     await handler(event)
 
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('order-123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', {
+    expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
       status: 'invalid',
     })
   })
 
-  test('cancels reservations and marks order invalid on ERROR', async () => {
+  test('never assigns order number on ERROR', async () => {
     const event = makeCallbackEvent({
       ...paidCallback,
       status: 'ERROR',
@@ -160,30 +180,40 @@ describe('Swish Callback Handler', () => {
     })
     await handler(event)
 
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('order-123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', {
+    expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
       status: 'invalid',
     })
   })
 
-  test('cancels reservations and marks order invalid on CANCELLED', async () => {
+  test('never assigns order number on CANCELLED', async () => {
     const event = makeCallbackEvent({ ...paidCallback, status: 'CANCELLED' })
     await handler(event)
 
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('order-123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('order-123', {
+    expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
       status: 'invalid',
     })
   })
 
+  test('does not send confirmation email on DECLINED', async () => {
+    const event = makeCallbackEvent({ ...paidCallback, status: 'DECLINED' })
+    await handler(event)
+
+    expect(mockSendOrderConfirmationEmails).not.toHaveBeenCalled()
+  })
+
   test('handles missing order gracefully', async () => {
-    mockGetOrderByNumber.mockImplementation(() => Promise.resolve(null))
+    mockGetOrder.mockImplementation(() => Promise.resolve(null))
 
     const event = makeCallbackEvent(paidCallback)
     const response = await handler(event)
 
     expect(response.statusCode).toBe(200)
     expect(mockUpdateOrder).not.toHaveBeenCalled()
+    expect(mockAssignOrderNumber).not.toHaveBeenCalled()
   })
 
   test('does not crash on CREATED status', async () => {
@@ -192,5 +222,6 @@ describe('Swish Callback Handler', () => {
 
     expect(response.statusCode).toBe(200)
     expect(mockUpdateOrder).not.toHaveBeenCalled()
+    expect(mockAssignOrderNumber).not.toHaveBeenCalled()
   })
 })

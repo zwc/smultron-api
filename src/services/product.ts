@@ -320,46 +320,72 @@ export const getAllOrders = async (
       console.warn(
         'StatusIndex GSI not available for orders, falling back to table scan with filtering',
       )
-      const allOrders = await db.scanTable<Order>(ORDERS_TABLE)
-      return allOrders.filter((order) => order.status === status)
+      const allOrders = await db.scanTable<any>(ORDERS_TABLE)
+      return allOrders.filter((item) => item.status === status)
     }
   }
-  // No status filter: get all orders via table scan
-  return await db.scanTable<Order>(ORDERS_TABLE)
+  // No status filter: get all real orders (exclude internal counter items which
+  // have no status field and live in the same table for atomic number generation)
+  const allItems = await db.scanTable<any>(ORDERS_TABLE)
+  return allItems.filter((item) =>
+    ['active', 'inactive', 'invalid'].includes(item.status),
+  )
 }
 
-// Generate order number in format YYMMXXX (e.g. "2604001")
+// Generate a sequential numeric order ID used as the Swish payeePaymentReference.
+// Swish requires a short alphanumeric reference; a sequential integer satisfies
+// this and lets the callback look up the order directly by id without a GSI.
+// The counter item has no `status` field so it is excluded from order queries.
+const generateOrderId = async (): Promise<string> => {
+  const counterKey = { id: '__order_id_counter__' }
+  const seq = await db.atomicIncrement(ORDERS_TABLE, counterKey, 'seq')
+  return seq.toString()
+}
+
+// Generate order number in format YYMM.ZZZ (e.g. "2605.001").
+// The dot-separated format clearly distinguishes the date prefix from the
+// monthly sequence, making it easy to read on invoices and in email.
+// Uses an atomic DynamoDB counter so concurrent payment confirmations never
+// receive the same number and the sequence never has gaps from unpaid orders.
+// Counter items are stored in the orders table with a special id prefix and
+// no `status` field so they are excluded from all order queries.
 const generateOrderNumber = async (): Promise<string> => {
   const now = new Date()
   const year = now.getFullYear().toString().slice(-2) // Last 2 digits of year
   const month = (now.getMonth() + 1).toString().padStart(2, '0') // Month with leading zero
   const prefix = `${year}${month}`
 
-  console.log('Getting all orders to generate number with prefix:', prefix)
+  // Atomically increment the monthly sequence counter.
+  // The counter item key is never returned by getAllOrders() because it lacks a status field.
+  const counterKey = { id: `__order_counter_${prefix}__` }
+  const seq = await db.atomicIncrement(ORDERS_TABLE, counterKey, 'seq')
 
-  // Get all orders for the current month
-  const allOrders = await getAllOrders()
-  console.log('Total orders in database:', allOrders.length)
-
-  const monthOrders = allOrders.filter((order) =>
-    order.number?.startsWith(prefix),
-  )
-  console.log('Orders this month:', monthOrders.length)
-
-  // Find the highest sequence number for this month (digits after the 4-char prefix)
-  let maxNumber = 0
-  for (const order of monthOrders) {
-    const seq = parseInt(order.number.slice(4), 10)
-    if (!isNaN(seq) && seq > maxNumber) {
-      maxNumber = seq
-    }
-  }
-
-  // Increment and format: YYMMXXX (3-digit zero-padded sequence)
-  const nextNumber = (maxNumber + 1).toString().padStart(3, '0')
-  const orderNumber = `${prefix}${nextNumber}`
+  const orderNumber = `${prefix}.${seq.toString().padStart(3, '0')}`
   console.log('Generated order number:', orderNumber)
   return orderNumber
+}
+
+/**
+ * Assigns an order number to an existing order after payment has been confirmed.
+ * This is the only place where order numbers are created — never at checkout time.
+ * Returns the assigned order number.
+ */
+export const assignOrderNumber = async (orderId: string): Promise<string> => {
+  const number = await generateOrderNumber()
+  const now = new Date().toISOString()
+
+  // Write the number directly so updateOrder's type constraint (which excludes
+  // `number`) does not prevent us from setting this field.
+  await db.updateItem<Order>(
+    ORDERS_TABLE,
+    { id: orderId },
+    'SET #number = :number, #updatedAt = :updatedAt',
+    { ':number': number, ':updatedAt': now },
+    { '#number': 'number', '#updatedAt': 'updatedAt' },
+  )
+
+  console.log('Order number assigned:', orderId, '->', number)
+  return number
 }
 
 export const createOrder = async (
@@ -372,11 +398,11 @@ export const createOrder = async (
   const timestamp = now.getTime()
   const isoString = now.toISOString()
 
-  // Generate unique ID and order number
-  const id = crypto.randomUUID()
-  console.log('Generating order number...')
-  const number = await generateOrderNumber()
-  console.log('Generated order number:', number)
+  // Generate a sequential numeric ID used as the Swish payeePaymentReference.
+  // The order number is intentionally NOT assigned here — it is only assigned
+  // in assignOrderNumber() once payment is confirmed, so the sequential
+  // order-number series never has gaps from unpaid checkouts.
+  const id = await generateOrderId()
 
   // Freeze product data from cart - copy full product details
   console.log('Freezing product data for', cart.length, 'items...')
@@ -411,10 +437,10 @@ export const createOrder = async (
 
   return {
     id,
-    number,
+    number: null, // Assigned only after payment is confirmed
     date: timestamp,
     date_change: timestamp,
-    status: 'active',
+    status: 'inactive', // awaiting payment
     delivery,
     delivery_cost,
     information,

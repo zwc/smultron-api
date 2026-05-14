@@ -478,6 +478,10 @@ export class SmultronStack extends cdk.Stack {
         handler: 'index.cancelSwish',
       },
     )
+    // Cancel needs to read the order, update its status, cancel stock reservations,
+    // and call the Swish API to cancel the payment instruction.
+    ordersTable.grantReadWriteData(cancelSwishFunction)
+    stockReservationsTable.grantReadWriteData(cancelSwishFunction)
 
     // Grant SES permissions for email notifications
     checkoutFunction.addToRolePolicy(

@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
-import { getOrderByNumber, updateOrder } from '../services/product';
-import { confirmReservations, cancelOrderReservations } from '../services/stock-reservation';
+import { getOrder, updateOrder, assignOrderNumber } from '../services/product';
+import { cancelOrderReservations } from '../services/stock-reservation';
 import { sendOrderConfirmationEmails, type OrderConfirmationData } from '../services/email';
-import { successResponse, errorResponse } from '../utils/response';
+import { successResponse } from '../utils/response';
 
 export const method = 'POST';
 export const route = '/swish/callback';
@@ -45,13 +45,15 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       currency,
     });
 
-    // Extract order number from payment reference
-    const orderNumber = payeePaymentReference;
+    // payeePaymentReference is the order ID (set at checkout time).
+    // Orders are looked up by their internal ID — not by order number — because
+    // order numbers are only assigned after payment is confirmed.
+    const orderId = payeePaymentReference;
 
     // Process payment status and update order accordingly
     switch (status) {
       case 'PAID':
-        console.log(`✓ Payment SUCCESSFUL for order ${orderNumber}`, {
+        console.log(`✓ Payment SUCCESSFUL for order ${orderId}`, {
           amount,
           currency,
           payerAlias,
@@ -59,118 +61,104 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         });
         
         try {
-          // Get the order
-          const order = await getOrderByNumber(orderNumber);
+          const order = await getOrder(orderId);
           if (!order) {
-            console.error(`Order ${orderNumber} not found`);
+            console.error(`Order ${orderId} not found`);
             break;
           }
 
-          // Confirm stock reservations (converts reservations to permanent stock reduction)
-          // Note: We need to get reservation IDs for this order, for now we'll skip this step
-          // and handle stock reduction through reservations system
-          // await confirmReservations(reservationIds);
+          // Assign the order number now that payment is confirmed. This is the
+          // first and only time a number is generated, keeping the sequence gap-free.
+          const orderNumber = await assignOrderNumber(order.id);
           
-          // Update order status to active (confirmed and paid)
+          // Mark order as paid/confirmed
           await updateOrder(order.id, { status: 'active' });
           
-          // Send confirmation emails
-          const emailData = createEmailData(order, 'swish', id, amount, currency);
+          // Send confirmation emails with the now-assigned order number
+          const emailData = createEmailData({ ...order, number: orderNumber }, 'swish', id, amount, currency);
           await sendOrderConfirmationEmails(emailData);
           
-          console.log(`Order ${orderNumber} confirmed and emails sent`);
+          console.log(`Order ${orderId} confirmed with number ${orderNumber} and emails sent`);
         } catch (error) {
-          console.error(`Failed to process successful payment for order ${orderNumber}:`, error);
+          console.error(`Failed to process successful payment for order ${orderId}:`, error);
         }
         break;
 
       case 'DECLINED':
-        console.log(`✗ Payment DECLINED for order ${orderNumber}`);
+        console.log(`✗ Payment DECLINED for order ${orderId}`);
         
         try {
-          // Get the order
-          const order = await getOrderByNumber(orderNumber);
+          const order = await getOrder(orderId);
           if (!order) {
-            console.error(`Order ${orderNumber} not found`);
+            console.error(`Order ${orderId} not found`);
             break;
           }
 
-          // Cancel stock reservations (releases reserved stock)
           await cancelOrderReservations(order.id);
-          
-          // Update order status to invalid (payment declined)
           await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderNumber} marked as invalid, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
         } catch (error) {
-          console.error(`Failed to process declined payment for order ${orderNumber}:`, error);
+          console.error(`Failed to process declined payment for order ${orderId}:`, error);
         }
         break;
 
       case 'ERROR':
-        console.error(`✗ Payment ERROR for order ${orderNumber}:`, {
+        console.error(`✗ Payment ERROR for order ${orderId}:`, {
           errorCode,
           errorMessage,
         });
         
         try {
-          // Get the order
-          const order = await getOrderByNumber(orderNumber);
+          const order = await getOrder(orderId);
           if (!order) {
-            console.error(`Order ${orderNumber} not found`);
+            console.error(`Order ${orderId} not found`);
             break;
           }
 
-          // Cancel stock reservations (releases reserved stock)
           await cancelOrderReservations(order.id);
-          
-          // Update order status to invalid (payment error)
           await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderNumber} marked as invalid due to payment error, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid due to payment error, stock reservations cancelled`);
         } catch (error) {
-          console.error(`Failed to process payment error for order ${orderNumber}:`, error);
+          console.error(`Failed to process payment error for order ${orderId}:`, error);
         }
         break;
 
       case 'CANCELLED':
-        console.log(`✗ Payment CANCELLED for order ${orderNumber}`);
+        console.log(`✗ Payment CANCELLED for order ${orderId}`);
         
         try {
-          // Get the order
-          const order = await getOrderByNumber(orderNumber);
+          const order = await getOrder(orderId);
           if (!order) {
-            console.error(`Order ${orderNumber} not found`);
+            console.error(`Order ${orderId} not found`);
             break;
           }
 
-          // Cancel stock reservations (releases reserved stock)
           await cancelOrderReservations(order.id);
-          
-          // Update order status to invalid (payment cancelled)
           await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderNumber} marked as invalid, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
         } catch (error) {
-          console.error(`Failed to process cancelled payment for order ${orderNumber}:`, error);
+          console.error(`Failed to process cancelled payment for order ${orderId}:`, error);
         }
         break;
 
       case 'CREATED':
-        console.log(`Payment request CREATED for order ${orderNumber}`);
+        console.log(`Payment request CREATED for order ${orderId}`);
         // Payment request created, waiting for customer to approve
         // No action needed yet - stock is already reserved
         break;
 
       default:
-        console.warn(`Unknown payment status: ${status} for order ${orderNumber}`);
+        console.warn(`Unknown payment status: ${status} for order ${orderId}`);
     }
 
     // Always return 200 OK to acknowledge the callback
     // Swish will retry if we don't return 200
     return successResponse({ 
       received: true,
-      orderNumber,
+      orderId,
       status,
     });
 

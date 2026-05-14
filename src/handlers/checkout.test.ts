@@ -29,11 +29,11 @@ const mockProduct = {
 }
 
 const mockOrder = {
-  id: 'order-123',
-  number: '2604001',
+  id: '123',
+  number: null, // Order number is null until payment is confirmed
   date: Date.now(),
   date_change: Date.now(),
-  status: 'active' as const,
+  status: 'inactive' as const,
   delivery: 'shipping',
   delivery_cost: 49,
   information: {
@@ -68,15 +68,20 @@ mock.module('../services/dynamodb', () => ({
   scanTable: async () => [],
   queryItems: async () => [],
   updateItem: async () => ({}),
+  atomicIncrement: async () => 1,
 }))
 
 mock.module('../services/product', () => ({
   getProduct: async () => ({ ...mockProduct }),
-  createOrder: async () => ({ ...mockOrder, status: 'inactive' }),
+  createOrder: async () => ({ ...mockOrder }),
   saveOrder: mockSaveOrder,
   updateProduct: async () => ({}),
-  getOrderByNumber: async () => null,
   updateOrder: async () => ({}),
+  getOrderByNumber: async () => null,
+  getAllOrders: async () => [],
+  getOrder: async () => null,
+  assignOrderNumber: async () => 'mocked-number',
+  saveOrder: mockSaveOrder,
 }))
 
 mock.module('../services/swish', () => ({
@@ -172,24 +177,26 @@ describe('Checkout Handler', () => {
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(201)
-    expect(body.data.order.id).toBe('order-123')
-    expect(body.data.order.number).toBe('2604001')
+    expect(body.data.order.id).toBe('123')
+    // Order number is null at checkout — assigned only after payment is confirmed
+    expect(body.data.order.number).toBeNull()
     expect(body.data.payment.method).toBe('swish')
     expect(body.data.payment.status).toBe('created')
     expect(body.data.payment.reference).toBe('MOCK-SWISH-ID-001')
   })
 
-  test('calls createSwishPayment with correct arguments', async () => {
+  test('calls createSwishPayment with order.id (not order number)', async () => {
     const event = makeCheckoutEvent(validCheckoutBody)
     await handler(event)
 
     expect(mockCreateSwishPayment).toHaveBeenCalledTimes(1)
-    const [orderNumber, amount, phone, message] =
+    const [paymentReference, amount, phone, message] =
       mockCreateSwishPayment.mock.calls[0]
-    expect(orderNumber).toBe('2604001')
+    // Payment reference is the order ID so the callback can look up the order
+    expect(paymentReference).toBe('123')
     expect(amount).toBe(249) // 100 * 2 + 49 delivery
     expect(phone).toBe('0701234567')
-    expect(message).toBe('Order 2604001')
+    expect(message).toBe('Order 123')
   })
 
   test('reserves stock before payment', async () => {
@@ -199,13 +206,14 @@ describe('Checkout Handler', () => {
     expect(mockReserveStock).toHaveBeenCalledTimes(1)
   })
 
-  test('saves order with inactive status before payment', async () => {
+  test('saves order with inactive status and no order number before payment', async () => {
     const event = makeCheckoutEvent(validCheckoutBody)
     await handler(event)
 
     expect(mockSaveOrder).toHaveBeenCalledTimes(1)
     const savedOrder = mockSaveOrder.mock.calls[0][0] as Record<string, unknown>
     expect(savedOrder.status).toBe('inactive')
+    expect(savedOrder.number).toBeNull()
   })
 
   test('cancels reservations when swish payment fails', async () => {

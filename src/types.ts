@@ -82,12 +82,24 @@ export interface AdminCategoriesResponse {
   }
 }
 
+// Semantic aliases for order status values:
+//   inactive = checkout attempt, awaiting payment confirmation
+//   active   = paid and confirmed order (has an order number)
+//   invalid  = payment failed, declined, or cancelled
+export type OrderStatus = 'active' | 'inactive' | 'invalid'
+
 export interface Order {
   id: string
-  number: string // Format: YYMMXXX (e.g., "2510001")
+  // Assigned only after payment is confirmed. null while the checkout is pending.
+  // The sequential order-number series (YYMMXXX) must never contain gaps from
+  // unpaid or cancelled checkouts, so no number is reserved until payment succeeds.
+  number: string | null
+  // Swish instruction ID stored so the cancel endpoint can cancel the Swish payment
+  // without the caller having to supply a separate payment reference.
+  swish_payment_id?: string
   date: number // Timestamp
   date_change: number // Timestamp
-  status: 'active' | 'inactive' | 'invalid'
+  status: OrderStatus
   delivery: string
   delivery_cost: number
   information: OrderInformation

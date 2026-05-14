@@ -100,3 +100,27 @@ export const updateItem = async <T>(
   );
   return result.Attributes as T;
 };
+
+/**
+ * Atomically increments a numeric attribute on an item and returns the new value.
+ * Uses DynamoDB's ADD operation which is safe under concurrent writes — two Lambda
+ * invocations incrementing the same counter will always receive distinct values.
+ * If the item or attribute does not yet exist it is initialised to 1.
+ */
+export const atomicIncrement = async (
+  tableName: string,
+  key: Record<string, any>,
+  attributeName: string,
+): Promise<number> => {
+  const result = await docClient.send(
+    new UpdateCommand({
+      TableName: tableName,
+      Key: key,
+      UpdateExpression: 'ADD #attr :one',
+      ExpressionAttributeNames: { '#attr': attributeName },
+      ExpressionAttributeValues: { ':one': 1 },
+      ReturnValues: 'ALL_NEW',
+    }),
+  )
+  return result.Attributes?.[attributeName] as number
+}
