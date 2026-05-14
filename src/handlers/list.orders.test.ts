@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 const paidOrder = {
   id: 'order-paid',
@@ -39,6 +40,7 @@ const mockGetAllOrders = mock(async (status?: string) => {
 const mockGetOrder = mock(async () => null)
 
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   getAllOrders: mockGetAllOrders,
   getOrder: mockGetOrder,
 }))

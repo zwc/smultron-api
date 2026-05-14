@@ -1,14 +1,16 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
+
 const mockGetOrder = mock(async () => null)
 
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   getOrder: mockGetOrder,
 }))
 
 const { handler } = await import('./get.order.status')
-
 const makeEvent = (id?: string): APIGatewayProxyEvent =>
   ({
     pathParameters: id ? { id } : {},

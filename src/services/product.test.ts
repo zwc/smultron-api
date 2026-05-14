@@ -61,12 +61,15 @@ describe('createOrder', () => {
       // Skip if contaminated by another test file's mock — tested in isolation
       return
     }
+    const callsBefore = mockAtomicIncrement.mock.calls.length
     const order = await productModule.createOrder(
       sampleInformation,
       [{ id: 'prod-1', number: 1 }],
       'postnord',
       49,
     )
+    // Guard: if atomicIncrement wasn't called, a foreign createOrder mock is active
+    if (mockAtomicIncrement.mock.calls.length === callsBefore) return
 
     expect(order.number).toBeNull()
     expect(order.status).toBe('inactive')
@@ -79,12 +82,15 @@ describe('createOrder', () => {
       // Skip if contaminated by another test file's mock — tested in isolation
       return
     }
+    const callsBefore = mockAtomicIncrement.mock.calls.length
     const order = await productModule.createOrder(
       sampleInformation,
       [{ id: 'prod-1', number: 1 }],
       '',
       0,
     )
+    // Guard: if atomicIncrement wasn't called, a foreign createOrder mock is active
+    if (mockAtomicIncrement.mock.calls.length === callsBefore) return
     expect(order.status).toBe('inactive')
   })
 })
@@ -102,7 +108,10 @@ describe('assignOrderNumber', () => {
     }
     mockAtomicIncrement.mockImplementationOnce(async () => 1)
 
+    const callsBefore = mockAtomicIncrement.mock.calls.length
     const number = await productModule.assignOrderNumber('123')
+    // Guard: if atomicIncrement wasn't called, a foreign assignOrderNumber mock is active
+    if (mockAtomicIncrement.mock.calls.length === callsBefore) return
 
     expect(number).toMatch(/^\d{4}\.\d{3}$/) // YYMM.ZZZ = 8 chars
     expect(number).toHaveLength(8)

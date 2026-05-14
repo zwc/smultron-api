@@ -1,6 +1,6 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import { createProduct, createCategory } from '../services/product'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 // Define mocks first
 const mockAdminGetProducts = mock(async () => ({ items: [], total: 0 }))
@@ -17,13 +17,9 @@ mock.module('../services/dynamodb', () => ({
 
 // Mock the module
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   adminGetProducts: mockAdminGetProducts,
   getAllCategories: mockGetAllCategories,
-  getActiveProducts: async () => [],
-  saveProduct: async () => undefined,
-  saveCategory: async () => undefined,
-  createCategory,
-  createProduct,
 }))
 
 // Import the handler

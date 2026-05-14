@@ -2,6 +2,8 @@ import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
 
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
+
 const mockUpdateProduct = mock(async () => ({}))
 
 mock.module('../services/dynamodb', () => ({
@@ -14,6 +16,7 @@ mock.module('../services/dynamodb', () => ({
 }))
 
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   updateProduct: mockUpdateProduct,
 }))
 

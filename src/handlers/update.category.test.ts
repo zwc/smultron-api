@@ -13,7 +13,10 @@ mock.module('../services/dynamodb', () => ({
   updateItem: async () => ({}),
 }))
 
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
+
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   updateCategory: mockUpdateCategory,
 }))
 

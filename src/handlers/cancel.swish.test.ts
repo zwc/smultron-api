@@ -38,12 +38,12 @@ mock.module('../services/swish', () => ({
   getSwishPaymentStatus: mock(() => Promise.resolve(null)),
 }))
 
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
+
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   getOrder: mockGetOrder,
   updateOrder: mockUpdateOrder,
-  // Pre-register the updateCategory binding so update.category.ts can import
-  // it without an ESM live-binding conflict when tests share the same process.
-  updateCategory: async () => ({}),
 }))
 
 mock.module('../services/stock-reservation', () => ({

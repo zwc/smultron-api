@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 // Mock DynamoDB network calls
 mock.module('../services/dynamodb', () => ({
@@ -10,6 +11,41 @@ mock.module('../services/dynamodb', () => ({
   scanTable: async () => [],
   queryItems: async () => [],
   updateItem: async () => ({}),
+}))
+
+// Provide a complete product mock so all ESM live bindings are established.
+// createProduct is a pure function so we inline a realistic implementation;
+// saveProduct is a no-op since the handler returns the product from createProduct.
+mock.module('../services/product', () => ({
+  ...productMockDefaults,
+  createProduct: (data: Record<string, any>) => {
+    const id = crypto.randomUUID()
+    const now = new Date().toISOString()
+    const category = data.category ?? ''
+    const slug =
+      data.slug ??
+      `${category ? category + '-' : ''}${data.title}`
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+    return {
+      article: '',
+      price_reduced: 0,
+      description: [],
+      tag: '',
+      index: 0,
+      max_order: 999,
+      image: '',
+      images: [],
+      ...data,
+      id,
+      slug,
+      category,
+      status: data.status ?? 'active',
+      createdAt: now,
+      updatedAt: now,
+    }
+  },
+  saveProduct: async () => undefined,
 }))
 
 const { handler } = await import('./create.product')

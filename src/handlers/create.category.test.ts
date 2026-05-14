@@ -1,6 +1,7 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 // Mock DynamoDB network calls
 mock.module('../services/dynamodb', () => ({
@@ -10,6 +11,28 @@ mock.module('../services/dynamodb', () => ({
   scanTable: async () => [],
   queryItems: async () => [],
   updateItem: async () => ({}),
+}))
+
+// Provide a complete product mock so all ESM live bindings are established.
+// createCategory is a pure function so we inline a realistic implementation;
+// saveCategory is a no-op since the handler returns the result of createCategory.
+mock.module('../services/product', () => ({
+  ...productMockDefaults,
+  createCategory: (data: Record<string, any>) => {
+    const id = crypto.randomUUID()
+    const now = new Date().toISOString()
+    return {
+      brand: '',
+      subtitle: '',
+      index: 0,
+      status: 'active',
+      ...data,
+      id,
+      createdAt: now,
+      updatedAt: now,
+    }
+  },
+  saveCategory: async () => undefined,
 }))
 
 const { handler } = await import('./create.category')

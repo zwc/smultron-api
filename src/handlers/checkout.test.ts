@@ -1,5 +1,6 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
 const mockCreateSwishPayment = mock(() =>
   Promise.resolve({
@@ -72,16 +73,15 @@ mock.module('../services/dynamodb', () => ({
 }))
 
 mock.module('../services/product', () => ({
+  ...productMockDefaults,
   getProduct: async () => ({ ...mockProduct }),
   createOrder: async () => ({ ...mockOrder }),
   saveOrder: mockSaveOrder,
   updateProduct: async () => ({}),
   updateOrder: async () => ({}),
   getOrderByNumber: async () => null,
-  getAllOrders: async () => [],
   getOrder: async () => null,
   assignOrderNumber: async () => 'mocked-number',
-  saveOrder: mockSaveOrder,
 }))
 
 mock.module('../services/swish', () => ({
