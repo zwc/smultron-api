@@ -8,6 +8,8 @@
     "test:integration": "bun test tests/integration/",
     "test:integration:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/integration/",
     "test:all": "bun test src/ && bun test tests/integration/",
+    "test:e2e": "bun test tests/e2e/",
+    "test:e2e:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/e2e/",
     "test:order-flow": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts",
     "test:order-flow:declined": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts --test-declined",
     "format": "prettier --write .",

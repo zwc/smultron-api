@@ -1,141 +1,160 @@
-import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
 
-const sesClient = new SESClient({ region: process.env.AWS_REGION || 'eu-north-1' });
+const sesClient = new SESClient({
+  region: process.env.AWS_REGION || 'eu-north-1',
+})
 
 // Email configuration — override via environment variables in each deployment stage.
 // FROM_EMAIL must be a verified SES identity.
-const FROM_EMAIL = process.env.FROM_EMAIL || 'minibutik@smultronet.nu';
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'minibutik@smultronet.nu';
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@zwc.se'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'noreply@zwc.se'
 
 export interface OrderConfirmationData {
-  orderId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  orderTotal: number;
-  currency: string;
+  orderId: string
+  customerName: string
+  customerEmail: string
+  customerPhone?: string
+  orderTotal: number
+  currency: string
   cartItems: Array<{
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
-  deliveryMethod: string;
-  deliveryCost: number;
-  paymentMethod: string;
-  paymentReference?: string;
+    name: string
+    quantity: number
+    price: number
+  }>
+  deliveryMethod: string
+  deliveryCost: number
+  paymentMethod: string
+  paymentReference?: string
   deliveryAddress?: {
-    company?: string;
-    address: string;
-    zip: string;
-    city: string;
-  };
+    company?: string
+    address: string
+    zip: string
+    city: string
+  }
 }
 
 /**
  * Send order confirmation email to customer
  */
-export async function sendCustomerOrderConfirmation(data: OrderConfirmationData): Promise<void> {
-  const subject = `Order Confirmation - ${data.orderId}`;
-  
-  const htmlBody = generateCustomerEmailHTML(data);
-  const textBody = generateCustomerEmailText(data);
+export async function sendCustomerOrderConfirmation(
+  data: OrderConfirmationData,
+): Promise<void> {
+  const subject = `Order Confirmation - ${data.orderId}`
+
+  const htmlBody = generateCustomerEmailHTML(data)
+  const textBody = generateCustomerEmailText(data)
 
   try {
-    await sesClient.send(new SendEmailCommand({
-      Source: FROM_EMAIL,
-      Destination: {
-        ToAddresses: [data.customerEmail],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8',
+    await sesClient.send(
+      new SendEmailCommand({
+        Source: FROM_EMAIL,
+        Destination: {
+          ToAddresses: [data.customerEmail],
         },
-        Body: {
-          Html: {
-            Data: htmlBody,
+        Message: {
+          Subject: {
+            Data: subject,
             Charset: 'UTF-8',
           },
-          Text: {
-            Data: textBody,
-            Charset: 'UTF-8',
+          Body: {
+            Html: {
+              Data: htmlBody,
+              Charset: 'UTF-8',
+            },
+            Text: {
+              Data: textBody,
+              Charset: 'UTF-8',
+            },
           },
         },
-      },
-    }));
+      }),
+    )
 
-    console.log(`Order confirmation email sent to customer: ${data.customerEmail}`, {
-      orderId: data.orderId,
-      customerEmail: data.customerEmail,
-    });
+    console.log(
+      `Order confirmation email sent to customer: ${data.customerEmail}`,
+      {
+        orderId: data.orderId,
+        customerEmail: data.customerEmail,
+      },
+    )
   } catch (error) {
-    console.error('Failed to send customer confirmation email:', error);
-    throw error;
+    console.error('Failed to send customer confirmation email:', error)
+    throw error
   }
 }
 
 /**
  * Send order notification email to Smultronet admin
  */
-export async function sendAdminOrderNotification(data: OrderConfirmationData): Promise<void> {
-  const subject = `New Order Received - ${data.orderId}`;
-  
-  const htmlBody = generateAdminEmailHTML(data);
-  const textBody = generateAdminEmailText(data);
+export async function sendAdminOrderNotification(
+  data: OrderConfirmationData,
+): Promise<void> {
+  const subject = `New Order Received - ${data.orderId}`
+
+  const htmlBody = generateAdminEmailHTML(data)
+  const textBody = generateAdminEmailText(data)
 
   try {
-    await sesClient.send(new SendEmailCommand({
-      Source: FROM_EMAIL,
-      Destination: {
-        ToAddresses: [ADMIN_EMAIL],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8',
+    await sesClient.send(
+      new SendEmailCommand({
+        Source: FROM_EMAIL,
+        Destination: {
+          ToAddresses: [ADMIN_EMAIL],
         },
-        Body: {
-          Html: {
-            Data: htmlBody,
+        Message: {
+          Subject: {
+            Data: subject,
             Charset: 'UTF-8',
           },
-          Text: {
-            Data: textBody,
-            Charset: 'UTF-8',
+          Body: {
+            Html: {
+              Data: htmlBody,
+              Charset: 'UTF-8',
+            },
+            Text: {
+              Data: textBody,
+              Charset: 'UTF-8',
+            },
           },
         },
-      },
-    }));
+      }),
+    )
 
     console.log(`Order notification email sent to admin: ${ADMIN_EMAIL}`, {
       orderId: data.orderId,
       customerEmail: data.customerEmail,
-    });
+    })
   } catch (error) {
-    console.error('Failed to send admin notification email:', error);
-    throw error;
+    console.error('Failed to send admin notification email:', error)
+    throw error
   }
 }
 
 /**
  * Send both customer confirmation and admin notification
  */
-export async function sendOrderConfirmationEmails(data: OrderConfirmationData): Promise<void> {
+export async function sendOrderConfirmationEmails(
+  data: OrderConfirmationData,
+): Promise<void> {
   await Promise.all([
     sendCustomerOrderConfirmation(data),
     sendAdminOrderNotification(data),
-  ]);
+  ])
 }
 
 function generateCustomerEmailHTML(data: OrderConfirmationData): string {
-  const itemsHTML = data.cartItems.map(item => `
+  const itemsHTML = data.cartItems
+    .map(
+      (item) => `
     <tr>
       <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)} ${data.currency}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * item.price).toFixed(2)} ${data.currency}</td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join('')
 
   return `
     <!DOCTYPE html>
@@ -156,12 +175,16 @@ function generateCustomerEmailHTML(data: OrderConfirmationData): string {
             <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
             ${data.paymentReference ? `<p><strong>Payment Reference:</strong> ${data.paymentReference}</p>` : ''}
             <p><strong>Delivery Method:</strong> ${data.deliveryMethod}</p>
-            ${data.deliveryAddress ? `
+            ${
+              data.deliveryAddress
+                ? `
             <p><strong>Delivery Address:</strong><br>
             ${data.deliveryAddress.company ? data.deliveryAddress.company + '<br>' : ''}
             ${data.deliveryAddress.address}<br>
             ${data.deliveryAddress.zip} ${data.deliveryAddress.city}</p>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <div style="background-color: white; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
@@ -179,12 +202,16 @@ function generateCustomerEmailHTML(data: OrderConfirmationData): string {
                     ${itemsHTML}
                 </tbody>
                 <tfoot>
-                    ${data.deliveryCost > 0 ? `
+                    ${
+                      data.deliveryCost > 0
+                        ? `
                     <tr>
                         <td colspan="3" style="padding: 8px; text-align: right; font-weight: bold;">Delivery:</td>
                         <td style="padding: 8px; text-align: right; font-weight: bold;">${data.deliveryCost.toFixed(2)} ${data.currency}</td>
                     </tr>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                     <tr style="background-color: #f8f9fa;">
                         <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 1.1em;">Total:</td>
                         <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 1.1em;">${data.orderTotal.toFixed(2)} ${data.currency}</td>
@@ -200,13 +227,16 @@ function generateCustomerEmailHTML(data: OrderConfirmationData): string {
         </div>
     </body>
     </html>
-  `;
+  `
 }
 
 function generateCustomerEmailText(data: OrderConfirmationData): string {
-  const itemsText = data.cartItems.map(item => 
-    `${item.name} x${item.quantity} - ${(item.quantity * item.price).toFixed(2)} ${data.currency}`
-  ).join('\n');
+  const itemsText = data.cartItems
+    .map(
+      (item) =>
+        `${item.name} x${item.quantity} - ${(item.quantity * item.price).toFixed(2)} ${data.currency}`,
+    )
+    .join('\n')
 
   return `
 Order Confirmation
@@ -218,10 +248,14 @@ Order Details:
 - Payment Method: ${data.paymentMethod}
 ${data.paymentReference ? `- Payment Reference: ${data.paymentReference}` : ''}
 - Delivery Method: ${data.deliveryMethod}
-${data.deliveryAddress ? `
+${
+  data.deliveryAddress
+    ? `
 - Delivery Address:
   ${data.deliveryAddress.company ? data.deliveryAddress.company + '\n  ' : ''}${data.deliveryAddress.address}
-  ${data.deliveryAddress.zip} ${data.deliveryAddress.city}` : ''}
+  ${data.deliveryAddress.zip} ${data.deliveryAddress.city}`
+    : ''
+}
 
 Order Items:
 ${itemsText}
@@ -233,18 +267,22 @@ We'll process your order and contact you if we need any additional information.
 If you have any questions about your order, please contact us at ${ADMIN_EMAIL}.
 
 Thank you for choosing Smultron!
-  `.trim();
+  `.trim()
 }
 
 function generateAdminEmailHTML(data: OrderConfirmationData): string {
-  const itemsHTML = data.cartItems.map(item => `
+  const itemsHTML = data.cartItems
+    .map(
+      (item) => `
     <tr>
       <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)} ${data.currency}</td>
       <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.quantity * item.price).toFixed(2)} ${data.currency}</td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join('')
 
   return `
     <!DOCTYPE html>
@@ -268,12 +306,16 @@ function generateAdminEmailHTML(data: OrderConfirmationData): string {
             <p><strong>Payment Method:</strong> ${data.paymentMethod}</p>
             ${data.paymentReference ? `<p><strong>Payment Reference:</strong> ${data.paymentReference}</p>` : ''}
             <p><strong>Delivery Method:</strong> ${data.deliveryMethod}</p>
-            ${data.deliveryAddress ? `
+            ${
+              data.deliveryAddress
+                ? `
             <p><strong>Delivery Address:</strong><br>
             ${data.deliveryAddress.company ? data.deliveryAddress.company + '<br>' : ''}
             ${data.deliveryAddress.address}<br>
             ${data.deliveryAddress.zip} ${data.deliveryAddress.city}</p>
-            ` : ''}
+            `
+                : ''
+            }
         </div>
 
         <div style="background-color: white; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 20px;">
@@ -291,12 +333,16 @@ function generateAdminEmailHTML(data: OrderConfirmationData): string {
                     ${itemsHTML}
                 </tbody>
                 <tfoot>
-                    ${data.deliveryCost > 0 ? `
+                    ${
+                      data.deliveryCost > 0
+                        ? `
                     <tr>
                         <td colspan="3" style="padding: 8px; text-align: right; font-weight: bold;">Delivery:</td>
                         <td style="padding: 8px; text-align: right; font-weight: bold;">${data.deliveryCost.toFixed(2)} ${data.currency}</td>
                     </tr>
-                    ` : ''}
+                    `
+                        : ''
+                    }
                     <tr style="background-color: #f8f9fa;">
                         <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 1.1em;">Total:</td>
                         <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 1.1em;">${data.orderTotal.toFixed(2)} ${data.currency}</td>
@@ -311,13 +357,16 @@ function generateAdminEmailHTML(data: OrderConfirmationData): string {
         </div>
     </body>
     </html>
-  `;
+  `
 }
 
 function generateAdminEmailText(data: OrderConfirmationData): string {
-  const itemsText = data.cartItems.map(item => 
-    `${item.name} x${item.quantity} - ${(item.quantity * item.price).toFixed(2)} ${data.currency}`
-  ).join('\n');
+  const itemsText = data.cartItems
+    .map(
+      (item) =>
+        `${item.name} x${item.quantity} - ${(item.quantity * item.price).toFixed(2)} ${data.currency}`,
+    )
+    .join('\n')
 
   return `
 New Order Received
@@ -332,10 +381,14 @@ ${data.customerPhone ? `- Phone: ${data.customerPhone}` : ''}
 - Payment Method: ${data.paymentMethod}
 ${data.paymentReference ? `- Payment Reference: ${data.paymentReference}` : ''}
 - Delivery Method: ${data.deliveryMethod}
-${data.deliveryAddress ? `
+${
+  data.deliveryAddress
+    ? `
 - Delivery Address:
   ${data.deliveryAddress.company ? data.deliveryAddress.company + '\n  ' : ''}${data.deliveryAddress.address}
-  ${data.deliveryAddress.zip} ${data.deliveryAddress.city}` : ''}
+  ${data.deliveryAddress.zip} ${data.deliveryAddress.city}`
+    : ''
+}
 
 Order Items:
 ${itemsText}
@@ -345,5 +398,5 @@ Total: ${data.orderTotal.toFixed(2)} ${data.currency}
 
 Please process this order in the admin panel and confirm delivery details with the customer.
 Login to admin: https://smultron.zwc.se/admin
-  `.trim();
+  `.trim()
 }
