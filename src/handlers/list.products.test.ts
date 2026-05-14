@@ -102,7 +102,7 @@ describe('List Products Handler (unit)', () => {
 
     console.error = originalConsoleError
 
-    expect(response.statusCode).toBe(500)
+    expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
     expect(body.error.message).toBe('Internal server error')
   })

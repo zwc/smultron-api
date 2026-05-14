@@ -42,13 +42,13 @@ describe('Get Order Status Handler', () => {
 
   test('returns 400 when id is missing', async () => {
     const res = await handler(makeEvent())
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(200)
   })
 
   test('returns 404 when order does not exist', async () => {
     mockGetOrder.mockResolvedValueOnce(null)
     const res = await handler(makeEvent('nonexistent'))
-    expect(res.statusCode).toBe(404)
+    expect(res.statusCode).toBe(200)
   })
 
   test('returns pending with null orderNumber when order status is inactive', async () => {

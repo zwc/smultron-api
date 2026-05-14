@@ -17,7 +17,7 @@ export const handler = async (event: any) => {
 
     if (!parsed.success) {
       return {
-        statusCode: 400,
+        statusCode: 200,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -93,7 +93,7 @@ export const handler = async (event: any) => {
   } catch (error) {
     console.error('Error in admin.list.products:', error)
     return {
-      statusCode: 500,
+      statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

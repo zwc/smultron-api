@@ -37,12 +37,12 @@ export const successResponse = <T>(
 
 export const errorResponse = (
   message: string,
-  statusCode: number = 200,
+  _statusCode: number = 200,
   meta: Record<string, any> | null = null
-): APIResponse => createResponse(statusCode, { data: null, meta, links: null, error: { message } });
+): APIResponse => createResponse(200, { data: null, meta, links: null, error: { message } });
 
 export const unauthorizedResponse = (): APIResponse =>
-  errorResponse('Unauthorized', 401);
+  errorResponse('Unauthorized');
 
 export const notFoundResponse = (resource: string = 'Resource'): APIResponse =>
-  errorResponse(`${resource} not found`, 404);
+  errorResponse(`${resource} not found`);

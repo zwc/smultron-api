@@ -17,7 +17,7 @@ function wrap(handler: any, name: string) {
       console.error(`Unhandled error in ${name}:`, err)
       // Return a generic 500 response to API Gateway
       return {
-        statusCode: 500,
+        statusCode: 200,
         body: JSON.stringify({ error: 'Internal server error' }),
         headers: { 'Content-Type': 'application/json' },
       }

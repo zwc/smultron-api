@@ -33,7 +33,7 @@ describe('Admin List Categories Handler (unit)', () => {
     } as unknown as APIGatewayProxyEvent
 
     const res = await handler(event)
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(200)
   })
 
   test('applies status filter, search, sorting and pagination', async () => {

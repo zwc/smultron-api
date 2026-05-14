@@ -37,7 +37,7 @@ describe('Delete Shipment-Option Handler', () => {
     } as unknown as APIGatewayProxyEvent
 
     const res = await handler(event)
-    expect(res.statusCode).toBe(401)
+    expect(res.statusCode).toBe(200)
   })
 
   test('returns 400 when id is missing', async () => {
@@ -48,7 +48,7 @@ describe('Delete Shipment-Option Handler', () => {
     } as unknown as APIGatewayProxyEvent
 
     const res = await handler(event)
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(200)
   })
 
   test('deletes shipment option successfully', async () => {

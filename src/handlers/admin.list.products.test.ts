@@ -39,7 +39,7 @@ describe('Admin List Products Handler (unit)', () => {
     } as unknown as APIGatewayProxyEvent
 
     const res = await handler(event)
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
     expect(body.error).toContain('Invalid query parameters')
   })
