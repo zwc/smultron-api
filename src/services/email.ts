@@ -6,8 +6,8 @@ const sesClient = new SESClient({
 
 // Email configuration — override via environment variables in each deployment stage.
 // FROM_EMAIL must be a verified SES identity.
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@zwc.se'
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'noreply@zwc.se'
+const FROM_EMAIL = process.env.FROM_EMAIL || 'minibutik@smultronet.nu'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'minibutik@smultronet.nu'
 
 export interface OrderConfirmationData {
   orderId: string
