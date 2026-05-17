@@ -205,7 +205,7 @@ export const handler = async (
           order.id,
           totalAmount,
           orderData.phone,
-          `Beställning ${order.id}`,
+          `Minibutik`,
         )
 
         // Persist the Swish instruction ID so the cancel endpoint can cancel it

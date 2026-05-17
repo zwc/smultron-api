@@ -197,7 +197,7 @@ describe('Checkout Handler', () => {
     expect(paymentReference).toBe('123')
     expect(amount).toBe(249) // 100 * 2 + 49 delivery
     expect(phone).toBe('0701234567')
-    expect(message).toBe('Beställning 123')
+    expect(message).toBe('Minibutik')
   })
 
   test('reserves stock before payment', async () => {
