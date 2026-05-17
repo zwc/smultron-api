@@ -48,10 +48,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Parse and validate query parameters
     const params = QueryParamsSchema.parse(qs);
 
-    // Get orders — default to 'active' (paid/confirmed) so unpaid checkout attempts
-    // are not shown as real orders. Pass ?status=inactive to inspect checkout attempts.
-    const statusFilter = params.status ?? 'active'
-    let orders = await getAllOrders(statusFilter);
+    let orders = await getAllOrders(params.status);
 
     // Apply search filter if query string is provided
     if (params.q) {

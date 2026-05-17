@@ -65,15 +65,13 @@ describe('List Orders Handler', () => {
     process.env.DISABLE_AUTH = 'false'
   })
 
-  test('defaults to active (paid) orders only — unpaid orders not shown', async () => {
+  test('defaults to all orders when no status filter is provided', async () => {
     const response = await handler(makeEvent())
     expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
 
-    // Verify only active (paid) orders are returned by default
-    expect(mockGetAllOrders).toHaveBeenCalledWith('active')
-    expect(body.data).toHaveLength(1)
-    expect(body.data[0].id).toBe('order-paid')
+    expect(mockGetAllOrders).toHaveBeenCalledWith(undefined)
+    expect(body.data).toHaveLength(2)
   })
 
   test('explicit status=active also returns only paid orders', async () => {
