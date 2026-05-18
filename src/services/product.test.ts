@@ -25,6 +25,8 @@ mock.module('./dynamodb', () => ({
 // Each test guards against this by validating the function type.
 const productModule = await import('./product')
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
 const sampleInformation = {
   name: 'Test User',
   company: '',
@@ -58,40 +60,63 @@ describe('createOrder', () => {
 
   test('returns order with number=null (not assigned until payment confirmed)', async () => {
     if (typeof productModule.createOrder !== 'function') {
-      // Skip if contaminated by another test file's mock — tested in isolation
       return
     }
-    const callsBefore = mockAtomicIncrement.mock.calls.length
     const order = await productModule.createOrder(
       sampleInformation,
       [{ id: 'prod-1', number: 1 }],
       'postnord',
       49,
     )
-    // Guard: if atomicIncrement wasn't called, a foreign createOrder mock is active
-    if (mockAtomicIncrement.mock.calls.length === callsBefore) return
+    // Guard: if id is not a UUID, a foreign mock is active — skip
+    if (!UUID_RE.test(order.id ?? '')) return
 
     expect(order.number).toBeNull()
-    expect(order.status).toBe('inactive')
-    expect(typeof order.id).toBe('string')
-    expect(order.id.length).toBeGreaterThan(0)
+    expect(order.status).toBe('pending')
+    expect(order.id).toMatch(UUID_RE)
   })
 
-  test('sets status to inactive at creation', async () => {
+  test('sets status to pending at creation', async () => {
     if (typeof productModule.createOrder !== 'function') {
-      // Skip if contaminated by another test file's mock — tested in isolation
       return
     }
-    const callsBefore = mockAtomicIncrement.mock.calls.length
     const order = await productModule.createOrder(
       sampleInformation,
       [{ id: 'prod-1', number: 1 }],
       '',
       0,
     )
-    // Guard: if atomicIncrement wasn't called, a foreign createOrder mock is active
-    if (mockAtomicIncrement.mock.calls.length === callsBefore) return
-    expect(order.status).toBe('inactive')
+    if (!UUID_RE.test(order.id ?? '')) return
+    expect(order.status).toBe('pending')
+  })
+
+  test('stores user-provided orderId on the order', async () => {
+    if (typeof productModule.createOrder !== 'function') {
+      return
+    }
+    const order = await productModule.createOrder(
+      sampleInformation,
+      [{ id: 'prod-1', number: 1 }],
+      '',
+      0,
+      'my-custom-ref-123',
+    )
+    if (!UUID_RE.test(order.id ?? '')) return
+    expect(order.orderId).toBe('my-custom-ref-123')
+  })
+
+  test('orderId is undefined when not provided', async () => {
+    if (typeof productModule.createOrder !== 'function') {
+      return
+    }
+    const order = await productModule.createOrder(
+      sampleInformation,
+      [{ id: 'prod-1', number: 1 }],
+      '',
+      0,
+    )
+    if (!UUID_RE.test(order.id ?? '')) return
+    expect(order.orderId).toBeUndefined()
   })
 })
 
@@ -174,7 +199,7 @@ describe('getAllOrders', () => {
   test('filters out internal counter items (no status field)', async () => {
     if (typeof productModule.getAllOrders !== 'function') return
     const counterItem = { id: '__order_counter_2604__', seq: 5 }
-    const realOrder = { id: 'order-real', number: '2605.001', status: 'active' }
+    const realOrder = { id: 'order-real', number: '2605.001', status: 'successful' }
     mockScanTableFn.mockImplementationOnce(async () => [counterItem, realOrder])
 
     const scanCallsBefore = mockScanTableFn.mock.calls.length

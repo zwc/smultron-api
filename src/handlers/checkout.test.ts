@@ -34,7 +34,7 @@ const mockOrder = {
   number: null, // Order number is null until payment is confirmed
   date: Date.now(),
   date_change: Date.now(),
-  status: 'inactive' as const,
+  status: 'pending' as const,
   delivery: 'shipping',
   delivery_cost: 49,
   information: {
@@ -207,13 +207,13 @@ describe('Checkout Handler', () => {
     expect(mockReserveStock).toHaveBeenCalledTimes(1)
   })
 
-  test('saves order with inactive status and no order number before payment', async () => {
+  test('saves order with pending status and no order number before payment', async () => {
     const event = makeCheckoutEvent(validCheckoutBody)
     await handler(event)
 
     expect(mockSaveOrder).toHaveBeenCalledTimes(1)
     const savedOrder = mockSaveOrder.mock.calls[0][0] as Record<string, unknown>
-    expect(savedOrder.status).toBe('inactive')
+    expect(savedOrder.status).toBe('pending')
     expect(savedOrder.number).toBeNull()
   })
 

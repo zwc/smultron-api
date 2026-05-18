@@ -63,6 +63,7 @@ export const AdminListProductsQuerySchema = createListQuerySchema(
 
 // Orders
 export const CreateOrderRequestSchema = z.object({
+  orderId: z.string().optional(),
   information: OrderInformationSchema,
   cart: z.array(z.object({ id: z.string(), number: z.number().int().min(1) })),
   order: z.object({ delivery: z.string(), delivery_cost: z.number().min(0) }),
@@ -117,7 +118,7 @@ export const AdminProductsResponseSchema = envelope(z.array(ProductSchema))
 
 // Update order status
 export const UpdateOrderStatusRequestSchema = z.object({
-  status: z.enum(['active', 'inactive', 'invalid']),
+  status: z.enum(['pending', 'successful', 'cancelled']),
 })
 export const UpdateOrderStatusResponseSchema = envelope(OrderSchema)
 

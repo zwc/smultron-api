@@ -328,7 +328,7 @@ export const getAllOrders = async (
   // have no status field and live in the same table for atomic number generation)
   const allItems = await db.scanTable<any>(ORDERS_TABLE)
   return allItems.filter((item) =>
-    ['active', 'inactive', 'invalid'].includes(item.status),
+    ['pending', 'successful', 'cancelled'].includes(item.status),
   )
 }
 
@@ -336,17 +336,22 @@ export const getAllOrders = async (
 // Swish requires a short alphanumeric reference; a sequential integer satisfies
 // this and lets the callback look up the order directly by id without a GSI.
 // The counter item has no `status` field so it is excluded from order queries.
-const generateOrderId = async (): Promise<string> => {
-  const counterKey = { id: '__order_id_counter__' }
-  const seq = await db.atomicIncrement(ORDERS_TABLE, counterKey, 'seq')
-  return seq.toString()
+
+// Fiscal year for order-number counters: starts July 1st each calendar year.
+// July–December of year Y and January–June of year Y+1 share counter key "Y".
+const getFiscalYear = (date: Date): string => {
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1 // 1–12
+  const fiscalYear = month >= 7 ? year : year - 1
+  return fiscalYear.toString().slice(-2)
 }
 
 // Generate order number in format YYMM.ZZZ (e.g. "2605.001").
 // The dot-separated format clearly distinguishes the date prefix from the
-// monthly sequence, making it easy to read on invoices and in email.
+// annual sequence, making it easy to read on invoices and in email.
 // Uses an atomic DynamoDB counter so concurrent payment confirmations never
 // receive the same number and the sequence never has gaps from unpaid orders.
+// The counter resets on July 1st each year (fiscal year boundary).
 // Counter items are stored in the orders table with a special id prefix and
 // no `status` field so they are excluded from all order queries.
 const generateOrderNumber = async (): Promise<string> => {
@@ -355,9 +360,10 @@ const generateOrderNumber = async (): Promise<string> => {
   const month = (now.getMonth() + 1).toString().padStart(2, '0') // Month with leading zero
   const prefix = `${year}${month}`
 
-  // Atomically increment the monthly sequence counter.
-  // The counter item key is never returned by getAllOrders() because it lacks a status field.
-  const counterKey = { id: `__order_counter_${prefix}__` }
+  // Counter key is shared across all months in the same fiscal year so the
+  // sequence is continuous from July 1st and resets the following July 1st.
+  const fiscalYearKey = getFiscalYear(now)
+  const counterKey = { id: `__order_counter_${fiscalYearKey}__` }
   const seq = await db.atomicIncrement(ORDERS_TABLE, counterKey, 'seq')
 
   const orderNumber = `${prefix}.${seq.toString().padStart(3, '0')}`
@@ -393,16 +399,16 @@ export const createOrder = async (
   cart: Array<{ id: string; number: number }>,
   delivery: string,
   delivery_cost: number,
+  orderId?: string,
 ): Promise<Order> => {
   const now = new Date()
   const timestamp = now.getTime()
   const isoString = now.toISOString()
 
-  // Generate a sequential numeric ID used as the Swish payeePaymentReference.
-  // The order number is intentionally NOT assigned here — it is only assigned
-  // in assignOrderNumber() once payment is confirmed, so the sequential
-  // order-number series never has gaps from unpaid checkouts.
-  const id = await generateOrderId()
+  // Generate a UUID as the internal partition key. The order number is intentionally
+  // NOT assigned here — it is only assigned in assignOrderNumber() once payment is
+  // confirmed, so the sequential order-number series never has gaps from unpaid checkouts.
+  const id = crypto.randomUUID()
 
   // Freeze product data from cart - copy full product details
   console.log('Freezing product data for', cart.length, 'items...')
@@ -437,10 +443,11 @@ export const createOrder = async (
 
   return {
     id,
+    orderId,
     number: null, // Assigned only after payment is confirmed
     date: timestamp,
     date_change: timestamp,
-    status: 'inactive', // awaiting payment
+    status: 'pending', // awaiting payment
     delivery,
     delivery_cost,
     information,

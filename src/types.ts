@@ -82,14 +82,16 @@ export interface AdminCategoriesResponse {
   }
 }
 
-// Semantic aliases for order status values:
-//   inactive = checkout attempt, awaiting payment confirmation
-//   active   = paid and confirmed order (has an order number)
-//   invalid  = payment failed, declined, or cancelled
-export type OrderStatus = 'active' | 'inactive' | 'invalid'
+// Order status values:
+//   pending    = checkout attempt, awaiting payment confirmation
+//   successful = paid and confirmed order (has an order number)
+//   cancelled  = payment failed, declined, or cancelled
+export type OrderStatus = 'pending' | 'successful' | 'cancelled'
 
 export interface Order {
   id: string
+  // Optional user-provided reference — can be any string; distinct from the internal UUID id
+  orderId?: string
   // Assigned only after payment is confirmed. null while the checkout is pending.
   // The sequential order-number series (YYMMXXX) must never contain gaps from
   // unpaid or cancelled checkouts, so no number is reserved until payment succeeds.

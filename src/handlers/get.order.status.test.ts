@@ -51,9 +51,8 @@ describe('Get Order Status Handler', () => {
     expect(res.statusCode).toBe(200)
   })
 
-  test('returns pending with null orderNumber when order status is inactive', async () => {
-    // Inactive (unpaid) orders have no order number yet
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, number: null, status: 'inactive' })
+  test('returns pending with null orderNumber when order status is pending', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, number: null, status: 'pending' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
@@ -62,17 +61,17 @@ describe('Get Order Status Handler', () => {
     expect(body.data.orderNumber).toBeNull()
   })
 
-  test('returns paid with orderNumber when order status is active', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'active' })
+  test('returns successful with orderNumber when order status is successful', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'successful' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
-    expect(body.data.status).toBe('paid')
+    expect(body.data.status).toBe('successful')
     expect(body.data.orderNumber).toBe('2604001')
   })
 
-  test('returns cancelled when order status is invalid', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'invalid' })
+  test('returns cancelled when order status is cancelled', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'cancelled' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)

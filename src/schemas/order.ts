@@ -30,13 +30,15 @@ export const OrderCartItemSchema = z.object({
 
 export const OrderSchema = z.object({
   id: z.string(),
+  // Optional user-provided reference — can be any string; distinct from the internal UUID id
+  orderId: z.string().optional(),
   // null while awaiting payment; assigned only after payment is confirmed
   number: z.string().nullable(),
   // Swish instruction ID used by the cancel endpoint
   swish_payment_id: z.string().optional(),
   date: z.number(),
   date_change: z.number(),
-  status: z.enum(['active', 'inactive', 'invalid']),
+  status: z.enum(['pending', 'successful', 'cancelled']),
   delivery: z.string(),
   delivery_cost: z.number(),
   information: OrderInformationSchema,

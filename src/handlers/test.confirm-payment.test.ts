@@ -12,7 +12,7 @@ const inactiveOrder = {
   number: null,
   date: Date.now(),
   date_change: Date.now(),
-  status: 'inactive' as const,
+  status: 'pending' as const,
   delivery: 'postnord',
   delivery_cost: 49,
   information: {
@@ -88,7 +88,7 @@ describe('test.confirm-payment handler', () => {
     expect(response.statusCode).toBe(200)
   })
 
-  test('runs the full confirmation flow for an inactive order', async () => {
+  test('runs the full confirmation flow for a pending order', async () => {
     const response = await handler(buildEvent('42'))
     const body = JSON.parse(response.body)
 
@@ -100,13 +100,13 @@ describe('test.confirm-payment handler', () => {
     expect(mockConfirmOrderReservations).toHaveBeenCalledWith('42')
     expect(mockAssignOrderNumber).toHaveBeenCalledTimes(1)
     expect(mockAssignOrderNumber).toHaveBeenCalledWith('42')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'successful' })
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
   })
 
-  test('is idempotent: already-active order returns success without side effects', async () => {
+  test('is idempotent: already-successful order returns success without side effects', async () => {
     mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'active' as const, number: '2605.001' }),
+      Promise.resolve({ ...inactiveOrder, status: 'successful' as const, number: '2605.001' }),
     )
 
     const response = await handler(buildEvent('42'))
@@ -121,9 +121,9 @@ describe('test.confirm-payment handler', () => {
     expect(mockUpdateOrder).not.toHaveBeenCalled()
   })
 
-  test('works on a cancelled (invalid) order — the whole point of the override', async () => {
+  test('works on a cancelled order — the whole point of the override', async () => {
     mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'invalid' as const }),
+      Promise.resolve({ ...inactiveOrder, status: 'cancelled' as const }),
     )
 
     const response = await handler(buildEvent('42'))
@@ -132,7 +132,7 @@ describe('test.confirm-payment handler', () => {
     expect(response.statusCode).toBe(200)
     expect(body.data.orderId).toBe('42')
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'successful' })
   })
 
   test('sends confirmation email with the assigned order number', async () => {

@@ -34,7 +34,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       throw error;
     }
 
-    const { information, cart, order: orderDetails } = validatedData;
+    const { information, cart, order: orderDetails, orderId } = validatedData;
 
     // Check stock availability and prepare stock updates
     const stockUpdates: Array<{ id: string; newStock: number }> = [];
@@ -67,7 +67,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       information,
       cart,
       orderDetails.delivery,
-      orderDetails.delivery_cost
+      orderDetails.delivery_cost,
+      orderId,
     );
 
     console.log('Order created successfully:', order.id, order.number);

@@ -462,10 +462,10 @@ async function main() {
     const updatedOrder = await getOrder(token, checkoutResult.data.order.id)
 
     logInfo(`Order Status: ${updatedOrder.status}`)
-    if (updatedOrder.status === 'active') {
+    if (updatedOrder.status === 'successful') {
       logSuccess('Order confirmed successfully!')
     } else {
-      logWarning(`Order status is ${updatedOrder.status}, expected 'active'`)
+      logWarning(`Order status is ${updatedOrder.status}, expected 'successful'`)
     }
 
     // Step 8: Verify stock actually reduced after payment
@@ -496,10 +496,10 @@ async function main() {
     logSuccess('Product creation/verification')
     logSuccess('Stock availability check')
     logSuccess('Stock reservation during checkout')
-    logSuccess('Order creation with inactive status')
+    logSuccess('Order creation with pending status')
     logSuccess('Swish payment integration')
     logSuccess('Payment callback processing')
-    logSuccess('Order status update to active')
+    logSuccess('Order status update to successful')
     logSuccess('Stock permanent reduction after payment')
 
     log('\nEmails should have been sent to:', 'yellow')
@@ -544,12 +544,12 @@ async function testDeclinedPayment() {
     await new Promise((resolve) => setTimeout(resolve, 2000))
     const updatedOrder = await getOrder(token, checkoutResult.data.order.id)
 
-    if (updatedOrder.status === 'invalid') {
-      logSuccess('Declined payment handled correctly - order marked as invalid')
+    if (updatedOrder.status === 'cancelled') {
+      logSuccess('Declined payment handled correctly - order marked as cancelled')
       logSuccess('Stock reservations should be cancelled')
     } else {
       logWarning(
-        `Expected order status 'invalid', got '${updatedOrder.status}'`,
+        `Expected order status 'cancelled', got '${updatedOrder.status}'`,
       )
     }
   } catch (error) {

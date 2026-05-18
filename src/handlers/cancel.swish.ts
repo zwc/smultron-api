@@ -16,9 +16,9 @@ export const route = '/cancel/{id}'
  * Cancel an ongoing checkout/payment attempt.
  *
  * The {id} path parameter is the internal order ID returned by POST /checkout.
- * Idempotent: if the order is already cancelled (status=invalid) the endpoint
+ * Idempotent: if the order is already cancelled (status=cancelled) the endpoint
  * returns success without performing any additional side effects.
- * A paid order (status=active) cannot be cancelled via this endpoint.
+ * A successful order (status=successful) cannot be cancelled via this endpoint.
  */
 export const handler = async (
   event: APIGatewayProxyEvent,
@@ -35,12 +35,12 @@ export const handler = async (
     }
 
     // Idempotency: already cancelled → success with no side effects
-    if (order.status === 'invalid') {
+    if (order.status === 'cancelled') {
       return successResponse({ id: orderId, status: 'CANCELLED' })
     }
 
-    // Paid orders cannot be cancelled here
-    if (order.status === 'active') {
+    // Successful orders cannot be cancelled here
+    if (order.status === 'successful') {
       return errorResponse('Cannot cancel a confirmed paid order', 409)
     }
 
@@ -68,7 +68,7 @@ export const handler = async (
     await cancelOrderReservations(orderId)
 
     // Mark the order as cancelled — no order number is assigned
-    await updateOrder(orderId, { status: 'invalid' })
+    await updateOrder(orderId, { status: 'cancelled' })
 
     console.log('Order cancelled:', orderId)
     return successResponse({ id: orderId, status: 'CANCELLED' })

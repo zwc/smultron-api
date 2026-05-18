@@ -5,6 +5,11 @@ import { cancelOrderReservations, confirmOrderReservations } from '../services/s
 import { sendOrderConfirmationEmails, type OrderConfirmationData } from '../services/email';
 import { successResponse } from '../utils/response';
 
+// Reconstruct a UUID from the 32-char hex string sent as payeePaymentReference.
+// At checkout we strip hyphens from the UUID (36→32 chars) to fit Swish's 35-char limit.
+const swishRefToOrderId = (ref: string): string =>
+  `${ref.slice(0, 8)}-${ref.slice(8, 12)}-${ref.slice(12, 16)}-${ref.slice(16, 20)}-${ref.slice(20)}`
+
 export const method = 'POST';
 export const route = '/swish/callback';
 
@@ -45,10 +50,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       currency,
     });
 
-    // payeePaymentReference is the order ID (set at checkout time).
-    // Orders are looked up by their internal ID — not by order number — because
-    // order numbers are only assigned after payment is confirmed.
-    const orderId = payeePaymentReference;
+    // payeePaymentReference is the UUID-without-hyphens sent at checkout time.
+    // Reconstruct the full UUID to look up the order by its partition key.
+    const orderId = swishRefToOrderId(payeePaymentReference);
 
     // Process payment status and update order accordingly
     switch (status) {
@@ -75,7 +79,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           const orderNumber = await assignOrderNumber(order.id);
           
           // Mark order as paid/confirmed
-          await updateOrder(order.id, { status: 'active' });
+          await updateOrder(order.id, { status: 'successful' });
           
           // Send confirmation emails with the now-assigned order number
           const emailData = createEmailData({ ...order, number: orderNumber }, 'swish', id, amount, currency);
@@ -98,9 +102,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
+          await updateOrder(order.id, { status: 'cancelled' });
           
-          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as cancelled, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process declined payment for order ${orderId}:`, error);
         }
@@ -120,9 +124,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
+          await updateOrder(order.id, { status: 'cancelled' });
           
-          console.log(`Order ${orderId} marked as invalid due to payment error, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as cancelled due to payment error, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process payment error for order ${orderId}:`, error);
         }
@@ -139,9 +143,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
+          await updateOrder(order.id, { status: 'cancelled' });
           
-          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as cancelled, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process cancelled payment for order ${orderId}:`, error);
         }

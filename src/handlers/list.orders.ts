@@ -13,7 +13,7 @@ export const route = '/admin/orders';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
-  status: z.enum(['active', 'inactive', 'invalid']).optional(),
+  status: z.enum(['pending', 'successful', 'cancelled']).optional(),
   q: z.string().optional(),
   sort: z.enum([
     'date', '-date',

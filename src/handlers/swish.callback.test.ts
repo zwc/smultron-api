@@ -9,11 +9,11 @@ const mockSendOrderConfirmationEmails = mock(() => Promise.resolve())
 const mockAssignOrderNumber = mock(() => Promise.resolve('2605.001'))
 
 const mockOrder = {
-  id: '123',
+  id: '00000000-0000-0000-0000-000000000123',
   number: null, // null until payment confirmed
   date: Date.now(),
   date_change: Date.now(),
-  status: 'inactive' as const,
+  status: 'pending' as const,
   delivery: 'shipping',
   delivery_cost: 49,
   information: {
@@ -84,10 +84,14 @@ const makeCallbackEvent = (
     pathParameters: null,
   }) as unknown as APIGatewayProxyEvent
 
-// payeePaymentReference is now the order ID
+// payeePaymentReference is now the UUID without hyphens (as sent by checkout)
+// UUID: '00000000-0000-0000-0000-000000000123' → '00000000000000000000000000000123' (32 chars)
+const ORDER_UUID = '00000000-0000-0000-0000-000000000123'
+const ORDER_SWISH_REF = '00000000000000000000000000000123'
+
 const paidCallback = {
   id: 'SWISH-PAYMENT-ID-001',
-  payeePaymentReference: '123', // order ID (not order number)
+  payeePaymentReference: ORDER_SWISH_REF,
   paymentReference: 'REF123',
   callbackUrl: 'https://smultron.zwc.se/api/v1/swish/callback',
   payerAlias: '46701234567',
@@ -127,7 +131,7 @@ describe('Swish Callback Handler', () => {
     const event = makeCallbackEvent(paidCallback)
     await handler(event)
 
-    expect(mockGetOrder).toHaveBeenCalledWith('123')
+    expect(mockGetOrder).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('assigns order number only after payment is PAID', async () => {
@@ -135,7 +139,7 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockAssignOrderNumber).toHaveBeenCalledTimes(1)
-    expect(mockAssignOrderNumber).toHaveBeenCalledWith('123')
+    expect(mockAssignOrderNumber).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('updates order to active when payment is PAID', async () => {
@@ -147,8 +151,8 @@ describe('Swish Callback Handler', () => {
     expect(body.data.received).toBe(true)
     expect(body.data.status).toBe('PAID')
 
-    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
-      status: 'active',
+    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
+      status: 'successful',
     })
   })
 
@@ -170,7 +174,7 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockConfirmOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockConfirmOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('does not confirm reservations on DECLINED', async () => {
@@ -178,7 +182,7 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('does not confirm reservations on ERROR', async () => {
@@ -186,7 +190,7 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('does not confirm reservations on CANCELLED', async () => {
@@ -194,7 +198,7 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
   })
 
   test('never assigns order number on DECLINED', async () => {
@@ -202,9 +206,9 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
-      status: 'invalid',
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
+    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
+      status: 'cancelled',
     })
   })
 
@@ -218,9 +222,9 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
-      status: 'invalid',
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
+    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
+      status: 'cancelled',
     })
   })
 
@@ -229,9 +233,9 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
-    expect(mockCancelOrderReservations).toHaveBeenCalledWith('123')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('123', {
-      status: 'invalid',
+    expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
+    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
+      status: 'cancelled',
     })
   })
 

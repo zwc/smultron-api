@@ -29,6 +29,7 @@ const CheckoutRequestSchema = z.object({
     payment: z.enum(['swish', 'card', 'invoice']),
     // Name of the shipment option (e.g. "postnord"). Required only when an address is supplied.
     delivery: z.string().optional().default(''),
+    orderId: z.string().optional(),
     name: z.string(),
     company: z.string().optional().default(''),
     address: z.string().optional().default(''),
@@ -160,6 +161,7 @@ export const handler = async (
       cart,
       orderData.delivery,
       deliveryCost,
+      orderData.orderId,
     )
 
     console.log('Order created:', order.id, '(number pending payment confirmation)')
@@ -197,12 +199,14 @@ export const handler = async (
 
     if (orderData.payment === 'swish') {
       try {
-        // Use the internal order ID as payeePaymentReference so the callback can
-        // look up the order directly without needing an order number at this stage.
+        // Strip hyphens from UUID so it fits within Swish's 35-character limit
+        // (UUID with hyphens = 36 chars; without hyphens = 32 chars).
+        // The callback reconstructs the UUID to look up the order by partition key.
+        const swishRef = order.id.replace(/-/g, '')
         console.log('Initiating Swish payment for order:', order.id)
 
         const swishPayment = await createSwishPayment(
-          order.id,
+          swishRef,
           totalAmount,
           orderData.phone,
           `Minibutik`,
