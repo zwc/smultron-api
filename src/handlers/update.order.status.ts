@@ -8,8 +8,8 @@ import { successResponse, errorResponse, unauthorizedResponse } from '../utils/r
 
 // Zod validation schema
 const UpdateOrderStatusSchema = z.object({
-  status: z.enum(['inactive', 'active', 'invalid'], {
-    message: "Status must be 'inactive', 'active', or 'invalid'"
+  status: z.enum(['pending', 'unpaid', 'inactive', 'active', 'invalid'], {
+    message: "Status must be 'pending', 'unpaid', 'inactive', 'active', or 'invalid'"
   })
 });
 

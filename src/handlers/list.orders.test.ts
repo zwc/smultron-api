@@ -35,7 +35,7 @@ const unpaidOrder = {
   number: null,
   date: Date.now(),
   date_change: Date.now(),
-  status: 'inactive' as const,
+  status: 'pending' as const,
   delivery: 'postnord',
   delivery_cost: 49,
   information: { name: 'Unpaid User', company: '', email: 'unpaid@example.com', phone: '070' },
@@ -46,7 +46,7 @@ const unpaidOrder = {
 
 const mockGetAllOrders = mock(async (status?: string) => {
   if (status === 'active') return [paidOrder]
-  if (status === 'inactive') return [unpaidOrder]
+  if (status === 'pending') return [unpaidOrder]
   return [paidOrder, unpaidOrder]
 })
 
@@ -101,12 +101,12 @@ describe('List Orders Handler', () => {
     expect(body.data[0].status).toBe('active')
   })
 
-  test('status=inactive returns checkout attempts for debugging', async () => {
-    const response = await handler(makeEvent({ status: 'inactive' }))
+  test('status=pending returns unpaid checkout attempts', async () => {
+    const response = await handler(makeEvent({ status: 'pending' }))
     expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
 
-    expect(mockGetAllOrders).toHaveBeenCalledWith('inactive')
+    expect(mockGetAllOrders).toHaveBeenCalledWith('pending')
     expect(body.data).toHaveLength(1)
     expect(body.data[0].id).toBe('order-unpaid')
     expect(body.data[0].number).toBeNull()

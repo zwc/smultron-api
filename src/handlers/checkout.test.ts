@@ -12,6 +12,7 @@ const mockCreateSwishPayment = mock(() =>
 )
 
 const mockSaveOrder = mock(() => Promise.resolve())
+const mockUpdateOrder = mock(() => Promise.resolve({}))
 const mockReserveStock = mock(() => Promise.resolve(['RES-001', 'RES-002']))
 const mockCancelOrderReservations = mock(() => Promise.resolve())
 
@@ -78,7 +79,7 @@ mock.module('../services/product', () => ({
   createOrder: async () => ({ ...mockOrder }),
   saveOrder: mockSaveOrder,
   updateProduct: async () => ({}),
-  updateOrder: async () => ({}),
+  updateOrder: mockUpdateOrder,
   getOrderByNumber: async () => null,
   getOrder: async () => null,
   assignOrderNumber: async () => 'mocked-number',
@@ -157,6 +158,7 @@ describe('Checkout Handler', () => {
   beforeEach(() => {
     mockCreateSwishPayment.mockClear()
     mockSaveOrder.mockClear()
+    mockUpdateOrder.mockClear()
     mockReserveStock.mockClear()
     mockCancelOrderReservations.mockClear()
   })
@@ -218,6 +220,17 @@ describe('Checkout Handler', () => {
     const savedOrder = mockSaveOrder.mock.calls[0][0] as Record<string, unknown>
     expect(savedOrder.status).toBe('pending')
     expect(savedOrder.number).toBeNull()
+  })
+
+  test('updates order to unpaid status after swish is initiated', async () => {
+    const event = makeCheckoutEvent(validCheckoutBody)
+    await handler(event)
+
+    const updateCall = mockUpdateOrder.mock.calls.find(
+      ([, updates]) => (updates as Record<string, unknown>).status === 'unpaid',
+    )
+    expect(updateCall).toBeDefined()
+    expect((updateCall![1] as Record<string, unknown>).swish_payment_id).toBe('MOCK-SWISH-ID-001')
   })
 
   test('cancels reservations when swish payment fails', async () => {

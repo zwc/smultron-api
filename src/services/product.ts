@@ -303,7 +303,7 @@ export const getOrder = async (id: string): Promise<Order | null> => {
 }
 
 export const getAllOrders = async (
-  status?: 'active' | 'inactive' | 'invalid',
+  status?: 'pending' | 'unpaid' | 'active' | 'inactive' | 'invalid',
 ): Promise<Order[]> => {
   if (status) {
     try {
@@ -328,7 +328,7 @@ export const getAllOrders = async (
   // have no status field and live in the same table for atomic number generation)
   const allItems = await db.scanTable<any>(ORDERS_TABLE)
   return allItems.filter((item) =>
-    ['inactive', 'active', 'invalid'].includes(item.status),
+    ['pending', 'unpaid', 'inactive', 'active', 'invalid'].includes(item.status),
   )
 }
 
@@ -447,7 +447,7 @@ export const createOrder = async (
     number: null, // Assigned only after payment is confirmed
     date: timestamp,
     date_change: timestamp,
-    status: 'inactive', // awaiting payment
+    status: 'pending', // awaiting payment
     delivery,
     delivery_cost,
     information,

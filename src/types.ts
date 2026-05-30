@@ -83,10 +83,12 @@ export interface AdminCategoriesResponse {
 }
 
 // Order status values:
-//   inactive = checkout attempt, awaiting payment confirmation (default)
+//   pending  = order created, payment not yet initiated
+//   unpaid   = checkout initiated (e.g. Swish request sent), awaiting payment confirmation
 //   active   = paid and confirmed order (has an order number)
+//   inactive = manually deactivated / archived
 //   invalid  = payment failed, declined, or cancelled
-export type OrderStatus = 'inactive' | 'active' | 'invalid'
+export type OrderStatus = 'pending' | 'unpaid' | 'inactive' | 'active' | 'invalid'
 
 export interface Order {
   id: string

@@ -155,7 +155,7 @@ export const handler = async (
 
     console.log('Cart validated. Total amount:', totalAmount, 'SEK')
 
-    // Step 2: Create order (inactive, no order number yet)
+    // Step 2: Create order (pending, no order number yet)
     const order = await createOrder(
       information,
       cart,
@@ -185,7 +185,7 @@ export const handler = async (
       )
     }
 
-    // Step 4: Save order to database (inactive until payment confirmed, no order number)
+    // Step 4: Save order to database (pending until payment confirmed, no order number)
     await saveOrder(order)
     console.log('Order saved to database with stock reservations')
 
@@ -212,9 +212,8 @@ export const handler = async (
           `Minibutik`,
         )
 
-        // Persist the Swish instruction ID so the cancel endpoint can cancel it
-        // without the caller having to supply a separate payment reference.
-        await updateOrder(order.id, { swish_payment_id: swishPayment.id })
+        // Persist the Swish instruction ID and mark order as unpaid (payment initiated)
+        await updateOrder(order.id, { swish_payment_id: swishPayment.id, status: 'unpaid' })
 
         paymentResponse = {
           method: 'swish',

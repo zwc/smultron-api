@@ -72,11 +72,11 @@ describe('createOrder', () => {
     if (!UUID_RE.test(order.id ?? '')) return
 
     expect(order.number).toBeNull()
-    expect(order.status).toBe('inactive')
+    expect(order.status).toBe('pending')
     expect(order.id).toMatch(UUID_RE)
   })
 
-  test('sets status to inactive at creation', async () => {
+  test('sets status to pending at creation', async () => {
     if (typeof productModule.createOrder !== 'function') {
       return
     }
@@ -87,7 +87,7 @@ describe('createOrder', () => {
       0,
     )
     if (!UUID_RE.test(order.id ?? '')) return
-    expect(order.status).toBe('inactive')
+    expect(order.status).toBe('pending')
   })
 
   test('stores user-provided orderId on the order', async () => {
