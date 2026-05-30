@@ -3,6 +3,19 @@ import type { APIGatewayProxyEvent } from 'aws-lambda'
 
 import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
+const mockCleanupExpiredReservations = mock(async () => 0)
+
+mock.module('../services/stock-reservation', () => ({
+  cleanupExpiredReservations: mockCleanupExpiredReservations,
+  reserveStock: async () => [],
+  getActiveReservations: async () => [],
+  getOrderReservations: async () => [],
+  confirmReservations: async () => undefined,
+  cancelReservations: async () => undefined,
+  confirmOrderReservations: async () => undefined,
+  cancelOrderReservations: async () => undefined,
+}))
+
 const mockGetOrder = mock(async () => null)
 
 mock.module('../services/product', () => ({
@@ -38,6 +51,13 @@ const baseOrder = {
 describe('Get Order Status Handler', () => {
   beforeEach(() => {
     mockGetOrder.mockClear()
+    mockCleanupExpiredReservations.mockClear()
+  })
+
+  test('cleans up expired reservations on every request', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'active' })
+    await handler(makeEvent('order-abc'))
+    expect(mockCleanupExpiredReservations).toHaveBeenCalledTimes(1)
   })
 
   test('returns 400 when id is missing', async () => {
@@ -51,30 +71,30 @@ describe('Get Order Status Handler', () => {
     expect(res.statusCode).toBe(200)
   })
 
-  test('returns pending with null orderNumber when order status is pending', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, number: null, status: 'pending' })
+  test('returns inactive with null orderNumber when order status is inactive', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, number: null, status: 'inactive' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
-    expect(body.data.status).toBe('pending')
+    expect(body.data.status).toBe('inactive')
     expect(body.data.orderId).toBe('order-abc')
     expect(body.data.orderNumber).toBeNull()
   })
 
-  test('returns successful with orderNumber when order status is successful', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'successful' })
+  test('returns active with orderNumber when order status is active', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'active' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
-    expect(body.data.status).toBe('successful')
+    expect(body.data.status).toBe('active')
     expect(body.data.orderNumber).toBe('2604001')
   })
 
-  test('returns cancelled when order status is cancelled', async () => {
-    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'cancelled' })
+  test('returns invalid when order status is invalid', async () => {
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'invalid' })
     const res = await handler(makeEvent('order-abc'))
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
-    expect(body.data.status).toBe('cancelled')
+    expect(body.data.status).toBe('invalid')
   })
 })

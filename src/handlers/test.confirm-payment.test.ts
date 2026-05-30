@@ -12,7 +12,7 @@ const inactiveOrder = {
   number: null,
   date: Date.now(),
   date_change: Date.now(),
-  status: 'pending' as const,
+  status: 'inactive' as const,
   delivery: 'postnord',
   delivery_cost: 49,
   information: {
@@ -46,11 +46,14 @@ mock.module('../services/product', () => ({
 }))
 
 mock.module('../services/stock-reservation', () => ({
+  cleanupExpiredReservations: async () => 0,
   confirmOrderReservations: mockConfirmOrderReservations,
   cancelOrderReservations: async () => undefined,
   reserveStock: async () => [],
   confirmReservations: async () => undefined,
   cancelReservations: async () => undefined,
+  getActiveReservations: async () => [],
+  getOrderReservations: async () => [],
 }))
 
 mock.module('../services/email', () => ({
@@ -100,13 +103,13 @@ describe('test.confirm-payment handler', () => {
     expect(mockConfirmOrderReservations).toHaveBeenCalledWith('42')
     expect(mockAssignOrderNumber).toHaveBeenCalledTimes(1)
     expect(mockAssignOrderNumber).toHaveBeenCalledWith('42')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'successful' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
   })
 
-  test('is idempotent: already-successful order returns success without side effects', async () => {
+  test('is idempotent: already-active order returns success without side effects', async () => {
     mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'successful' as const, number: '2605.001' }),
+      Promise.resolve({ ...inactiveOrder, status: 'active' as const, number: '2605.001' }),
     )
 
     const response = await handler(buildEvent('42'))
@@ -121,9 +124,9 @@ describe('test.confirm-payment handler', () => {
     expect(mockUpdateOrder).not.toHaveBeenCalled()
   })
 
-  test('works on a cancelled order — the whole point of the override', async () => {
+  test('works on an invalid order — the whole point of the override', async () => {
     mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'cancelled' as const }),
+      Promise.resolve({ ...inactiveOrder, status: 'invalid' as const }),
     )
 
     const response = await handler(buildEvent('42'))
@@ -132,7 +135,7 @@ describe('test.confirm-payment handler', () => {
     expect(response.statusCode).toBe(200)
     expect(body.data.orderId).toBe('42')
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'successful' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
   })
 
   test('sends confirmation email with the assigned order number', async () => {

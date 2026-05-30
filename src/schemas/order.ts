@@ -38,7 +38,7 @@ export const OrderSchema = z.object({
   swish_payment_id: z.string().optional(),
   date: z.number(),
   date_change: z.number(),
-  status: z.enum(['pending', 'successful', 'cancelled']),
+  status: z.enum(['inactive', 'active', 'invalid']),
   delivery: z.string(),
   delivery_cost: z.number(),
   information: OrderInformationSchema,

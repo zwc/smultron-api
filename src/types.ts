@@ -83,10 +83,10 @@ export interface AdminCategoriesResponse {
 }
 
 // Order status values:
-//   pending    = checkout attempt, awaiting payment confirmation
-//   successful = paid and confirmed order (has an order number)
-//   cancelled  = payment failed, declined, or cancelled
-export type OrderStatus = 'pending' | 'successful' | 'cancelled'
+//   inactive = checkout attempt, awaiting payment confirmation (default)
+//   active   = paid and confirmed order (has an order number)
+//   invalid  = payment failed, declined, or cancelled
+export type OrderStatus = 'inactive' | 'active' | 'invalid'
 
 export interface Order {
   id: string

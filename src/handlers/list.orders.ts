@@ -3,6 +3,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { getAllOrders, getOrder } from '../services/product';
+import { cleanupExpiredReservations } from '../services/stock-reservation';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
 import { ListOrdersResponseSchema } from '../schemas/handlers';
 
@@ -13,7 +14,7 @@ export const route = '/admin/orders';
 
 // Query parameter validation schema
 const QueryParamsSchema = z.object({
-  status: z.enum(['pending', 'successful', 'cancelled']).optional(),
+  status: z.enum(['inactive', 'active', 'invalid']).optional(),
   q: z.string().optional(),
   sort: z.enum([
     'date', '-date',
@@ -31,6 +32,12 @@ export const requestSchema = QueryParamsSchema;
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
+    try {
+      await cleanupExpiredReservations()
+    } catch (cleanupError) {
+      console.error('Failed to cleanup expired reservations:', cleanupError)
+    }
+
     if (!verifyAuthToken(event.headers)) {
       return unauthorizedResponse();
     }

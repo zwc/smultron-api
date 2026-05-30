@@ -38,7 +38,7 @@ export const handler = async (
       return notFoundResponse('Order')
     }
 
-    if (order.status === 'successful') {
+    if (order.status === 'active') {
       return successResponse({
         orderId,
         orderNumber: order.number,
@@ -52,7 +52,7 @@ export const handler = async (
 
     const orderNumber = await assignOrderNumber(order.id)
 
-    await updateOrder(order.id, { status: 'successful' })
+    await updateOrder(order.id, { status: 'active' })
 
     const emailData = buildEmailData({ ...order, number: orderNumber })
     await sendOrderConfirmationEmails(emailData)

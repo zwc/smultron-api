@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { APIResponse } from '../types'
 import { getOrder } from '../services/product'
+import { cleanupExpiredReservations } from '../services/stock-reservation'
 import {
   successResponse,
   errorResponse,
@@ -14,6 +15,12 @@ export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIResponse> => {
   try {
+    try {
+      await cleanupExpiredReservations()
+    } catch (cleanupError) {
+      console.error('Failed to cleanup expired reservations:', cleanupError)
+    }
+
     const id = event.pathParameters?.id
     if (!id) {
       return errorResponse('Order ID is required', 400)

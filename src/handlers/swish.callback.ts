@@ -79,7 +79,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           const orderNumber = await assignOrderNumber(order.id);
           
           // Mark order as paid/confirmed
-          await updateOrder(order.id, { status: 'successful' });
+          await updateOrder(order.id, { status: 'active' });
           
           // Send confirmation emails with the now-assigned order number
           const emailData = createEmailData({ ...order, number: orderNumber }, 'swish', id, amount, currency);
@@ -102,9 +102,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'cancelled' });
+          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as cancelled, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process declined payment for order ${orderId}:`, error);
         }
@@ -124,9 +124,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'cancelled' });
+          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as cancelled due to payment error, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid due to payment error, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process payment error for order ${orderId}:`, error);
         }
@@ -143,9 +143,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'cancelled' });
+          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as cancelled, stock reservations cancelled`);
+          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
         } catch (error) {
           console.error(`Failed to process cancelled payment for order ${orderId}:`, error);
         }

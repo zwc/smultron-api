@@ -91,11 +91,14 @@ mock.module('../services/swish', () => ({
 }))
 
 mock.module('../services/stock-reservation', () => ({
+  cleanupExpiredReservations: async () => 0,
   reserveStock: mockReserveStock,
   cancelOrderReservations: mockCancelOrderReservations,
   confirmReservations: async () => undefined,
   confirmOrderReservations: async () => undefined,
   cancelReservations: async () => undefined,
+  getActiveReservations: async () => [],
+  getOrderReservations: async () => [],
 }))
 
 mock.module('../services/email', () => ({

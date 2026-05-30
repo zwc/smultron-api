@@ -166,7 +166,7 @@ export const handler = async (
 
     console.log('Order created:', order.id, '(number pending payment confirmation)')
 
-    // Step 3: Reserve stock for 10 minutes
+    // Step 3: Reserve stock for 5 minutes
     let reservationIds: string[] = []
     try {
       reservationIds = await reserveStock(order.id, cartItems)

@@ -3,17 +3,24 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { updateOrderStatus } from '../services/product';
+import { cleanupExpiredReservations } from '../services/stock-reservation';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
 
 // Zod validation schema
 const UpdateOrderStatusSchema = z.object({
-  status: z.enum(['pending', 'successful', 'cancelled'], {
-    message: "Status must be 'pending', 'successful', or 'cancelled'"
+  status: z.enum(['inactive', 'active', 'invalid'], {
+    message: "Status must be 'inactive', 'active', or 'invalid'"
   })
 });
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
+    try {
+      await cleanupExpiredReservations()
+    } catch (cleanupError) {
+      console.error('Failed to cleanup expired reservations:', cleanupError)
+    }
+
     if (!verifyAuthToken(event.headers)) {
       return unauthorizedResponse();
     }

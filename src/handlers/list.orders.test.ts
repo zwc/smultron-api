@@ -3,12 +3,25 @@ import type { APIGatewayProxyEvent } from 'aws-lambda'
 import { generateToken } from '../utils/jwt'
 import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
+const mockCleanupExpiredReservations = mock(async () => 0)
+
+mock.module('../services/stock-reservation', () => ({
+  cleanupExpiredReservations: mockCleanupExpiredReservations,
+  reserveStock: async () => [],
+  getActiveReservations: async () => [],
+  getOrderReservations: async () => [],
+  confirmReservations: async () => undefined,
+  cancelReservations: async () => undefined,
+  confirmOrderReservations: async () => undefined,
+  cancelOrderReservations: async () => undefined,
+}))
+
 const paidOrder = {
   id: 'order-paid',
   number: '2604001',
   date: Date.now(),
   date_change: Date.now(),
-  status: 'successful' as const,
+  status: 'active' as const,
   delivery: 'postnord',
   delivery_cost: 49,
   information: { name: 'Paid User', company: '', email: 'paid@example.com', phone: '070' },
@@ -22,7 +35,7 @@ const unpaidOrder = {
   number: null,
   date: Date.now(),
   date_change: Date.now(),
-  status: 'pending' as const,
+  status: 'inactive' as const,
   delivery: 'postnord',
   delivery_cost: 49,
   information: { name: 'Unpaid User', company: '', email: 'unpaid@example.com', phone: '070' },
@@ -32,8 +45,8 @@ const unpaidOrder = {
 }
 
 const mockGetAllOrders = mock(async (status?: string) => {
-  if (status === 'successful') return [paidOrder]
-  if (status === 'pending') return [unpaidOrder]
+  if (status === 'active') return [paidOrder]
+  if (status === 'inactive') return [unpaidOrder]
   return [paidOrder, unpaidOrder]
 })
 
@@ -61,8 +74,14 @@ describe('List Orders Handler', () => {
   beforeEach(() => {
     mockGetAllOrders.mockClear()
     mockGetOrder.mockClear()
+    mockCleanupExpiredReservations.mockClear()
     process.env.JWT_SECRET = 'very-secure-dev-jwt-secret'
     process.env.DISABLE_AUTH = 'false'
+  })
+
+  test('cleans up expired reservations on every request', async () => {
+    await handler(makeEvent())
+    expect(mockCleanupExpiredReservations).toHaveBeenCalledTimes(1)
   })
 
   test('defaults to all orders when no status filter is provided', async () => {
@@ -74,20 +93,20 @@ describe('List Orders Handler', () => {
     expect(body.data).toHaveLength(2)
   })
 
-  test('explicit status=successful also returns only paid orders', async () => {
-    const response = await handler(makeEvent({ status: 'successful' }))
+  test('explicit status=active also returns only paid orders', async () => {
+    const response = await handler(makeEvent({ status: 'active' }))
     expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
     expect(body.data).toHaveLength(1)
-    expect(body.data[0].status).toBe('successful')
+    expect(body.data[0].status).toBe('active')
   })
 
-  test('status=pending returns checkout attempts for debugging', async () => {
-    const response = await handler(makeEvent({ status: 'pending' }))
+  test('status=inactive returns checkout attempts for debugging', async () => {
+    const response = await handler(makeEvent({ status: 'inactive' }))
     expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
 
-    expect(mockGetAllOrders).toHaveBeenCalledWith('pending')
+    expect(mockGetAllOrders).toHaveBeenCalledWith('inactive')
     expect(body.data).toHaveLength(1)
     expect(body.data[0].id).toBe('order-unpaid')
     expect(body.data[0].number).toBeNull()

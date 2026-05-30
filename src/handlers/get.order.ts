@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { APIResponse } from '../types';
 import { verifyAuthToken } from '../middleware/auth';
 import { getOrder } from '../services/product';
+import { cleanupExpiredReservations } from '../services/stock-reservation';
 import { successResponse, errorResponse, unauthorizedResponse, notFoundResponse } from '../utils/response';
 import { GetOrderResponseSchema } from '../schemas/handlers';
 
@@ -12,6 +13,12 @@ export const route = '/admin/orders/{id}';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
   try {
+    try {
+      await cleanupExpiredReservations()
+    } catch (cleanupError) {
+      console.error('Failed to cleanup expired reservations:', cleanupError)
+    }
+
     if (!verifyAuthToken(event.headers)) {
       return unauthorizedResponse();
     }

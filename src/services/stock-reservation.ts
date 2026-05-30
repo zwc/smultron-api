@@ -4,8 +4,8 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const STOCK_RESERVATIONS_TABLE = process.env.STOCK_RESERVATIONS_TABLE!;
 
-// Stock reservation expires after 10 minutes
-const RESERVATION_TTL_MINUTES = 10;
+// Stock reservation expires after 5 minutes
+const RESERVATION_TTL_MINUTES = 5;
 
 export interface StockReservation {
   productId: string;
