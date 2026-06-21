@@ -40,8 +40,7 @@ export const handler = async (
 
     if (order.status === 'active') {
       return successResponse({
-        orderId,
-        orderNumber: order.number,
+        ...order,
         message: 'Order already confirmed',
       })
     }
@@ -54,16 +53,20 @@ export const handler = async (
 
     await updateOrder(order.id, { status: 'active' })
 
-    const emailData = buildEmailData({ ...order, number: orderNumber })
+    const updatedOrder = await getOrder(order.id)
+    if (!updatedOrder) {
+      return errorResponse('Failed to retrieve updated order', 500)
+    }
+
+    const emailData = buildEmailData(updatedOrder)
     await sendOrderConfirmationEmails(emailData)
 
     console.log(
-      `[TEST] Order ${orderId} force-confirmed with number ${orderNumber}`,
+      `[TEST] Order ${orderId} force-confirmed with number ${updatedOrder.number}`,
     )
 
     return successResponse({
-      orderId,
-      orderNumber,
+      ...updatedOrder,
       message: 'Order confirmed as paid (test override)',
     })
   } catch (error) {

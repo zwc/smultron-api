@@ -31,11 +31,7 @@ export const handler = async (
       return notFoundResponse('Order')
     }
 
-    return successResponse({
-      orderId: order.id,
-      orderNumber: order.number,
-      status: order.status,
-    })
+    return successResponse(order)
   } catch (error) {
     console.error('Get order status error:', error)
     return errorResponse('Internal server error', 500)

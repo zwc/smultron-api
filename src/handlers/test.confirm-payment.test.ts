@@ -40,7 +40,10 @@ const mockGetOrder = mock(() => Promise.resolve({ ...inactiveOrder }))
 
 mock.module('../services/product', () => ({
   ...productMockDefaults,
-  getOrder: mockGetOrder,
+  getOrder: (id: string) => {
+    const order = mockGetOrder(id) as any
+    return Promise.resolve(order)
+  },
   updateOrder: mockUpdateOrder,
   assignOrderNumber: mockAssignOrderNumber,
 }))
@@ -92,12 +95,26 @@ describe('test.confirm-payment handler', () => {
   })
 
   test('runs the full confirmation flow for a pending order', async () => {
+    mockGetOrder.mockImplementation((id) => {
+      if (mockUpdateOrder.mock.calls.length > 0) {
+        return Promise.resolve({
+          ...inactiveOrder,
+          id: '42',
+          status: 'active',
+          number: '2605.001',
+        })
+      }
+      return Promise.resolve({ ...inactiveOrder, id: '42' })
+    })
+
     const response = await handler(buildEvent('42'))
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(200)
-    expect(body.data.orderId).toBe('42')
-    expect(body.data.orderNumber).toBe('2605.001')
+    expect(body.data.id).toBe('42')
+    expect(body.data.number).toBe('2605.001')
+    expect(body.data.information.name).toBe('Test User')
+    expect(body.data.cart).toHaveLength(1)
 
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
     expect(mockConfirmOrderReservations).toHaveBeenCalledWith('42')
@@ -109,14 +126,20 @@ describe('test.confirm-payment handler', () => {
 
   test('is idempotent: already-active order returns success without side effects', async () => {
     mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'active' as const, number: '2605.001' }),
+      Promise.resolve({
+        ...inactiveOrder,
+        id: '42',
+        status: 'active' as const,
+        number: '2605.001',
+      }),
     )
 
     const response = await handler(buildEvent('42'))
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(200)
-    expect(body.data.orderNumber).toBe('2605.001')
+    // Check fields directly, as they should be present in body.data when status is success
+    expect(body.data.number).toBe('2605.001')
     expect(body.data.message).toContain('already confirmed')
 
     expect(mockConfirmOrderReservations).not.toHaveBeenCalled()
@@ -125,24 +148,49 @@ describe('test.confirm-payment handler', () => {
   })
 
   test('works on an invalid order — the whole point of the override', async () => {
-    mockGetOrder.mockImplementation(() =>
-      Promise.resolve({ ...inactiveOrder, status: 'invalid' as const }),
-    )
+    mockGetOrder.mockImplementation((id) => {
+      if (mockUpdateOrder.mock.calls.length > 0) {
+        return Promise.resolve({
+          ...inactiveOrder,
+          id: '42',
+          status: 'active',
+          number: '2605.001',
+        })
+      }
+      return Promise.resolve({
+        ...inactiveOrder,
+        id: '42',
+        status: 'invalid' as const,
+      })
+    })
 
     const response = await handler(buildEvent('42'))
     const body = JSON.parse(response.body)
 
     expect(response.statusCode).toBe(200)
-    expect(body.data.orderId).toBe('42')
+    expect(body.data.id).toBe('42')
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
     expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
   })
 
   test('sends confirmation email with the assigned order number', async () => {
+    mockGetOrder.mockImplementation((id) => {
+      if (mockUpdateOrder.mock.calls.length > 0) {
+        return Promise.resolve({
+          ...inactiveOrder,
+          id: '42',
+          status: 'active',
+          number: '2605.001',
+        })
+      }
+      return Promise.resolve({ ...inactiveOrder, id: '42' })
+    })
+
     await handler(buildEvent('42'))
 
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
-    const emailData = mockSendOrderConfirmationEmails.mock.calls[0][0] as Record<string, unknown>
+    const emailData = mockSendOrderConfirmationEmails.mock
+      .calls[0][0] as Record<string, unknown>
     expect(emailData.orderId).toBe('2605.001')
     expect(emailData.paymentReference).toBe('test-override')
     expect(emailData.customerEmail).toBe('test@example.com')
