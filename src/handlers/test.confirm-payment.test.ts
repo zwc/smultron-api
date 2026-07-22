@@ -120,7 +120,10 @@ describe('test.confirm-payment handler', () => {
     expect(mockConfirmOrderReservations).toHaveBeenCalledWith('42')
     expect(mockAssignOrderNumber).toHaveBeenCalledTimes(1)
     expect(mockAssignOrderNumber).toHaveBeenCalledWith('42')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', {
+      status: 'active',
+      amount: 249,
+    })
     expect(mockSendOrderConfirmationEmails).toHaveBeenCalledTimes(1)
   })
 
@@ -170,7 +173,10 @@ describe('test.confirm-payment handler', () => {
     expect(response.statusCode).toBe(200)
     expect(body.data.id).toBe('42')
     expect(mockConfirmOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockUpdateOrder).toHaveBeenCalledWith('42', { status: 'active' })
+    expect(mockUpdateOrder).toHaveBeenCalledWith('42', {
+      status: 'active',
+      amount: 249,
+    })
   })
 
   test('sends confirmation email with the assigned order number', async () => {

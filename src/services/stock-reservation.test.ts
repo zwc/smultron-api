@@ -1,5 +1,8 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
 
+// Other handler tests mock this module; restore so we load the real implementation.
+mock.restore()
+
 const mockSend = mock(async () => ({ Items: [] }))
 const mockUpdateProductStock = mock(async () => undefined)
 const mockGetProduct = mock(async () => ({ stock: 10 }))
@@ -31,9 +34,8 @@ mock.module('./product', () => ({
   updateProductStock: mockUpdateProductStock,
 }))
 
-const { confirmOrderReservations, cancelOrderReservations } = await import(
-  './stock-reservation'
-)
+const { confirmOrderReservations, cancelOrderReservations, reserveStock } =
+  await import(`./stock-reservation?test=${Date.now()}`)
 
 const activeReservation = {
   productId: 'prod-1',
@@ -45,70 +47,89 @@ const activeReservation = {
   status: 'active' as const,
 }
 
+describe('reserveStock', () => {
+  beforeEach(() => {
+    mockSend.mockClear()
+    mockUpdateProductStock.mockClear()
+    mockUpdateProductStock.mockImplementation(async () => undefined)
+  })
+
+  test('atomically decrements stock then writes reservation', async () => {
+    mockSend.mockImplementation(async () => ({}))
+
+    const ids = await reserveStock('order-123', [{ id: 'prod-1', quantity: 2 }])
+
+    expect(mockUpdateProductStock).toHaveBeenCalledWith('prod-1', -2)
+    expect(ids).toHaveLength(1)
+    expect(mockSend).toHaveBeenCalled()
+  })
+
+  test('throws and does not leave reservation when stock condition fails', async () => {
+    const err = new Error(' Conditional check failed')
+    err.name = 'ConditionalCheckFailedException'
+    mockUpdateProductStock.mockImplementationOnce(async () => {
+      throw err
+    })
+
+    await expect(
+      reserveStock('order-123', [{ id: 'prod-1', quantity: 2 }]),
+    ).rejects.toThrow(/Insufficient stock/)
+
+    expect(mockSend).not.toHaveBeenCalled()
+  })
+})
+
 describe('confirmOrderReservations', () => {
   beforeEach(() => {
     mockSend.mockClear()
     mockUpdateProductStock.mockClear()
   })
 
-  test('confirms active reservations and permanently reduces stock', async () => {
-    if (typeof confirmOrderReservations !== 'function') return
-    // getOrderReservations (QueryCommand) returns one active reservation
+  test('confirms active reservations without decreasing stock again', async () => {
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation }],
     }))
-    // PutCommand to mark confirmed
     mockSend.mockImplementationOnce(async () => ({}))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await confirmOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
-    expect(mockUpdateProductStock).toHaveBeenCalledTimes(1)
-    expect(mockUpdateProductStock).toHaveBeenCalledWith('prod-1', -2)
+    expect(mockUpdateProductStock).not.toHaveBeenCalled()
   })
 
   test('does nothing when there are no active reservations', async () => {
-    if (typeof confirmOrderReservations !== 'function') return
     mockSend.mockImplementationOnce(async () => ({ Items: [] }))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await confirmOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
     expect(mockUpdateProductStock).not.toHaveBeenCalled()
   })
 
   test('skips already-cancelled reservations', async () => {
-    if (typeof confirmOrderReservations !== 'function') return
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation, status: 'cancelled' }],
     }))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await confirmOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
     expect(mockUpdateProductStock).not.toHaveBeenCalled()
   })
 
-  test('confirms multiple active reservations and reduces stock for each', async () => {
-    if (typeof confirmOrderReservations !== 'function') return
-    const second = { ...activeReservation, productId: 'prod-2', reservationId: 'RES-002', quantity: 1 }
+  test('confirms multiple active reservations without stock changes', async () => {
+    const second = {
+      ...activeReservation,
+      productId: 'prod-2',
+      reservationId: 'RES-002',
+      quantity: 1,
+    }
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation }, second],
     }))
-    // Two PutCommands for the two reservations
     mockSend.mockImplementationOnce(async () => ({}))
     mockSend.mockImplementationOnce(async () => ({}))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await confirmOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
-    expect(mockUpdateProductStock).toHaveBeenCalledTimes(2)
-    expect(mockUpdateProductStock).toHaveBeenCalledWith('prod-1', -2)
-    expect(mockUpdateProductStock).toHaveBeenCalledWith('prod-2', -1)
+    expect(mockUpdateProductStock).not.toHaveBeenCalled()
   })
 })
 
@@ -118,38 +139,28 @@ describe('cancelOrderReservations', () => {
     mockUpdateProductStock.mockClear()
   })
 
-  test('cancels active reservations for an order', async () => {
-    if (typeof cancelOrderReservations !== 'function') return
-    // getOrderReservations returns one active reservation
+  test('cancels active reservations and restores stock', async () => {
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation }],
     }))
-    // ScanCommand inside cancelReservations (find by reservationId)
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation }],
     }))
-    // PutCommand to mark cancelled
     mockSend.mockImplementationOnce(async () => ({}))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await cancelOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
-    // Stock should NOT be modified on cancellation — reservations are just marked cancelled
-    expect(mockUpdateProductStock).not.toHaveBeenCalled()
+    expect(mockUpdateProductStock).toHaveBeenCalledWith('prod-1', 2)
   })
 
   test('does nothing when there are no active reservations', async () => {
-    if (typeof cancelOrderReservations !== 'function') return
     mockSend.mockImplementationOnce(async () => ({
       Items: [{ ...activeReservation, status: 'cancelled' }],
     }))
 
-    const sendCallsBefore = mockSend.mock.calls.length
     await cancelOrderReservations('order-123')
-    if (mockSend.mock.calls.length === sendCallsBefore) return // contaminated mock active
 
-    // No further DynamoDB calls needed
     expect(mockSend).toHaveBeenCalledTimes(1)
+    expect(mockUpdateProductStock).not.toHaveBeenCalled()
   })
 })

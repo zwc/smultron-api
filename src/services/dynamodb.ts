@@ -86,7 +86,8 @@ export const updateItem = async <T>(
   key: Record<string, any>,
   updateExpression: string,
   expressionAttributeValues: Record<string, any>,
-  expressionAttributeNames?: Record<string, string>
+  expressionAttributeNames?: Record<string, string>,
+  conditionExpression?: string,
 ): Promise<T> => {
   const result = await docClient.send(
     new UpdateCommand({
@@ -95,6 +96,7 @@ export const updateItem = async <T>(
       UpdateExpression: updateExpression,
       ExpressionAttributeValues: expressionAttributeValues,
       ExpressionAttributeNames: expressionAttributeNames,
+      ConditionExpression: conditionExpression,
       ReturnValues: 'ALL_NEW',
     })
   );

@@ -52,6 +52,8 @@ const CheckoutResponseSchema = z.object({
   payment: z.object({
     method: z.string(),
     status: z.string(),
+    // Total SEK sent to Swish (cart + delivery)
+    amount: z.number().optional(),
     reference: z.string().optional(),
     swishUrl: z.string().optional(),
   }),
@@ -190,9 +192,11 @@ export const handler = async (
     console.log('Order saved to database with stock reservations')
 
     // Step 5: Initialize payment based on payment method
+    let orderStatus = order.status
     let paymentResponse = {
       method: orderData.payment,
       status: 'pending',
+      amount: totalAmount,
       reference: undefined as string | undefined,
       swishUrl: undefined as string | undefined,
     }
@@ -214,10 +218,12 @@ export const handler = async (
 
         // Persist the Swish instruction ID and mark order as unpaid (payment initiated)
         await updateOrder(order.id, { swish_payment_id: swishPayment.id, status: 'unpaid' })
+        orderStatus = 'unpaid'
 
         paymentResponse = {
           method: 'swish',
           status: swishPayment.status.toLowerCase(),
+          amount: totalAmount,
           reference: swishPayment.id,
           swishUrl: swishPayment.location,
         }
@@ -259,7 +265,7 @@ export const handler = async (
         id: order.id,
         // null at this point — the number is assigned only after payment is confirmed
         number: order.number,
-        status: order.status,
+        status: orderStatus,
       },
       payment: paymentResponse,
     }

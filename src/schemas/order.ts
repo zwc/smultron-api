@@ -41,6 +41,8 @@ export const OrderSchema = z.object({
   status: z.enum(['pending', 'unpaid', 'inactive', 'active', 'invalid']),
   delivery: z.string(),
   delivery_cost: z.number(),
+  // Paid Swish amount (SEK). Present only after payment is confirmed.
+  amount: z.number().optional(),
   information: OrderInformationSchema,
   cart: z.array(OrderCartItemSchema),
   createdAt: z.string(),

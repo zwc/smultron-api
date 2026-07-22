@@ -20,7 +20,7 @@ The `/v1/checkout` endpoint provides a complete checkout flow that:
   "order": {
     "payment": "swish",
     "delivery": "postnord",
-    "delivery_cost": 82,
+    "delivery_cost": 69,
     "name": "Henrik",
     "company": "",
     "address": "Åloppevägen 43",
@@ -183,7 +183,7 @@ curl -X POST https://dev.smultron.zwc.se/v1/checkout \
     "order": {
       "payment": "swish",
       "delivery": "postnord",
-      "delivery_cost": 82,
+      "delivery_cost": 69,
       "name": "Henrik",
       "company": "",
       "address": "Åloppevägen 43",
@@ -214,7 +214,7 @@ const response = await fetch('https://dev.smultron.zwc.se/v1/checkout', {
     order: {
       payment: 'swish',
       delivery: 'postnord',
-      delivery_cost: 82,
+      delivery_cost: 69,
       name: 'Henrik',
       company: '',
       address: 'Åloppevägen 43',

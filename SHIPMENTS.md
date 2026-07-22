@@ -40,7 +40,7 @@ curl -X POST "$API_BASE/shipment-options" \
   -d '{
     "name": "postnord",
     "description": "spårbart med postnord",
-    "cost": 82
+    "cost": 69
   }'
 ```
 
@@ -64,7 +64,7 @@ aws dynamodb put-item \
     "id": {"S": "1"},
     "name": {"S": "postnord"},
     "description": {"S": "spårbart med postnord"},
-    "cost": {"N": "82"},
+    "cost": {"N": "69"},
     "createdAt": {"S": "2026-04-11T00:00:00.000Z"},
     "updatedAt": {"S": "2026-04-11T00:00:00.000Z"}
   }'

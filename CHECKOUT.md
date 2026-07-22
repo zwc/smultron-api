@@ -43,7 +43,7 @@ curl -s -X POST https://stage.smultron.zwc.se/v1/checkout \
     "order": {
       "payment": "swish",
       "delivery": "postnord",
-      "delivery_cost": 82,
+      "delivery_cost": 69,
       "name": "Bernhard Hettman",
       "company": "",
       "address": "Varmfrontsgatan 18",
@@ -181,7 +181,7 @@ Example response:
     "number": "2604.001",
     "status": "active",
     "delivery": "postnord",
-    "delivery_cost": 82,
+    "delivery_cost": 69,
     "information": {
       "name": "Bernhard Hettman",
       "company": "",

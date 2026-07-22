@@ -106,6 +106,8 @@ export interface Order {
   status: OrderStatus
   delivery: string
   delivery_cost: number
+  // Paid Swish amount (SEK). Set only after payment is confirmed.
+  amount?: number
   information: OrderInformation
   cart: OrderCartItem[] // Frozen product snapshots
   createdAt: string

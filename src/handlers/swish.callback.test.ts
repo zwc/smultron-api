@@ -156,6 +156,7 @@ describe('Swish Callback Handler', () => {
 
     expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
       status: 'active',
+      amount: 249,
     })
   })
 

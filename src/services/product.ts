@@ -162,19 +162,27 @@ export const updateProductStock = async (
 ): Promise<void> => {
   const now = new Date().toISOString()
 
-  // Use atomic update to increment/decrement stock
+  // Decrements require stock >= |change| so concurrent reserves cannot oversell.
+  const condition =
+    stockChange < 0 ? '#stock >= :minStock' : undefined
+  const values: Record<string, number | string> = {
+    ':change': stockChange,
+    ':updatedAt': now,
+  }
+  if (stockChange < 0) {
+    values[':minStock'] = Math.abs(stockChange)
+  }
+
   await db.updateItem(
     PRODUCTS_TABLE,
     { id },
     'SET #stock = #stock + :change, #updatedAt = :updatedAt',
-    {
-      ':change': stockChange,
-      ':updatedAt': now,
-    },
+    values,
     {
       '#stock': 'stock',
       '#updatedAt': 'updatedAt',
     },
+    condition,
   )
 }
 

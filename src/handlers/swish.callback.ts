@@ -77,10 +77,17 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           // Assign the order number now that payment is confirmed. This is the
           // first and only time a number is generated, keeping the sequence gap-free.
           const orderNumber = await assignOrderNumber(order.id);
-          
-          // Mark order as paid/confirmed
-          await updateOrder(order.id, { status: 'active' });
-          
+
+          const paidAmount = amount != null ? parseFloat(amount) : undefined
+
+          // Mark order as paid/confirmed and persist the Swish amount
+          await updateOrder(order.id, {
+            status: 'active',
+            ...(paidAmount != null && !Number.isNaN(paidAmount)
+              ? { amount: paidAmount }
+              : {}),
+          });
+
           // Send confirmation emails with the now-assigned order number
           const emailData = createEmailData({ ...order, number: orderNumber }, 'swish', id, amount, currency);
           await sendOrderConfirmationEmails(emailData);

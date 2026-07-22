@@ -56,7 +56,7 @@ const TEST_ORDER = {
   order: {
     payment: 'swish',
     delivery: 'postnord',
-    delivery_cost: 82,
+    delivery_cost: 69,
     name: 'Henrik',
     company: '',
     address: 'Åloppevägen 43',

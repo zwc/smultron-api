@@ -1,5 +1,6 @@
-import { DynamoDBDocumentClient, PutCommand, QueryCommand, DeleteCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { updateProductStock } from './product';
 
 const client = DynamoDBDocumentClient.from(new DynamoDBClient({}));
 const STOCK_RESERVATIONS_TABLE = process.env.STOCK_RESERVATIONS_TABLE!;
@@ -23,37 +24,39 @@ export interface CartItem {
 }
 
 /**
- * Reserve stock for cart items
- * Returns reservation IDs or throws error if insufficient stock
+ * Reserve stock for cart items by atomically decrementing product stock.
+ * Returns reservation IDs or throws error if insufficient stock.
  */
 export async function reserveStock(orderId: string, cartItems: CartItem[]): Promise<string[]> {
   const reservationIds: string[] = [];
+  const decremented: Array<{ productId: string; quantity: number }> = [];
   const reservationsToCreate: StockReservation[] = [];
-  
+
   const now = Date.now();
-  const expiresAt = Math.floor((now + (RESERVATION_TTL_MINUTES * 60 * 1000)) / 1000); // TTL in seconds
+  const expiresAt = Math.floor((now + (RESERVATION_TTL_MINUTES * 60 * 1000)) / 1000);
 
   try {
-    // Check current stock and active reservations for each product
     for (const item of cartItems) {
       const productId = item.id;
       const requestedQuantity = item.quantity;
 
-      // Get current active reservations for this product
-      const activeReservations = await getActiveReservations(productId);
-      const reservedQuantity = activeReservations.reduce((sum, res) => sum + res.quantity, 0);
-
-      // Get current product stock (this will need to be implemented in product service)
-      const currentStock = await getCurrentStock(productId);
-      const availableStock = currentStock - reservedQuantity;
-
-      if (availableStock < requestedQuantity) {
-        throw new Error(`Insufficient stock for product ${productId}. Available: ${availableStock}, Requested: ${requestedQuantity}`);
+      try {
+        // Atomic claim: fails with ConditionalCheckFailedException if stock < qty
+        await updateProductStock(productId, -requestedQuantity);
+      } catch (error) {
+        const name = error instanceof Error ? error.name : '';
+        if (name === 'ConditionalCheckFailedException') {
+          throw new Error(
+            `Insufficient stock for product ${productId}. Requested: ${requestedQuantity}`,
+          );
+        }
+        throw error;
       }
 
-      // Create reservation record
+      decremented.push({ productId, quantity: requestedQuantity });
+
       const reservationId = `RES-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const reservation: StockReservation = {
+      reservationsToCreate.push({
         productId,
         reservationId,
         orderId,
@@ -61,13 +64,10 @@ export async function reserveStock(orderId: string, cartItems: CartItem[]): Prom
         createdAt: now,
         expiresAt,
         status: 'active',
-      };
-
-      reservationsToCreate.push(reservation);
+      });
       reservationIds.push(reservationId);
     }
 
-    // Create all reservations
     for (const reservation of reservationsToCreate) {
       await client.send(new PutCommand({
         TableName: STOCK_RESERVATIONS_TABLE,
@@ -83,10 +83,23 @@ export async function reserveStock(orderId: string, cartItems: CartItem[]): Prom
 
     return reservationIds;
   } catch (error) {
-    // If any reservation fails, clean up any that were created
+    // Roll back any stock already claimed
+    if (decremented.length > 0) {
+      console.log('Rolling back stock decrements due to reservation error');
+      for (const item of decremented) {
+        try {
+          await updateProductStock(item.productId, item.quantity);
+        } catch (rollbackError) {
+          console.error(
+            `Failed to restore stock for ${item.productId}:`,
+            rollbackError,
+          );
+        }
+      }
+    }
     if (reservationIds.length > 0) {
-      console.log('Cleaning up partial reservations due to error');
-      await cancelReservations(reservationIds);
+      console.log('Cleaning up partial reservation rows due to error');
+      await cancelReservations(reservationIds, false);
     }
     throw error;
   }
@@ -139,7 +152,6 @@ export async function confirmReservations(reservationIds: string[]): Promise<voi
   console.log(`Confirming ${reservationIds.length} stock reservations`, { reservationIds });
 
   for (const reservationId of reservationIds) {
-    // Find the reservation
     const reservations = await client.send(new ScanCommand({
       TableName: STOCK_RESERVATIONS_TABLE,
       FilterExpression: 'reservationId = :reservationId AND #status = :status',
@@ -155,7 +167,7 @@ export async function confirmReservations(reservationIds: string[]): Promise<voi
     if (reservations.Items && reservations.Items.length > 0) {
       const reservation = reservations.Items[0] as StockReservation;
 
-      // Update status to confirmed (keeps record for audit)
+      // Stock already decremented at reserve time — only mark confirmed
       await client.send(new PutCommand({
         TableName: STOCK_RESERVATIONS_TABLE,
         Item: {
@@ -164,22 +176,20 @@ export async function confirmReservations(reservationIds: string[]): Promise<voi
           confirmedAt: Date.now(),
         },
       }));
-
-      // Permanently reduce stock in products table
-      await permanentlyReduceStock(reservation.productId, reservation.quantity);
     }
   }
 }
 
 /**
- * Cancel reservations (release reserved stock)
- * This is called when payment fails or order is cancelled
+ * Cancel reservations and optionally restore stock.
  */
-export async function cancelReservations(reservationIds: string[]): Promise<void> {
+export async function cancelReservations(
+  reservationIds: string[],
+  restoreStock = true,
+): Promise<void> {
   console.log(`Cancelling ${reservationIds.length} stock reservations`, { reservationIds });
 
   for (const reservationId of reservationIds) {
-    // Find and delete the reservation
     const reservations = await client.send(new ScanCommand({
       TableName: STOCK_RESERVATIONS_TABLE,
       FilterExpression: 'reservationId = :reservationId',
@@ -191,7 +201,10 @@ export async function cancelReservations(reservationIds: string[]): Promise<void
     if (reservations.Items && reservations.Items.length > 0) {
       const reservation = reservations.Items[0] as StockReservation;
 
-      // Update status to cancelled (keeps record for audit)
+      if (reservation.status === 'active' && restoreStock) {
+        await updateProductStock(reservation.productId, reservation.quantity);
+      }
+
       await client.send(new PutCommand({
         TableName: STOCK_RESERVATIONS_TABLE,
         Item: {
@@ -205,8 +218,8 @@ export async function cancelReservations(reservationIds: string[]): Promise<void
 }
 
 /**
- * Confirm reservations for an entire order (convert to permanent stock reduction)
- * This is called when payment is successful
+ * Confirm reservations for an entire order.
+ * Stock was already claimed at reserve time — only flip status.
  */
 export async function confirmOrderReservations(orderId: string): Promise<void> {
   const reservations = await getOrderReservations(orderId)
@@ -228,12 +241,11 @@ export async function confirmOrderReservations(orderId: string): Promise<void> {
         confirmedAt: Date.now(),
       },
     }))
-    await permanentlyReduceStock(reservation.productId, reservation.quantity)
   }
 }
 
 /**
- * Cancel reservations for an entire order
+ * Cancel reservations for an entire order and restore stock
  */
 export async function cancelOrderReservations(orderId: string): Promise<void> {
   const reservations = await getOrderReservations(orderId);
@@ -242,51 +254,16 @@ export async function cancelOrderReservations(orderId: string): Promise<void> {
     .map(r => r.reservationId);
 
   if (activeReservationIds.length > 0) {
-    await cancelReservations(activeReservationIds);
+    await cancelReservations(activeReservationIds, true);
   }
 }
 
 /**
- * Get current stock from products table
- * This function needs to be implemented based on your product schema
- */
-async function getCurrentStock(productId: string): Promise<number> {
-  // Import product service to get current stock
-  const { getProduct } = await import('./product');
-  
-  try {
-    const product = await getProduct(productId);
-    return product?.stock || 0;
-  } catch (error) {
-    console.error(`Failed to get stock for product ${productId}:`, error);
-    return 0;
-  }
-}
-
-/**
- * Permanently reduce stock in products table
- * This is called when payment is confirmed
- */
-async function permanentlyReduceStock(productId: string, quantity: number): Promise<void> {
-  // Import product service to update stock
-  const { updateProductStock } = await import('./product');
-  
-  try {
-    await updateProductStock(productId, -quantity);
-    console.log(`Permanently reduced stock for product ${productId} by ${quantity}`);
-  } catch (error) {
-    console.error(`Failed to reduce stock for product ${productId}:`, error);
-    throw error;
-  }
-}
-
-/**
- * Cleanup expired reservations (can be called periodically or via scheduled Lambda)
+ * Cleanup expired reservations and restore stock
  */
 export async function cleanupExpiredReservations(): Promise<number> {
   const now = Math.floor(Date.now() / 1000);
-  
-  // Scan for expired reservations
+
   const result = await client.send(new ScanCommand({
     TableName: STOCK_RESERVATIONS_TABLE,
     FilterExpression: '#status = :status AND expiresAt < :now',
@@ -300,12 +277,20 @@ export async function cleanupExpiredReservations(): Promise<number> {
   }));
 
   const expiredReservations = result.Items as StockReservation[] || [];
-  
+
   if (expiredReservations.length > 0) {
     console.log(`Found ${expiredReservations.length} expired reservations to cleanup`);
-    
-    // Update status to expired
+
     for (const reservation of expiredReservations) {
+      try {
+        await updateProductStock(reservation.productId, reservation.quantity);
+      } catch (error) {
+        console.error(
+          `Failed to restore stock for expired reservation ${reservation.reservationId}:`,
+          error,
+        );
+      }
+
       await client.send(new PutCommand({
         TableName: STOCK_RESERVATIONS_TABLE,
         Item: {

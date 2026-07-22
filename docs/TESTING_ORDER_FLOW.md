@@ -22,7 +22,7 @@ The test uses a sample order with 2 products:
   "order": {
     "payment": "swish",
     "delivery": "postnord",
-    "delivery_cost": 82,
+    "delivery_cost": 69,
     "name": "Henrik",
     "address": "Åloppevägen 43",
     "zip": "123 45",
@@ -47,7 +47,7 @@ The test uses a sample order with 2 products:
 }
 ```
 
-**Total Order Value:** 1,797 SEK (599×2 + 599×1) + 82 SEK delivery = **1,879 SEK**
+**Total Order Value:** 1,797 SEK (599×2 + 599×1) + 69 SEK delivery = **1,866 SEK**
 
 ## Prerequisites
 

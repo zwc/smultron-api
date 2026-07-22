@@ -51,14 +51,24 @@ export const handler = async (
 
     const orderNumber = await assignOrderNumber(order.id)
 
-    await updateOrder(order.id, { status: 'active' })
+    const cartTotal = order.cart.reduce(
+      (sum, item) => sum + (item.price || 0) * item.number,
+      0,
+    )
+    const paidAmount = cartTotal + (order.delivery_cost || 0)
+
+    await updateOrder(order.id, { status: 'active', amount: paidAmount })
 
     const updatedOrder = await getOrder(order.id)
     if (!updatedOrder) {
       return errorResponse('Failed to retrieve updated order', 500)
     }
 
-    const emailData = buildEmailData(updatedOrder)
+    const emailData = buildEmailData({
+      ...updatedOrder,
+      number: orderNumber,
+      amount: paidAmount,
+    })
     await sendOrderConfirmationEmails(emailData)
 
     console.log(
@@ -80,12 +90,16 @@ const buildEmailData = (order: any): OrderConfirmationData => {
     (sum: number, item: any) => sum + (item.price || 0) * item.number,
     0,
   )
+  const orderTotal =
+    order.amount != null
+      ? order.amount
+      : cartTotal + (order.delivery_cost || 0)
   return {
     orderId: order.number,
     customerName: order.information.name,
     customerEmail: order.information.email,
     customerPhone: order.information.phone,
-    orderTotal: cartTotal + (order.delivery_cost || 0),
+    orderTotal,
     currency: 'SEK',
     cartItems: order.cart.map((item: any) => ({
       name: item.title || 'Unknown Product',

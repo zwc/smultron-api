@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<meta name="apple-mobile-web-app-capable" content="yes"/>
+		<meta names="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<style>
+			@font-face	{ font-family: 'circular'; src: url('https://smultronet.nu/fonts/CircularStd-Book.woff2') format('woff2'), url('https://smultronet.nu/fonts/CircularStd-Book.woff') format('woff'); font-weight: 100; font-style: normal; font-display: swap; }
+			@font-face	{ font-family: 'apercu-mono'; src: url('https://smultronet.nu/fonts/Apercu-Mono.woff2') format('woff2'), url('https://smultronet.nu/fonts/Apercu-Mono.woff') format('woff'); font-weight: 100; font-style: normal; }
+
+			body { margin: 0; }
+
+			.headline
+			{
+				width: 402px; height: 45px; margin: auto; display: block;
+			}
+			
+			@media screen and (max-width: 652px)
+			{
+				body
+				{
+					margin: 0 16px;
+				}
+			}
+
+			@media screen and (max-width: 540px)
+			{
+				.headline
+				{
+					width: 300px; height: auto;
+				}
+			}
+
+			@media screen and (max-width: 370px)
+			{
+				.headline
+				{
+					width: 240px;
+				}
+			}
+
+		</style>
+		
+	</head>
+	<body style="background: rgba(235,65,107,0.12) ;font-family: 'circular', sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+
+		<div style="max-width: 620px; margin: 0 auto 16px auto; background: white; border-radius: 0 0 13px 13px;">
+			<div style="padding: 32px 32px 20px 32px;">
+
+
+			<!-- ------------ -->
+			<!-- [area] intro -->
+
+				<table style="width: 100%;margin: 32px 0 56px 0;padding: 0;border-spacing: 0;border: none;outline: none;">
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 0;border-spacing: 0;text-align: center;"><img src="https://smultronet.nu/graphics/email/headline.png" class="headline"></td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 24px 32px 0 32px;border-spacing: 0;text-align: center;font-size: 14px;line-height: 1.5">Vi har skickat en bekräftelse med e-post till dig och packar dina varor så snabbt vi kan. Din leverans kommer snart att dyka upp i din PostNord-app. Tack igen.</td>
+					</tr>
+				</table>
+
+
+			<!-- -------------------------- -->
+			<!-- [area] contact och payment -->
+
+				<table style="width: 100%;margin: 0 0 12px 0;padding: 0;border-spacing: 0;border: none;outline: none;font-size: 14px;line-height: 1.5;">
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">Beställningsnummer</td>
+						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;">{{ORDER_NUMBER}}</td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">Leverans &ndash; PostNord</td>
+						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;">{{DELIVERY_COST}}</td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">Betalat &ndash; Swish</td>
+						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;">{{SWISH_AMOUNT}}</td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">Adress</td>
+						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;">{{ADDRESS_BLOCK}}</td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">E-post</td>
+						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;"><a href="mailto:{{EMAIL}}" style="color: black !important; text-decoration: none !important;">{{EMAIL}}</a></td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="border: none;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: none;">Telefon</td>
+						<td style="border: none;font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: none;text-align: right;"><a href="tel:{{PHONE_TEL}}" style="color: black !important; text-decoration: none !important;">{{PHONE}}</a></td>
+					</tr>
+				</table>
+
+			</div>
+		</div>
+
+
+	<!-- --------------- -->
+	<!-- [area] products -->
+
+		<div style="max-width: 620px; margin: 0 auto 16px auto; background: white; border-radius: 13px;">
+			<div style="padding: 32px 32px 20px 32px;">
+
+{{PRODUCTS_HTML}}
+
+			</div>
+		</div>
+
+
+	<!-- ----------- -->
+	<!-- [area] foot -->
+
+		<div style="max-width: 620px; margin: 0 auto; background: white; border-radius: 13px 13px 0 0;">
+			<div style="padding: 32px 32px 20px 32px;">
+
+				<table style="width: 100%;margin: 0;padding: 0;border-spacing: 0;border: none;outline: none;">
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 0;border-spacing: 0;"><a href="https://smultronet.nu" style="width: 130px;margin: auto;display: block;color: rgb(0,0,0);text-decoration: none;"><img src="https://smultronet.nu/graphics/email/logo.png" style="width: 130px; height: 20px; margin: 12px auto 32px auto; display: block;"></a></td>
+					</tr>
+					<tr style="margin: 0;padding: 0;border-spacing: 0;">
+						<td style="margin: 0;padding: 0;border-spacing: 0;">
+
+							<table style="width: auto;margin: 0 auto 24px auto;padding: 0;border-spacing: 0;border: none;outline: none;font-size: 14px;line-height: 1.5;">
+								<tr style="margin: 0;padding: 0;border-spacing: 0;">
+									<td style="margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;text-align: right;">Telefon</td>
+									<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;"><a href="tel:0856034350" style="color: black; text-decoration: none;">08-560 343 50</a></td>
+								</tr>
+								<tr style="margin: 0;padding: 0;border-spacing: 0;">
+									<td style="margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;text-align: right;">E-post</td>
+									<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;"><a href="mailto:info@smultronet.nu" style="color: black; text-decoration: none;">info@smultronet.nu</a></td>
+								</tr>
+								<tr style="margin: 0;padding: 0;border-spacing: 0;">
+									<td style="margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;text-align: right;">Adress</td>
+									<td style="font-family: 'apercu-mono', monospace;font-size: 13px;margin: 0;padding: 2px 6px 1px 6px;border-spacing: 0;"><a href="https://maps.apple.com/?address=Mälarö%20torg%203,%20178%2030%20Ekerö,%20Sverige&auid=14479689881134457882&ll=59.290047,17.811029&lsp=9902&q=Smultronet&_ext=CiwKBQgEENIBCgQIBRADCgUIBhDfAQoECAoQAAoECFIQBAoECFUQAAoECFkQAhImKZyYP+GYpE1AMXTQ1j+GzTFAORpuZT2/pU1AQZ5srQwH0jFAUAQ%3D" style="color: black; text-decoration: none;">Mälarö torg 3, Ekerö</a></td>
+								</tr>
+							</table>
+
+						</td>
+					</tr>
+				</table>
+
+			</div>
+		</div>
+		
+		<div style="max-width: 620px; height: 9px; margin: 0 auto 64px auto; background: url(https://smultronet.nu/graphics/email/border.png); background-size: 18px 9px;"></div>
+
+
+	</body>
+</html>

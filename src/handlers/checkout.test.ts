@@ -186,8 +186,10 @@ describe('Checkout Handler', () => {
     expect(body.data.order.id).toBe('123')
     // Order number is null at checkout — assigned only after payment is confirmed
     expect(body.data.order.number).toBeNull()
+    expect(body.data.order.status).toBe('unpaid')
     expect(body.data.payment.method).toBe('swish')
     expect(body.data.payment.status).toBe('created')
+    expect(body.data.payment.amount).toBe(249)
     expect(body.data.payment.reference).toBe('MOCK-SWISH-ID-001')
   })
 
