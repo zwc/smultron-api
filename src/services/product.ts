@@ -313,31 +313,16 @@ export const getOrder = async (id: string): Promise<Order | null> => {
 export const getAllOrders = async (
   status?: 'pending' | 'unpaid' | 'active' | 'inactive' | 'invalid',
 ): Promise<Order[]> => {
-  if (status) {
-    try {
-      // Use GSI for efficient query when filtering by status
-      return await db.queryItems<Order>(
-        ORDERS_TABLE,
-        'StatusIndex',
-        '#status = :status',
-        { ':status': status },
-        { '#status': 'status' },
-      )
-    } catch (error) {
-      // Fall back to scanning and filtering if GSI is not available
-      console.warn(
-        'StatusIndex GSI not available for orders, falling back to table scan with filtering',
-      )
-      const allOrders = await db.scanTable<any>(ORDERS_TABLE)
-      return allOrders.filter((item) => item.status === status)
-    }
-  }
-  // No status filter: get all real orders (exclude internal counter items which
-  // have no status field and live in the same table for atomic number generation)
+  // Full table scan (paginated in scanTable). Prefer this over StatusIndex:
+  // 1) Order rows embed frozen product payloads and often exceed one DynamoDB
+  //    page — queryItems/scanTable used to stop after the first 1MB page.
+  // 2) StatusIndex is sparse on sort key `date`; legacy rows without `date`
+  //    never appear in the GSI even when status is set.
   const allItems = await db.scanTable<any>(ORDERS_TABLE)
-  return allItems.filter((item) =>
+  const orders = allItems.filter((item) =>
     ['pending', 'unpaid', 'inactive', 'active', 'invalid'].includes(item.status),
   )
+  return status ? orders.filter((order) => order.status === status) : orders
 }
 
 // Generate a sequential numeric order ID used as the Swish payeePaymentReference.

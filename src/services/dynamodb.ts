@@ -54,13 +54,24 @@ export const deleteItem = async (
 };
 
 export const scanTable = async <T>(tableName: string): Promise<T[]> => {
-  const result = await docClient.send(
-    new ScanCommand({
-      TableName: tableName,
-    })
-  );
-  return (result.Items as T[]) || [];
-};
+  const items: T[] = []
+  let exclusiveStartKey: Record<string, unknown> | undefined
+
+  do {
+    const result = await docClient.send(
+      new ScanCommand({
+        TableName: tableName,
+        ExclusiveStartKey: exclusiveStartKey,
+      }),
+    )
+    if (result.Items?.length) {
+      items.push(...(result.Items as T[]))
+    }
+    exclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+  } while (exclusiveStartKey)
+
+  return items
+}
 
 export const queryItems = async <T>(
   tableName: string,
@@ -69,17 +80,28 @@ export const queryItems = async <T>(
   expressionAttributeValues: Record<string, any>,
   expressionAttributeNames?: Record<string, string>
 ): Promise<T[]> => {
-  const result = await docClient.send(
-    new QueryCommand({
-      TableName: tableName,
-      IndexName: indexName,
-      KeyConditionExpression: keyConditionExpression,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ExpressionAttributeNames: expressionAttributeNames,
-    })
-  );
-  return (result.Items as T[]) || [];
-};
+  const items: T[] = []
+  let exclusiveStartKey: Record<string, unknown> | undefined
+
+  do {
+    const result = await docClient.send(
+      new QueryCommand({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: keyConditionExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExclusiveStartKey: exclusiveStartKey,
+      }),
+    )
+    if (result.Items?.length) {
+      items.push(...(result.Items as T[]))
+    }
+    exclusiveStartKey = result.LastEvaluatedKey as Record<string, unknown> | undefined
+  } while (exclusiveStartKey)
+
+  return items
+}
 
 export const updateItem = async <T>(
   tableName: string,

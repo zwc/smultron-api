@@ -66,13 +66,19 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       );
     }
 
-    // Apply sorting
+    // Apply sorting (null/undefined values sort last)
     const sortField = params.sort.startsWith('-') ? params.sort.slice(1) : params.sort;
     const sortDirection = params.sort.startsWith('-') ? -1 : 1;
 
     orders = orders.sort((a, b) => {
       let aVal: any = a[sortField as keyof typeof a];
       let bVal: any = b[sortField as keyof typeof b];
+
+      const aMissing = aVal === undefined || aVal === null;
+      const bMissing = bVal === undefined || bVal === null;
+      if (aMissing && bMissing) return 0;
+      if (aMissing) return 1;
+      if (bMissing) return -1;
 
       // Handle string comparison (case-insensitive)
       if (typeof aVal === 'string' && typeof bVal === 'string') {
