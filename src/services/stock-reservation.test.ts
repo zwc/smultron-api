@@ -1,6 +1,8 @@
 import { describe, test, expect, mock, beforeEach } from 'bun:test'
+import { productMockDefaults } from '../test-helpers/productMockDefaults'
 
-// Other handler tests mock this module; restore so we load the real implementation.
+// Handler suites may have mocked this module already. Restore, then re-mock
+// product with the FULL export set (Bun locks named bindings on first mock).
 mock.restore()
 
 const mockSend = mock(async () => ({ Items: [] }))
@@ -30,6 +32,7 @@ mock.module('@aws-sdk/client-dynamodb', () => ({
 }))
 
 mock.module('./product', () => ({
+  ...productMockDefaults,
   getProduct: mockGetProduct,
   updateProductStock: mockUpdateProductStock,
 }))

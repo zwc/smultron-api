@@ -35,7 +35,7 @@ jobs:
         run: bun install
 
       - name: Run unit tests
-        run: bun test
+        run: bun test src/
 
   deploy-dev:
     name: Deploy to Dev
