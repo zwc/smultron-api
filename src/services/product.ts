@@ -497,12 +497,35 @@ export const updateOrder = async (
 export const updateOrderStatus = async (
   id: string,
   status: Order['status'],
+  reason?: string,
 ): Promise<Order> => {
   const now = new Date()
+
+  if (status === 'invalid') {
+    return await db.updateItem<Order>(
+      ORDERS_TABLE,
+      { id },
+      'SET #status = :status, #reason = :reason, #date_change = :date_change, #updatedAt = :updatedAt',
+      {
+        ':status': status,
+        ':reason': reason,
+        ':date_change': now.getTime(),
+        ':updatedAt': now.toISOString(),
+      },
+      {
+        '#status': 'status',
+        '#reason': 'reason',
+        '#date_change': 'date_change',
+        '#updatedAt': 'updatedAt',
+      },
+    )
+  }
+
+  // Drop stale invalid reason when leaving invalid (or never was)
   return await db.updateItem<Order>(
     ORDERS_TABLE,
     { id },
-    'SET #status = :status, #date_change = :date_change, #updatedAt = :updatedAt',
+    'SET #status = :status, #date_change = :date_change, #updatedAt = :updatedAt REMOVE #reason',
     {
       ':status': status,
       ':date_change': now.getTime(),
@@ -512,6 +535,7 @@ export const updateOrderStatus = async (
       '#status': 'status',
       '#date_change': 'date_change',
       '#updatedAt': 'updatedAt',
+      '#reason': 'reason',
     },
   )
 }

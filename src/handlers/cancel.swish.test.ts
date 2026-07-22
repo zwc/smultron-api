@@ -3,7 +3,7 @@ import type { APIGatewayProxyEvent } from 'aws-lambda'
 
 const mockCancelSwishPayment = mock(() => Promise.resolve())
 const mockCancelOrderReservations = mock(() => Promise.resolve())
-const mockUpdateOrder = mock(() => Promise.resolve({}))
+const mockUpdateSwishPaymentStatus = mock(() => Promise.resolve())
 
 const inactiveOrder = {
   id: '456',
@@ -32,6 +32,7 @@ const mockGetOrder = mock(() => Promise.resolve({ ...inactiveOrder }))
 
 mock.module('../services/swish', () => ({
   cancelSwishPayment: mockCancelSwishPayment,
+  updateSwishPaymentStatus: mockUpdateSwishPaymentStatus,
   createSwishPayment: mock(() =>
     Promise.resolve({ id: '', location: '', status: 'CREATED' }),
   ),
@@ -43,7 +44,6 @@ import { productMockDefaults } from '../test-helpers/productMockDefaults'
 mock.module('../services/product', () => ({
   ...productMockDefaults,
   getOrder: mockGetOrder,
-  updateOrder: mockUpdateOrder,
 }))
 
 mock.module('../services/stock-reservation', () => ({
@@ -68,7 +68,7 @@ describe('cancel.swish handler', () => {
   beforeEach(() => {
     mockCancelSwishPayment.mockClear()
     mockCancelOrderReservations.mockClear()
-    mockUpdateOrder.mockClear()
+    mockUpdateSwishPaymentStatus.mockClear()
     mockGetOrder.mockClear()
     mockGetOrder.mockImplementation(() => Promise.resolve({ ...inactiveOrder }))
   })
@@ -88,7 +88,7 @@ describe('cancel.swish handler', () => {
     expect(mockCancelSwishPayment).not.toHaveBeenCalled()
   })
 
-  test('cancels Swish payment, reservations, and marks order invalid', async () => {
+  test('cancels Swish payment and reservations without changing order status', async () => {
     const response = await handler(buildEvent('456'))
     expect(response.statusCode).toBe(200)
     const body = JSON.parse(response.body)
@@ -98,10 +98,16 @@ describe('cancel.swish handler', () => {
     expect(mockCancelSwishPayment).toHaveBeenCalledWith('SWISH-INSTRUCTION-ID-001')
     expect(mockCancelOrderReservations).toHaveBeenCalledTimes(1)
     expect(mockCancelOrderReservations).toHaveBeenCalledWith('456')
-    expect(mockUpdateOrder).toHaveBeenCalledWith('456', { status: 'invalid' })
+    expect(mockUpdateSwishPaymentStatus).toHaveBeenCalledWith(
+      'SWISH-INSTRUCTION-ID-001',
+      {
+        status: 'CANCELLED',
+        reason: 'The checkout was cancelled before payment was completed.',
+      },
+    )
   })
 
-  test('is idempotent: already invalid order returns success without side effects', async () => {
+  test('is idempotent for already-invalid orders: success without side effects', async () => {
     mockGetOrder.mockImplementation(() =>
       Promise.resolve({ ...inactiveOrder, status: 'invalid' as const }),
     )
@@ -110,10 +116,9 @@ describe('cancel.swish handler', () => {
     const body = JSON.parse(response.body)
     expect(body.data).toEqual({ id: '456', status: 'CANCELLED' })
 
-    // No side effects on already-invalid order
     expect(mockCancelSwishPayment).not.toHaveBeenCalled()
     expect(mockCancelOrderReservations).not.toHaveBeenCalled()
-    expect(mockUpdateOrder).not.toHaveBeenCalled()
+    expect(mockUpdateSwishPaymentStatus).not.toHaveBeenCalled()
   })
 
   test('returns 409 when trying to cancel an active (paid) order', async () => {
@@ -123,7 +128,7 @@ describe('cancel.swish handler', () => {
     const response = await handler(buildEvent('456'))
     expect(response.statusCode).toBe(200)
     expect(mockCancelSwishPayment).not.toHaveBeenCalled()
-    expect(mockUpdateOrder).not.toHaveBeenCalled()
+    expect(mockUpdateSwishPaymentStatus).not.toHaveBeenCalled()
   })
 
   test('skips Swish cancellation when order has no swish_payment_id', async () => {
@@ -133,10 +138,9 @@ describe('cancel.swish handler', () => {
     const response = await handler(buildEvent('456'))
     expect(response.statusCode).toBe(200)
 
-    // No Swish call, but reservations and status are still handled
     expect(mockCancelSwishPayment).not.toHaveBeenCalled()
+    expect(mockUpdateSwishPaymentStatus).not.toHaveBeenCalled()
     expect(mockCancelOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockUpdateOrder).toHaveBeenCalledWith('456', { status: 'invalid' })
   })
 
   test('continues cancellation when Swish API call fails (Swish may already be expired)', async () => {
@@ -144,10 +148,15 @@ describe('cancel.swish handler', () => {
       Promise.reject(new Error('Swish API error')),
     )
     const response = await handler(buildEvent('456'))
-    // Should still succeed — Swish errors are non-fatal for order cancellation
     expect(response.statusCode).toBe(200)
     expect(mockCancelOrderReservations).toHaveBeenCalledTimes(1)
-    expect(mockUpdateOrder).toHaveBeenCalledWith('456', { status: 'invalid' })
+    expect(mockUpdateSwishPaymentStatus).toHaveBeenCalledWith(
+      'SWISH-INSTRUCTION-ID-001',
+      {
+        status: 'CANCELLED',
+        reason: 'The checkout was cancelled before payment was completed.',
+      },
+    )
   })
 
   test('returns 500 when an unexpected error occurs', async () => {

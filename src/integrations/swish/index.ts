@@ -6,9 +6,11 @@ export {
   cancelPaymentRequest,
   handleSwishCallback,
   logPaymentRequest,
+  updatePaymentRequestStatus,
   SwishPaymentError,
   type SwishClient,
   type SwishRequestLog,
+  type SwishPaymentStatusUpdate,
 } from './client.ts'
 export type {
   PaymentRequestInput,

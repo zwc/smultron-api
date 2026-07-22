@@ -478,10 +478,12 @@ export class SmultronStack extends cdk.Stack {
         handler: 'index.cancelSwish',
       },
     )
-    // Cancel needs to read the order, update its status, cancel stock reservations,
-    // and call the Swish API to cancel the payment instruction.
-    ordersTable.grantReadWriteData(cancelSwishFunction)
+    // Cancel needs to read the order, update the payments table, cancel stock
+    // reservations, and call the Swish API to cancel the payment instruction.
+    // Order status is left unchanged (only admins mark orders invalid).
+    ordersTable.grantReadData(cancelSwishFunction)
     stockReservationsTable.grantReadWriteData(cancelSwishFunction)
+    swishRequestsTable.grantWriteData(cancelSwishFunction)
 
     // TEST ONLY — remove before launch
     const testConfirmPaymentFunction = new lambda.Function(

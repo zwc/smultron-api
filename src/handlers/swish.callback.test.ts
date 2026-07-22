@@ -7,6 +7,7 @@ const mockCancelOrderReservations = mock(() => Promise.resolve())
 const mockConfirmOrderReservations = mock(() => Promise.resolve())
 const mockSendOrderConfirmationEmails = mock(() => Promise.resolve())
 const mockAssignOrderNumber = mock(() => Promise.resolve('2605.001'))
+const mockUpdateSwishPaymentStatus = mock(() => Promise.resolve())
 
 const mockOrder = {
   id: '00000000-0000-0000-0000-000000000123',
@@ -76,6 +77,15 @@ mock.module('../services/email', () => ({
   sendAdminOrderNotification: async () => undefined,
 }))
 
+mock.module('../services/swish', () => ({
+  updateSwishPaymentStatus: mockUpdateSwishPaymentStatus,
+  createSwishPayment: mock(() =>
+    Promise.resolve({ id: '', location: '', status: 'CREATED' }),
+  ),
+  getSwishPaymentStatus: mock(() => Promise.resolve(null)),
+  cancelSwishPayment: mock(() => Promise.resolve()),
+}))
+
 const { handler } = await import('./swish.callback')
 
 const makeCallbackEvent = (
@@ -117,6 +127,7 @@ describe('Swish Callback Handler', () => {
     mockSendOrderConfirmationEmails.mockClear()
     mockAssignOrderNumber.mockClear()
     mockAssignOrderNumber.mockImplementation(() => Promise.resolve('2605.001'))
+    mockUpdateSwishPaymentStatus.mockClear()
     mockGetOrder.mockClear()
     mockGetOrder.mockImplementation(() => Promise.resolve({ ...mockOrder }))
   })
@@ -205,18 +216,26 @@ describe('Swish Callback Handler', () => {
     expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
   })
 
-  test('never assigns order number on DECLINED', async () => {
+  test('records DECLINED on payments table without changing order status', async () => {
     const event = makeCallbackEvent({ ...paidCallback, status: 'DECLINED' })
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockUpdateOrder).not.toHaveBeenCalled()
     expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
-    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
-      status: 'invalid',
-    })
+    expect(mockUpdateSwishPaymentStatus).toHaveBeenCalledWith(
+      'SWISH-PAYMENT-ID-001',
+      {
+        status: 'DECLINED',
+        reason:
+          'The customer declined the Swish payment in their banking app.',
+        errorCode: null,
+        errorMessage: null,
+      },
+    )
   })
 
-  test('never assigns order number on ERROR', async () => {
+  test('records ERROR on payments table without changing order status', async () => {
     const event = makeCallbackEvent({
       ...paidCallback,
       status: 'ERROR',
@@ -226,21 +245,36 @@ describe('Swish Callback Handler', () => {
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockUpdateOrder).not.toHaveBeenCalled()
     expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
-    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
-      status: 'invalid',
-    })
+    expect(mockUpdateSwishPaymentStatus).toHaveBeenCalledWith(
+      'SWISH-PAYMENT-ID-001',
+      {
+        status: 'ERROR',
+        reason:
+          'The Swish payment failed due to an error from Swish (RF07: Transaction declined).',
+        errorCode: 'RF07',
+        errorMessage: 'Transaction declined',
+      },
+    )
   })
 
-  test('never assigns order number on CANCELLED', async () => {
+  test('records CANCELLED on payments table without changing order status', async () => {
     const event = makeCallbackEvent({ ...paidCallback, status: 'CANCELLED' })
     await handler(event)
 
     expect(mockAssignOrderNumber).not.toHaveBeenCalled()
+    expect(mockUpdateOrder).not.toHaveBeenCalled()
     expect(mockCancelOrderReservations).toHaveBeenCalledWith(ORDER_UUID)
-    expect(mockUpdateOrder).toHaveBeenCalledWith(ORDER_UUID, {
-      status: 'invalid',
-    })
+    expect(mockUpdateSwishPaymentStatus).toHaveBeenCalledWith(
+      'SWISH-PAYMENT-ID-001',
+      {
+        status: 'CANCELLED',
+        reason: 'The Swish payment was cancelled before it was completed.',
+        errorCode: null,
+        errorMessage: null,
+      },
+    )
   })
 
   test('does not send confirmation email on DECLINED', async () => {

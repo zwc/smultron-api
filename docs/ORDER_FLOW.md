@@ -56,9 +56,13 @@ The checkout system has been completely redesigned to implement a robust order f
 3. Sends confirmation emails to customer and admin
 
 #### On DECLINED/ERROR/CANCELLED (Failure):
-1. Cancels stock reservations → releases reserved stock
-2. Updates order status to `'invalid'`
-3. Stock becomes available for other customers
+1. Updates the **payments** (Swish requests) table with status + plain-English `reason`
+2. Cancels stock reservations → releases reserved stock
+3. **Does not change `order.status`** — order stays `pending`/`unpaid`
+
+Only an admin may set `order.status` to `'invalid'` (via `PUT /admin/orders/{id}/status`), optionally with a custom `reason`.
+
+Checkout cancel (`PATCH /cancel/{id}`) cancels the Swish payment + reservations and records `CANCELLED` on the payments table — again without changing order status.
 
 ### 6. Email Notifications ✅
 - **Location**: `src/services/email.ts`

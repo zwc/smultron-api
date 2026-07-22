@@ -5,8 +5,12 @@ import {
   getPaymentRequest,
   cancelPaymentRequest,
   logPaymentRequest,
+  updatePaymentRequestStatus,
   type SwishClient,
+  type SwishPaymentStatusUpdate,
 } from '../integrations/swish/index'
+
+export type { SwishPaymentStatusUpdate }
 
 const SWISH_ENVIRONMENT = process.env.SWISH_ENVIRONMENT || 'production'
 
@@ -108,4 +112,12 @@ export const cancelSwishPayment = async (paymentId: string): Promise<void> => {
 
   const client = getSwishClient()
   await cancelPaymentRequest(client, paymentId)
+}
+
+/** Update the payments (Swish requests) table with the latest payment outcome. */
+export const updateSwishPaymentStatus = async (
+  paymentId: string,
+  update: SwishPaymentStatusUpdate,
+): Promise<void> => {
+  await updatePaymentRequestStatus(paymentId, update)
 }

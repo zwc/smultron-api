@@ -5,12 +5,15 @@ import { verifyAuthToken } from '../middleware/auth';
 import { updateOrderStatus } from '../services/product';
 import { cleanupExpiredReservations } from '../services/stock-reservation';
 import { successResponse, errorResponse, unauthorizedResponse } from '../utils/response';
+import { INVALID_ORDER_REASON } from '../utils/order-invalid-reason';
 
 // Zod validation schema
 const UpdateOrderStatusSchema = z.object({
   status: z.enum(['pending', 'unpaid', 'inactive', 'active', 'invalid'], {
     message: "Status must be 'pending', 'unpaid', 'inactive', 'active', or 'invalid'"
-  })
+  }),
+  // Optional plain-English reason when marking invalid; defaults applied below.
+  reason: z.string().trim().min(1).optional(),
 });
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse> => {
@@ -51,7 +54,12 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       throw error;
     }
 
-    const updatedOrder = await updateOrderStatus(id, validatedData.status);
+    const reason =
+      validatedData.status === 'invalid'
+        ? validatedData.reason ?? INVALID_ORDER_REASON.ADMIN
+        : undefined;
+
+    const updatedOrder = await updateOrderStatus(id, validatedData.status, reason);
 
   return successResponse(updatedOrder);
   } catch (error) {

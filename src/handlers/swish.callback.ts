@@ -3,7 +3,12 @@ import type { APIResponse } from '../types';
 import { getOrder, updateOrder, assignOrderNumber } from '../services/product';
 import { cancelOrderReservations, confirmOrderReservations } from '../services/stock-reservation';
 import { sendOrderConfirmationEmails, type OrderConfirmationData } from '../services/email';
+import { updateSwishPaymentStatus } from '../services/swish';
 import { successResponse } from '../utils/response';
+import {
+  PAYMENT_STATUS_REASON,
+  paymentErrorReason,
+} from '../utils/payment-status-reason';
 
 // Reconstruct a UUID from the 32-char hex string sent as payeePaymentReference.
 // At checkout we strip hyphens from the UUID (36→32 chars) to fit Swish's 35-char limit.
@@ -36,7 +41,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
       amount,
       currency,
       payerAlias,
-      dateCreated,
       datePaid
     } = callback;
 
@@ -54,7 +58,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
     // Reconstruct the full UUID to look up the order by its partition key.
     const orderId = swishRefToOrderId(payeePaymentReference);
 
-    // Process payment status and update order accordingly
+    // Process payment status. Failures update the payments table only —
+    // order.status is never set to 'invalid' by the system.
     switch (status) {
       case 'PAID':
         console.log(`✓ Payment SUCCESSFUL for order ${orderId}`, {
@@ -65,6 +70,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         });
         
         try {
+          await updateSwishPaymentStatus(id, {
+            status: 'PAID',
+            reason: PAYMENT_STATUS_REASON.PAID,
+            errorCode: null,
+            errorMessage: null,
+          });
+
           const order = await getOrder(orderId);
           if (!order) {
             console.error(`Order ${orderId} not found`);
@@ -102,16 +114,23 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         console.log(`✗ Payment DECLINED for order ${orderId}`);
         
         try {
+          await updateSwishPaymentStatus(id, {
+            status: 'DECLINED',
+            reason: PAYMENT_STATUS_REASON.DECLINED,
+            errorCode: errorCode ?? null,
+            errorMessage: errorMessage ?? null,
+          });
+
           const order = await getOrder(orderId);
           if (!order) {
             console.error(`Order ${orderId} not found`);
             break;
           }
 
+          // Release stock only — leave order status unchanged (still unpaid/pending)
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
+          console.log(`Payment declined for order ${orderId}; reservations cancelled (order status unchanged)`);
         } catch (error) {
           console.error(`Failed to process declined payment for order ${orderId}:`, error);
         }
@@ -124,6 +143,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         });
         
         try {
+          await updateSwishPaymentStatus(id, {
+            status: 'ERROR',
+            reason: paymentErrorReason(errorCode, errorMessage),
+            errorCode: errorCode ?? null,
+            errorMessage: errorMessage ?? null,
+          });
+
           const order = await getOrder(orderId);
           if (!order) {
             console.error(`Order ${orderId} not found`);
@@ -131,9 +157,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as invalid due to payment error, stock reservations cancelled`);
+          console.log(`Payment error for order ${orderId}; reservations cancelled (order status unchanged)`);
         } catch (error) {
           console.error(`Failed to process payment error for order ${orderId}:`, error);
         }
@@ -143,6 +168,13 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
         console.log(`✗ Payment CANCELLED for order ${orderId}`);
         
         try {
+          await updateSwishPaymentStatus(id, {
+            status: 'CANCELLED',
+            reason: PAYMENT_STATUS_REASON.CANCELLED,
+            errorCode: errorCode ?? null,
+            errorMessage: errorMessage ?? null,
+          });
+
           const order = await getOrder(orderId);
           if (!order) {
             console.error(`Order ${orderId} not found`);
@@ -150,9 +182,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIResponse>
           }
 
           await cancelOrderReservations(order.id);
-          await updateOrder(order.id, { status: 'invalid' });
           
-          console.log(`Order ${orderId} marked as invalid, stock reservations cancelled`);
+          console.log(`Payment cancelled for order ${orderId}; reservations cancelled (order status unchanged)`);
         } catch (error) {
           console.error(`Failed to process cancelled payment for order ${orderId}:`, error);
         }

@@ -39,6 +39,8 @@ export const OrderSchema = z.object({
   date: z.number(),
   date_change: z.number(),
   status: z.enum(['pending', 'unpaid', 'inactive', 'active', 'invalid']),
+  // Plain-English explanation when an admin marks status 'invalid'
+  reason: z.string().optional(),
   delivery: z.string(),
   delivery_cost: z.number(),
   // Paid Swish amount (SEK). Present only after payment is confirmed.

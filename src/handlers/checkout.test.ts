@@ -89,6 +89,7 @@ mock.module('../services/swish', () => ({
   createSwishPayment: mockCreateSwishPayment,
   cancelSwishPayment: mock(() => Promise.resolve()),
   getSwishPaymentStatus: mock(() => Promise.resolve(null)),
+  updateSwishPaymentStatus: mock(() => Promise.resolve()),
 }))
 
 mock.module('../services/stock-reservation', () => ({

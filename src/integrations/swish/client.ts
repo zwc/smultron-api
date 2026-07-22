@@ -19,7 +19,7 @@ export interface SwishClient {
   }
 }
 
-import { putItem } from '../../services/dynamodb'
+import { putItem, updateItem } from '../../services/dynamodb'
 
 const SWISH_TABLE = process.env.SWISH_REQUESTS_TABLE ?? 'smultron-swish'
 
@@ -35,6 +35,14 @@ export interface SwishRequestLog {
   status: string
 }
 
+export interface SwishPaymentStatusUpdate {
+  status: string
+  /** Plain-English explanation of the latest payment outcome */
+  reason?: string
+  errorCode?: string | null
+  errorMessage?: string | null
+}
+
 export const logPaymentRequest = async (
   log: SwishRequestLog,
 ): Promise<void> => {
@@ -46,6 +54,56 @@ export const logPaymentRequest = async (
     })
   } catch (err) {
     console.error('Failed to persist Swish payment request:', err)
+  }
+}
+
+/**
+ * Persist the latest Swish payment outcome on the payments table.
+ * Payment declines/errors/cancels live here — they must not change order.status.
+ */
+export const updatePaymentRequestStatus = async (
+  instructionId: string,
+  update: SwishPaymentStatusUpdate,
+): Promise<void> => {
+  if (!instructionId) return
+
+  try {
+    const now = new Date().toISOString()
+    const parts = ['#status = :status', '#updatedAt = :updatedAt']
+    const names: Record<string, string> = {
+      '#status': 'status',
+      '#updatedAt': 'updatedAt',
+    }
+    const values: Record<string, unknown> = {
+      ':status': update.status,
+      ':updatedAt': now,
+    }
+
+    if (update.reason != null) {
+      parts.push('#reason = :reason')
+      names['#reason'] = 'reason'
+      values[':reason'] = update.reason
+    }
+    if (update.errorCode !== undefined) {
+      parts.push('#errorCode = :errorCode')
+      names['#errorCode'] = 'errorCode'
+      values[':errorCode'] = update.errorCode
+    }
+    if (update.errorMessage !== undefined) {
+      parts.push('#errorMessage = :errorMessage')
+      names['#errorMessage'] = 'errorMessage'
+      values[':errorMessage'] = update.errorMessage
+    }
+
+    await updateItem(
+      SWISH_TABLE,
+      { id: instructionId },
+      `SET ${parts.join(', ')}`,
+      values,
+      names,
+    )
+  } catch (err) {
+    console.error('Failed to update Swish payment status:', err)
   }
 }
 

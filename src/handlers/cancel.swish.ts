@@ -1,13 +1,14 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { APIResponse } from '../types'
-import { getOrder, updateOrder } from '../services/product'
-import { cancelSwishPayment } from '../services/swish'
+import { getOrder } from '../services/product'
+import { cancelSwishPayment, updateSwishPaymentStatus } from '../services/swish'
 import { cancelOrderReservations } from '../services/stock-reservation'
 import {
   successResponse,
   errorResponse,
   notFoundResponse,
 } from '../utils/response'
+import { PAYMENT_STATUS_REASON } from '../utils/payment-status-reason'
 
 export const method = 'PATCH'
 export const route = '/cancel/{id}'
@@ -16,8 +17,9 @@ export const route = '/cancel/{id}'
  * Cancel an ongoing checkout/payment attempt.
  *
  * The {id} path parameter is the internal order ID returned by POST /checkout.
- * Idempotent: if the order is already invalid the endpoint returns success
- * without performing any additional side effects.
+ * Cancels the Swish payment and stock reservations, and records the outcome on
+ * the payments table. Does NOT change order.status — only an admin may mark an
+ * order invalid.
  * A paid order (status=active) cannot be cancelled via this endpoint.
  */
 export const handler = async (
@@ -34,14 +36,14 @@ export const handler = async (
       return notFoundResponse('Order')
     }
 
-    // Idempotency: already invalid → success with no side effects
-    if (order.status === 'invalid') {
-      return successResponse({ id: orderId, status: 'CANCELLED' })
-    }
-
     // Paid orders cannot be cancelled here
     if (order.status === 'active') {
       return errorResponse('Cannot cancel a confirmed paid order', 409)
+    }
+
+    // Already manually invalidated — nothing left to cancel on the payment side
+    if (order.status === 'invalid') {
+      return successResponse({ id: orderId, status: 'CANCELLED' })
     }
 
     // Cancel the Swish payment if one was created for this order.
@@ -62,15 +64,17 @@ export const handler = async (
           swishError,
         )
       }
+
+      await updateSwishPaymentStatus(order.swish_payment_id, {
+        status: 'CANCELLED',
+        reason: PAYMENT_STATUS_REASON.CHECKOUT_CANCELLED,
+      })
     }
 
-    // Release reserved stock
+    // Release reserved stock — order stays pending/unpaid until admin acts
     await cancelOrderReservations(orderId)
 
-    // Mark invalid — stays in getAllOrders allowlist (unlike legacy 'cancelled')
-    await updateOrder(orderId, { status: 'invalid' })
-
-    console.log('Order cancelled:', orderId)
+    console.log('Payment cancelled for order (order status unchanged):', orderId)
     return successResponse({ id: orderId, status: 'CANCELLED' })
   } catch (error) {
     console.error('Cancel order error:', error)

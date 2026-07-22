@@ -87,7 +87,8 @@ export interface AdminCategoriesResponse {
 //   unpaid   = checkout initiated (e.g. Swish request sent), awaiting payment confirmation
 //   active   = paid and confirmed order (has an order number)
 //   inactive = manually deactivated / archived
-//   invalid  = payment failed, declined, or cancelled
+//   invalid  = manually marked invalid by an admin (never set automatically)
+// Payment declines/errors/cancels are recorded on the payments (Swish) table only.
 export type OrderStatus = 'pending' | 'unpaid' | 'inactive' | 'active' | 'invalid'
 
 export interface Order {
@@ -104,6 +105,8 @@ export interface Order {
   date: number // Timestamp
   date_change: number // Timestamp
   status: OrderStatus
+  // Plain-English explanation when an admin marks status 'invalid'. Absent otherwise.
+  reason?: string
   delivery: string
   delivery_cost: number
   // Paid Swish amount (SEK). Set only after payment is confirmed.
