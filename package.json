@@ -10,6 +10,9 @@
     "test:all": "bun test src/ && bun test tests/integration/",
     "test:e2e": "bun test tests/e2e/",
     "test:e2e:dev": "API_URL=https://dev.smultron.zwc.se/v1 bun test tests/e2e/",
+    "test:playwright": "playwright test",
+    "test:playwright:ui": "playwright test --ui",
+    "test:playwright:headed": "playwright test --headed",
     "test:order-flow": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts",
     "test:order-flow:declined": "API_URL=https://dev.smultron.zwc.se/v1 bun run scripts/test-complete-order-flow.ts --test-declined",
     "format": "prettier --write .",
@@ -46,6 +49,7 @@
     "zod-to-openapi": "^0.2.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/aws-lambda": "^8.10.161",
     "@types/bcryptjs": "^3.0.0",
     "@types/bun": "^1.3.14",
