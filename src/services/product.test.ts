@@ -199,7 +199,7 @@ describe('getAllOrders', () => {
   test('filters out internal counter items (no status field)', async () => {
     if (typeof productModule.getAllOrders !== 'function') return
     const counterItem = { id: '__order_counter_2604__', seq: 5 }
-    const realOrder = { id: 'order-real', number: '2605.001', status: 'successful' }
+    const realOrder = { id: 'order-real', number: '2605.001', status: 'active' }
     mockScanTableFn.mockImplementationOnce(async () => [counterItem, realOrder])
 
     const scanCallsBefore = mockScanTableFn.mock.calls.length
