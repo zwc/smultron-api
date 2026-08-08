@@ -225,15 +225,38 @@ describe('Checkout Handler', () => {
     expect(savedOrder.number).toBeNull()
   })
 
-  test('updates order to unpaid status after swish is initiated', async () => {
+  test('marks the order unpaid before Swish and then stores the payment ID', async () => {
     const event = makeCheckoutEvent(validCheckoutBody)
     await handler(event)
 
-    const updateCall = mockUpdateOrder.mock.calls.find(
-      ([, updates]) => (updates as Record<string, unknown>).status === 'unpaid',
-    )
-    expect(updateCall).toBeDefined()
-    expect((updateCall![1] as Record<string, unknown>).swish_payment_id).toBe('MOCK-SWISH-ID-001')
+    expect(mockUpdateOrder.mock.calls).toEqual([
+      [mockOrder.id, { status: 'unpaid' }],
+      [mockOrder.id, { swish_payment_id: 'MOCK-SWISH-ID-001' }],
+    ])
+  })
+
+  test('does not overwrite a fast PAID callback with unpaid', async () => {
+    mockCreateSwishPayment.mockImplementationOnce(async () => {
+      expect(mockUpdateOrder.mock.calls[0]).toEqual([
+        mockOrder.id,
+        { status: 'unpaid' },
+      ])
+      await mockUpdateOrder(mockOrder.id, { status: 'active' })
+      return {
+        id: 'MOCK-SWISH-ID-001',
+        location:
+          'https://mss.cpc.getswish.net/swish-cpcapi/api/v2/paymentrequests/MOCK-SWISH-ID-001',
+        status: 'CREATED',
+      }
+    })
+
+    await handler(makeCheckoutEvent(validCheckoutBody))
+
+    expect(mockUpdateOrder.mock.calls).toEqual([
+      [mockOrder.id, { status: 'unpaid' }],
+      [mockOrder.id, { status: 'active' }],
+      [mockOrder.id, { swish_payment_id: 'MOCK-SWISH-ID-001' }],
+    ])
   })
 
   test('cancels reservations when swish payment fails', async () => {

@@ -203,6 +203,11 @@ export const handler = async (
 
     if (orderData.payment === 'swish') {
       try {
+        // Mark the order unpaid before creating the request so a fast PAID
+        // callback cannot be overwritten when this handler resumes.
+        await updateOrder(order.id, { status: 'unpaid' })
+        orderStatus = 'unpaid'
+
         // Strip hyphens from UUID so it fits within Swish's 35-character limit
         // (UUID with hyphens = 36 chars; without hyphens = 32 chars).
         // The callback reconstructs the UUID to look up the order by partition key.
@@ -216,9 +221,9 @@ export const handler = async (
           `Minibutik`,
         )
 
-        // Persist the Swish instruction ID and mark order as unpaid (payment initiated)
-        await updateOrder(order.id, { swish_payment_id: swishPayment.id, status: 'unpaid' })
-        orderStatus = 'unpaid'
+        // Persist only the instruction ID. The callback may already have marked
+        // the order active, so do not write the status again here.
+        await updateOrder(order.id, { swish_payment_id: swishPayment.id })
 
         paymentResponse = {
           method: 'swish',
