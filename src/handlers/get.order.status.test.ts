@@ -17,10 +17,15 @@ mock.module('../services/stock-reservation', () => ({
 }))
 
 const mockGetOrder = mock(async () => null)
+const mockGetOrderPayments = mock(async () => [])
 
 mock.module('../services/product', () => ({
   ...productMockDefaults,
   getOrder: mockGetOrder,
+}))
+
+mock.module('../services/payment', () => ({
+  getOrderPayments: mockGetOrderPayments,
 }))
 
 const { handler } = await import('./get.order.status')
@@ -51,6 +56,8 @@ const baseOrder = {
 describe('Get Order Status Handler', () => {
   beforeEach(() => {
     mockGetOrder.mockClear()
+    mockGetOrderPayments.mockClear()
+    mockGetOrderPayments.mockResolvedValue([])
     mockCleanupExpiredReservations.mockClear()
   })
 
@@ -102,5 +109,20 @@ describe('Get Order Status Handler', () => {
     expect(res.statusCode).toBe(200)
     const body = JSON.parse(res.body)
     expect(body.data.status).toBe('invalid')
+  })
+
+  test('returns every connected Swish payment under payments', async () => {
+    const payments = [
+      { id: 'payment-1', status: 'DECLINED' },
+      { id: 'payment-2', status: 'CREATED' },
+    ]
+    mockGetOrder.mockResolvedValueOnce({ ...baseOrder, status: 'unpaid' })
+    mockGetOrderPayments.mockResolvedValueOnce(payments as any)
+
+    const res = await handler(makeEvent('order-abc'))
+    const body = JSON.parse(res.body)
+
+    expect(mockGetOrderPayments).toHaveBeenCalledWith('order-abc')
+    expect(body.data.payments).toEqual(payments)
   })
 })

@@ -114,6 +114,16 @@ export class SmultronStack extends cdk.Stack {
           : cdk.RemovalPolicy.DESTROY,
     })
 
+    swishRequestsTable.addGlobalSecondaryIndex({
+      indexName: 'PayeePaymentReferenceIndex',
+      partitionKey: {
+        name: 'payeePaymentReference',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    })
+
     // Shipment Options Table
     const shipmentOptionsTable = new dynamodb.Table(
       this,
@@ -438,6 +448,7 @@ export class SmultronStack extends cdk.Stack {
       },
     )
     ordersTable.grantReadData(getOrderStatusFunction)
+    swishRequestsTable.grantReadData(getOrderStatusFunction)
 
     const swishCallbackFunction = new lambda.Function(
       this,

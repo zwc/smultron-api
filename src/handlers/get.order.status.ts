@@ -1,6 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda'
 import type { APIResponse } from '../types'
 import { getOrder } from '../services/product'
+import { getOrderPayments } from '../services/payment'
 import { cleanupExpiredReservations } from '../services/stock-reservation'
 import {
   successResponse,
@@ -31,7 +32,8 @@ export const handler = async (
       return notFoundResponse('Order')
     }
 
-    return successResponse(order)
+    const payments = await getOrderPayments(order.id)
+    return successResponse({ ...order, payments })
   } catch (error) {
     console.error('Get order status error:', error)
     return errorResponse('Internal server error', 500)

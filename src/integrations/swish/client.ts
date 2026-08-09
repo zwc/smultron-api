@@ -19,9 +19,10 @@ export interface SwishClient {
   }
 }
 
-import { putItem, updateItem } from '../../services/dynamodb'
+import { putItem, queryItems, updateItem } from '../../services/dynamodb'
 
 const SWISH_TABLE = process.env.SWISH_REQUESTS_TABLE ?? 'smultron-swish'
+const PAYMENT_REFERENCE_INDEX = 'PayeePaymentReferenceIndex'
 
 export interface SwishRequestLog {
   instructionId: string
@@ -34,6 +35,25 @@ export interface SwishRequestLog {
   callbackUrl: string
   status: string
 }
+
+export interface SwishPayment extends SwishRequestLog {
+  id: string
+  createdAt: string
+  updatedAt?: string
+  reason?: string
+  errorCode?: string | null
+  errorMessage?: string | null
+}
+
+export const getPaymentRequestsByReference = (
+  payeePaymentReference: string,
+): Promise<SwishPayment[]> =>
+  queryItems(
+    SWISH_TABLE,
+    PAYMENT_REFERENCE_INDEX,
+    'payeePaymentReference = :payeePaymentReference',
+    { ':payeePaymentReference': payeePaymentReference },
+  )
 
 export interface SwishPaymentStatusUpdate {
   status: string
