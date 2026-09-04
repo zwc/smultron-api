@@ -69,7 +69,7 @@ function buildProductsHtml(
       (item) => `
 				<table style="width: 100%;margin: 0 0 12px 0;padding: 0;border-spacing: 0;border: none;outline: none;font-size: 14px;line-height: 1.5;">
 					<tr style="margin: 0;padding: 0;border-spacing: 0;">
-						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">${escapeHtml(item.name)}</td>
+						<td style="margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);">${escapeHtml(item.name)}${item.subtitle ? ` &ndash; ${escapeHtml(item.subtitle)}` : ''}</td>
 						<td style="font-family: 'apercu-mono', monospace;font-size: 13px;color: grey;margin: 0;padding: 8px 0 8px 0;border-spacing: 0;vertical-align: top;border-bottom: 1px dotted rgba(0,0,0,0.5);text-align: right;">${formatSek(item.price)}</td>
 					</tr>
 					<tr style="margin: 0;padding: 0;border-spacing: 0;">
@@ -130,7 +130,7 @@ export function generateOrderEmailText(
   const itemsText = data.cartItems
     .map(
       (item) =>
-        `${item.name} x${item.quantity} — ${formatSek(item.quantity * item.price)}`,
+        `${item.name}${item.subtitle ? ` – ${item.subtitle}` : ''} x${item.quantity} — ${formatSek(item.quantity * item.price)}`,
     )
     .join('\n')
 

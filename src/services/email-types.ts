@@ -7,6 +7,7 @@ export interface OrderConfirmationData {
   currency: string
   cartItems: Array<{
     name: string
+    subtitle: string
     quantity: number
     price: number
   }>

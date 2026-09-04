@@ -182,6 +182,14 @@ describe('Swish Callback Handler', () => {
     expect(emailData.orderId).toBe('2605.001')
     expect(emailData.paymentMethod).toBe('swish')
     expect(emailData.customerEmail).toBe('test@example.com')
+    expect(emailData.cartItems).toEqual([
+      {
+        name: 'Test Product',
+        subtitle: 'A test product',
+        quantity: 2,
+        price: 100,
+      },
+    ])
   })
 
   test('confirms stock reservations when payment is PAID', async () => {

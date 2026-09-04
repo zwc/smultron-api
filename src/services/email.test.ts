@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 import {
   formatSek,
+  generateOrderEmailText,
   renderOrderEmailHtml,
 } from './email-template'
 import type { OrderConfirmationData } from './email-types'
@@ -13,7 +14,12 @@ const sample: OrderConfirmationData = {
   orderTotal: 1267,
   currency: 'SEK',
   cartItems: [
-    { name: 'Labubu – Give me some love', quantity: 2, price: 599 },
+    {
+      name: 'Labubu',
+      subtitle: 'Give me some love',
+      quantity: 2,
+      price: 599,
+    },
   ],
   deliveryMethod: 'postnord',
   deliveryCost: 69,
@@ -37,10 +43,13 @@ describe('formatSek', () => {
 describe('renderOrderEmailHtml', () => {
   test('fills postnord template with Swish total and delivery cost', () => {
     const html = renderOrderEmailHtml(sample)
+    const text = generateOrderEmailText(sample, 'order@smultronet.nu')
     expect(html).toContain('2606.007')
     expect(html).toContain('1 267 kr')
     expect(html).toContain('69 kr')
     expect(html).toContain('PostNord')
+    expect(html).toContain('Labubu &ndash; Give me some love')
+    expect(text).toContain('Labubu – Give me some love')
     expect(html).toContain('2 st')
     expect(html).toContain('1 198 kr')
     expect(html).toContain('henrik@vh.se')
@@ -57,5 +66,14 @@ describe('renderOrderEmailHtml', () => {
     expect(html).toContain('Upphämtning')
     expect(html).toContain('0 kr')
     expect(html).not.toContain('PostNord-app')
+  })
+
+  test('omits subtitle separator when subtitle is unavailable', () => {
+    const html = renderOrderEmailHtml({
+      ...sample,
+      cartItems: [{ ...sample.cartItems[0]!, subtitle: '' }],
+    })
+    expect(html).toContain('>Labubu</td>')
+    expect(html).not.toContain('Labubu &ndash;')
   })
 })

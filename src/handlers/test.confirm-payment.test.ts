@@ -29,6 +29,7 @@ const inactiveOrder = {
       id: 'prod-1',
       number: 2,
       title: 'Test Product',
+      subtitle: 'A test product',
       price: 100,
     },
   ],
@@ -200,6 +201,14 @@ describe('test.confirm-payment handler', () => {
     expect(emailData.orderId).toBe('2605.001')
     expect(emailData.paymentReference).toBe('test-override')
     expect(emailData.customerEmail).toBe('test@example.com')
+    expect(emailData.cartItems).toEqual([
+      {
+        name: 'Test Product',
+        subtitle: 'A test product',
+        quantity: 2,
+        price: 100,
+      },
+    ])
   })
 
   test('returns 500 on unexpected error', async () => {

@@ -245,6 +245,7 @@ function createEmailData(
     currency: currency || 'SEK',
     cartItems: order.cart.map((item: any) => ({
       name: item.title || 'Unknown Product',
+      subtitle: item.subtitle || '',
       quantity: item.number,
       price: item.price || 0,
     })),
